@@ -19,5 +19,9 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/hyperaudio-dev/hyperaudio/issues"
+  },
+  "dependencies": {
+    "dragdrop": "git://github.com/hyperaudio-dev/dragdrop.git#master",
+    "wordselect": "git://github.com/hyperaudio-dev/wordselect.git#master"
   }
 }
