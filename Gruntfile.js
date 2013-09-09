@@ -44,16 +44,20 @@ module.exports = function(grunt) {
 
 		jshint: {
 
-			src: {
-				files: [
-					'Gruntfile.js',
-					'src/**/*.js'
-				]
+			before: {
+				files: {
+					src: [
+						'Gruntfile.js',
+						'src/**/*.js'
+					]
+				}
 			},
-			dist: {
-				files: [
-					'dist/<%= pkg.name %>.js'
-				]
+			after: {
+				files: {
+					src: [
+						'dist/<%= pkg.name %>.js'
+					]
+				}
 			},
 
 			// configure JSHint (Documented at http://www/jshint.com/docs/)
