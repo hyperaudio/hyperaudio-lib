@@ -1,1 +1,2 @@
+	return hyperaudio;
 }(window, document));
