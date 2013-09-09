@@ -1,0 +1,23 @@
+{
+  "name": "hyperaudio",
+  "version": "0.0.0",
+  "description": "The hyperaudio.js library.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperaudio-dev/hyperaudio.git"
+  },
+  "keywords": [
+    "audio",
+    "video",
+    "transcript"
+  ],
+  "author": "Mark Panaghiston <markp@happyworm.com> (http://happyworm.com)",
+  "contributors": [
+    "Mark Panaghiston <markp@happyworm.com> (http://happyworm.com)",
+    "Matteo Spinelli <matteo@cubiq.org> (http://cubiq.org)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hyperaudio-dev/hyperaudio/issues"
+  }
+}
