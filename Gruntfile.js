@@ -17,7 +17,8 @@ module.exports = function(grunt) {
 						'src/wrapper/top.js',
 						'node_modules/dragdrop/dragdrop.js',
 						'node_modules/wordselect/wordselect.js',
-						'src/*.js',
+						'src/hyperaudio.js',
+						'src/utilities/utilities.js',
 						'src/wrapper/bot.js'
 					]
 				}
@@ -42,11 +43,19 @@ module.exports = function(grunt) {
 		},
 
 		jshint: {
-			// define the files to lint
-			files: [
-				'Gruntfile.js',
-				'src/**/*.js'
-			],
+
+			src: {
+				files: [
+					'Gruntfile.js',
+					'src/**/*.js'
+				]
+			},
+			dist: {
+				files: [
+					'dist/<%= pkg.name %>.js'
+				]
+			},
+
 			// configure JSHint (Documented at http://www/jshint.com/docs/)
 			options: {
 				// lots of other options...
