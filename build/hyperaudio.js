@@ -1,6 +1,5 @@
-/*! hyperaudio 9th September 2013 20:39:30 */
+/*! hyperaudio v0.0.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) */
 var ha = (function(window, document) {
-
 var DragDrop = (function (window, document) {
 
 	function DragDrop (handle, droppable, options) {
@@ -44,6 +43,7 @@ var DragDrop = (function (window, document) {
 	}
 
 	DragDrop.prototype.handleEvent = function (e) {
+		// jshint -W086
 		switch (e.type) {
 			case 'mousedown':
 				if ( e.which !== 1 ) {
@@ -61,6 +61,7 @@ var DragDrop = (function (window, document) {
 				this.end(e);
 				break;
 		}
+		// jshint +W086
 	};
 
 	DragDrop.prototype.start = function (e) {
@@ -215,11 +216,10 @@ var DragDrop = (function (window, document) {
 		document.removeEventListener('mousedown', this, false);
 		document.removeEventListener('mousemove', this, false);
 		document.removeEventListener('mouseup', this, false);
-	}
+	};
 
 	return DragDrop;
-})(window, document);
-var WordSelect = (function (window, document) {
+})(window, document);var WordSelect = (function (window, document) {
 
 	function addTagHelpers (el) {
 		var text = (el.innerText || el.textContent).split(' ');
@@ -232,7 +232,7 @@ var WordSelect = (function (window, document) {
 
 		var re = new RegExp("(^|\\s)" + c + "(\\s|$)");
 		return re.test(e.className);
-	};
+	}
 
 	function addClass (e, c) {
 		if ( hasClass(e, c) ) {
@@ -242,16 +242,16 @@ var WordSelect = (function (window, document) {
 		var newclass = e.className.split(' ');
 		newclass.push(c);
 		e.className = newclass.join(' ');
-	};
+	}
 
-	 function removeClass (e, c) {
+	function removeClass (e, c) {
 		if ( !hasClass(e, c) ) {
 			return;
 		}
 
 		var re = new RegExp("(^|\\s)" + c + "(\\s|$)", 'g');
 		e.className = e.className.replace(re, ' ');
-	};
+	}
 
 	function WordSelect (el, options) {
 		this.element = document.querySelector(el);
@@ -284,6 +284,7 @@ var WordSelect = (function (window, document) {
 	}
 
 	WordSelect.prototype.handleEvent = function (e) {
+		// jshint -W086
 		switch (e.type) {
 			case 'mousedown':
 				if ( e.which !== 1 ) {
@@ -301,6 +302,7 @@ var WordSelect = (function (window, document) {
 				this.end(e);
 				break;
 		}
+		// jshint +W086
 	};
 
 	WordSelect.prototype.start = function (e) {
@@ -487,17 +489,14 @@ var WordSelect = (function (window, document) {
 		this.element.removeEventListener('mousedown', this, false);
 		this.element.removeEventListener('mousemove', this, false);
 		this.element.removeEventListener('mouseup', this, false);
-	}
+	};
 
 	return WordSelect;
 
-})(window, document);
-var hyperaudio = {};
-
+})(window, document);var hyperaudio = {};
 hyperaudio.utils = {
 	DragDrop: DragDrop,
 	WordSelect: WordSelect
 };
-
 	return hyperaudio;
 }(window, document));
