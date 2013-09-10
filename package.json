@@ -1,8 +1,7 @@
 {
   "name": "hyperaudio",
-  "version": "0.0.1",
-  "description": "The Hyperaudio Library.",
-  "homepage": "http://hyperaud.io",
+  "version": "0.0.0",
+  "description": "The hyperaudio.js library.",
   "repository": {
     "type": "git",
     "url": "https://github.com/hyperaudio-dev/hyperaudio.git"
@@ -12,7 +11,7 @@
     "video",
     "transcript"
   ],
-  "author": "Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io)",
+  "author": "Mark Panaghiston <markp@happyworm.com> (http://happyworm.com)",
   "contributors": [
     "Mark Panaghiston <markp@happyworm.com> (http://happyworm.com)",
     "Matteo Spinelli <matteo@cubiq.org> (http://cubiq.org)"
@@ -26,7 +25,9 @@
     "wordselect": "git://github.com/hyperaudio-dev/wordselect.git#master"
   },
   "devDependencies": {
-    "jshint": "~2.1.10",
-    "uglify-js": "~2.4.0"
+    "grunt": "~0.4.1",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-uglify": "~0.2.4"
   }
 }
