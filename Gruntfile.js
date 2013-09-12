@@ -5,15 +5,17 @@ module.exports = function(grunt) {
 
 		// https://github.com/felixge/node-dateformat
 		dateFormat: 'dS mmmm yyyy HH:MM:ss',
+		stdBanner: '/*! <%= pkg.name %> v<%= pkg.version %> ~ (c) 2012-<%= grunt.template.today("yyyy") %> <%= pkg.author %> ~ Built on: <%= grunt.template.today(dateFormat) %> */\n',
 
 		concat: {
 
 			options: {
-				banner: '/*! <%= pkg.name %> <%= grunt.template.today(dateFormat) %> */\n',
+				// banner: '/*! <%= pkg.name %> v<%= pkg.version %> (c) 2012-<%= grunt.template.today("yyyy") %> <%= grunt.template.today(dateFormat) %> */\n',
+				banner: '<%= stdBanner %>'
 			},
 			hyperaudio: {
 				files: {
-					'dist/<%= pkg.name %>.js': [
+					'build/<%= pkg.name %>.js': [
 						'src/wrapper/top.js',
 						'node_modules/dragdrop/dragdrop.js',
 						'node_modules/wordselect/wordselect.js',
@@ -30,14 +32,15 @@ module.exports = function(grunt) {
 				// mangle: false,
 				// compress: false,
 
-				banner: '/*! <%= pkg.name %> <%= grunt.template.today(dateFormat) %> */\n',
+				// banner: '/*! <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today(dateFormat) %> */\n',
+				banner: '<%= stdBanner %>',
 				beautify: {
 					max_line_len: 0 // Generates the output on a single line
 				}
 			},
 			hyperaudio: {
 				files: {
-					'dist/<%= pkg.name %>.min.js': ['dist/<%= pkg.name %>.js']
+					'dist/<%= pkg.name %>.min.js': ['build/<%= pkg.name %>.js']
 				}
 			}
 		},
@@ -62,6 +65,8 @@ module.exports = function(grunt) {
 
 			// configure JSHint (Documented at http://www/jshint.com/docs/)
 			options: {
+				// Using the jshinnt defaults
+/*
 				// lots of other options...
 				curly: true,
 				eqeqeq: true,
@@ -69,6 +74,7 @@ module.exports = function(grunt) {
 				globals: {
 					jQuery: true
 				}
+*/
 			}
 		}
 	});
