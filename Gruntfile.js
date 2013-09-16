@@ -11,7 +11,7 @@ module.exports = function(grunt) {
 
 			options: {
 				banner: '<%= stdBanner %>',
-				separator: ';\n\n'
+				separator: '\n\n'
 			},
 			hyperaudio: {
 				files: {
@@ -56,14 +56,14 @@ module.exports = function(grunt) {
 				files: {
 					src: [
 						'Gruntfile.js',
-						'src/**/*.js'
+						'src/*.js'
 					]
 				}
 			},
 			after: {
 				files: {
 					src: [
-						'dist/<%= pkg.name %>.js'
+						'build/<%= pkg.name %>.js'
 					]
 				}
 			},
@@ -88,7 +88,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 
-	grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+	grunt.registerTask('default', ['jshint:before', 'concat', 'uglify', 'jshint:after']);
 
 	grunt.registerTask('build', ['concat', 'uglify']);
 	grunt.registerTask('test', ['jshint']);
