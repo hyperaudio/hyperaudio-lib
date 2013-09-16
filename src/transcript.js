@@ -9,8 +9,12 @@ var Transcript = (function($) {
 	function Transcript(options) {
 
 		this.options = {
-			target: '#transcript',
-			src: ''
+			target: '#transcript', // The selector of element where the transcript is written to.
+			src: '', // The source URL of the transcript.
+			group: 'p', // Element type used to group paragraphs.
+			element: 'a', // Element type used per word.
+			attribute: 'm', // Attribute name that holds the timing information.
+			unit: 0.001 // Milliseconds.
 		};
 
 		for(var i in options) {
