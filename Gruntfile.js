@@ -5,13 +5,13 @@ module.exports = function(grunt) {
 
 		// https://github.com/felixge/node-dateformat
 		dateFormat: 'dS mmmm yyyy HH:MM:ss',
-		stdBanner: '/*! <%= pkg.name %> v<%= pkg.version %> ~ (c) 2012-<%= grunt.template.today("yyyy") %> <%= pkg.author %> ~ Built on: <%= grunt.template.today(dateFormat) %> */\n',
+		stdBanner: '/*! <%= pkg.name %> v<%= pkg.version %> ~ (c) 2012-<%= grunt.template.today("yyyy") %> <%= pkg.author %> ~ Built: <%= grunt.template.today(dateFormat) %> */\n',
 
 		concat: {
 
 			options: {
-				// banner: '/*! <%= pkg.name %> v<%= pkg.version %> (c) 2012-<%= grunt.template.today("yyyy") %> <%= grunt.template.today(dateFormat) %> */\n',
-				banner: '<%= stdBanner %>'
+				banner: '<%= stdBanner %>',
+				separator: ';\n\n'
 			},
 			hyperaudio: {
 				files: {
@@ -32,7 +32,6 @@ module.exports = function(grunt) {
 				// mangle: false,
 				// compress: false,
 
-				// banner: '/*! <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today(dateFormat) %> */\n',
 				banner: '<%= stdBanner %>',
 				beautify: {
 					max_line_len: 0 // Generates the output on a single line

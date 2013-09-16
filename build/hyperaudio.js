@@ -1,5 +1,6 @@
-/*! hyperaudio v0.0.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built on: 12th September 2013 19:13:24 */
+/*! hyperaudio v0.0.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 16th September 2013 15:45:31 */
 var ha = (function(window, document) {
+;
 
 var DragDrop = (function (window, document) {
 
@@ -220,7 +221,8 @@ var DragDrop = (function (window, document) {
 	};
 
 	return DragDrop;
-})(window, document);
+})(window, document);;
+
 var WordSelect = (function (window, document) {
 
 	function addTagHelpers (el) {
@@ -495,13 +497,16 @@ var WordSelect = (function (window, document) {
 
 	return WordSelect;
 
-})(window, document);
+})(window, document);;
+
 var hyperaudio = {};
+;
 
 hyperaudio.utils = {
 	DragDrop: DragDrop,
 	WordSelect: WordSelect
 };
+;
 
 	return hyperaudio;
 }(window, document));
