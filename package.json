@@ -23,7 +23,8 @@
   },
   "dependencies": {
     "dragdrop": "git://github.com/hyperaudio-dev/dragdrop.git#master",
-    "wordselect": "git://github.com/hyperaudio-dev/wordselect.git#master"
+    "wordselect": "git://github.com/hyperaudio-dev/wordselect.git#master",
+    "transcripts": "git://github.com/hyperaudio-dev/transcripts.git#master"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
