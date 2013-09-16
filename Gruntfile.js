@@ -20,7 +20,7 @@ module.exports = function(grunt) {
 						'node_modules/dragdrop/dragdrop.js',
 						'node_modules/wordselect/wordselect.js',
 						'src/hyperaudio.js',
-						'src/utilities/utilities.js',
+						'src/mapping/utilities.js',
 						'src/wrapper/bot.js'
 					]
 				}
