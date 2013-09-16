@@ -16,11 +16,17 @@ module.exports = function(grunt) {
 			hyperaudio: {
 				files: {
 					'build/<%= pkg.name %>.js': [
+						// Top closure wrapper
 						'src/wrapper/top.js',
+						// Utilities read from: npm install
 						'node_modules/dragdrop/dragdrop.js',
 						'node_modules/wordselect/wordselect.js',
-						'src/hyperaudio.js',
+						// Modules that form the Hyperaudio Lib
+						'src/*.js',
+						// Mapping objects onto the Hyperaudio Lib
+						'src/mapping/hyperaudio.js',
 						'src/mapping/utilities.js',
+						// Bottom closure wrapper
 						'src/wrapper/bot.js'
 					]
 				}
