@@ -16,10 +16,11 @@ var Transcript = (function($) {
 			element: 'a', // Element type used per word.
 			attribute: 'm', // Attribute name that holds the timing information.
 			unit: 0.001, // Milliseconds.
-			debug: false
+			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
 		this.event = {
+			load: 'ha:load',
 			error: 'ha:error'
 		};
 
@@ -44,7 +45,14 @@ var Transcript = (function($) {
 					if(status === 'error') {
 						self._error(xhr.status + ' ' + xhr.statusText + ' : ' + self.options.src);
 					} else {
-						// Sweet
+						self._trigger(self.event.load, {msg: 'Transcript Loaded : ' + self.options.src});
+						if(self.options.async) {
+							setTimeout(function() {
+								self.parse();
+							}, 0);
+						} else {
+							self.parse();
+						}
 					}
 				});
 			} else {
@@ -52,7 +60,7 @@ var Transcript = (function($) {
 			}
 		},
 		parse: function() {
-			//
+			// The prototype would have called initSourcePopcorn() here, among a ton of other things.
 		},
 
 		// Plan to put these into a common object and then simple inheritence by adding to prototype.
