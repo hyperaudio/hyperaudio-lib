@@ -2,7 +2,7 @@
  *
  */
 
-var Transcript = (function($) {
+var Transcript = (function($, Popcorn) {
 
 	var DEBUG = true;
 
@@ -13,8 +13,8 @@ var Transcript = (function($) {
 			target: '#transcript', // The selector of element where the transcript is written to.
 			src: '', // The source URL of the transcript.
 			group: 'p', // Element type used to group paragraphs.
-			element: 'a', // Element type used per word.
-			attribute: 'm', // Attribute name that holds the timing information.
+			word: 'a', // Element type used per word.
+			timeAttr: 'm', // Attribute name that holds the timing information.
 			unit: 0.001, // Milliseconds.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -59,8 +59,30 @@ var Transcript = (function($) {
 				this._error('target not found : ' + this.options.target);
 			}
 		},
+
+		// Rough code in here...
 		parse: function() {
-			// The prototype would have called initSourcePopcorn() here, among a ton of other things.
+			var self = this;
+
+			this.popcorn = Popcorn("#source-video");
+
+			$(this.options.target + ' ' + this.options.word).each(function() {  
+				self.popcorn.transcript({
+					time: $(this).attr(self.options.timeAttr) * self.options.unit, // seconds
+					futureClass: "transcript-grey",
+					target: this,
+					onNewPara: function(parent) {
+						// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+					}
+				});
+			});
+
+
+			$(this.options.target).on('click', 'a', function(e) {
+				var tAttr = $(this).attr(self.options.timeAttr),
+					time = tAttr * self.options.unit;
+				self.popcorn.currentTime(time);
+			});
 		},
 
 		// Plan to put these into a common object and then simple inheritence by adding to prototype.
@@ -84,4 +106,4 @@ var Transcript = (function($) {
 	};
 
 	return Transcript;
-}(jQuery));
+}(jQuery, Popcorn));

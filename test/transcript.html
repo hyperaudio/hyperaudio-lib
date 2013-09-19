@@ -3,10 +3,31 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Transcript demo</title>
+
+<style>
+.transcript {
+	font: 14px/1.2 Arial;
+	color: #000;
+}
+.transcript-grey {
+	color: #666;
+}
+.transcript a {
+	cursor: pointer;
+}
+.transcript a:hover {
+	color: orange;
+}
+</style>
+
 </head>
 <body>
 
-<div id="trans"></div>
+<video id="source-video" controls>
+	<source src="http://happyworm.com/video/internetindians.mp4" type="video/mp4" />
+</video>
+
+<div id="trans" class="transcript"></div>
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.js"></script>
 <script type="text/javascript" src="../lib/popcorn-1.4.0.js"></script>

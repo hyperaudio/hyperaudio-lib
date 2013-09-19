@@ -1,6 +1,6 @@
 // PLUGIN: Transcript
 
-(function( Popcorn ) {
+(function ( Popcorn ) {
 
 	/**
 	 * Transcript popcorn plug-in 
@@ -54,7 +54,10 @@
 				}
 			},
 
-			_setup: function(options) {
+			// The popcorn docs appears to have renamed 'options' with 'track', but its operation seems the same.
+			// Believe that this is to identify the parameter as the track object, rather than 'options', which is probably used all over the place.
+
+			_setup: function( options ) {
 
 				var parent, iAmNewPara;
 
@@ -108,23 +111,31 @@
 
 			},
 
+			_update: function( options ) {
+				// update code, fire on update/modification of a plugin created track event.
+			},
+
+			_teardown: function( options ) {
+				// teardown code, fire on removal of plugin or destruction of instance
+			},
+
 			/**
 			 * @member transcript 
 			 * The start function will be executed when the currentTime 
-			 * of the video  reaches the start time provided by the 
+			 * of the video reaches the start time provided by the 
 			 * options variable
 			 */
-			start: function(event, options) {
+			start: function( event, options ) {
 				options.transcriptFuture();
 			},
 
 			/**
 			 * @member transcript 
 			 * The end function will be executed when the currentTime 
-			 * of the video  reaches the end time provided by the 
+			 * of the video reaches the end time provided by the 
 			 * options variable
 			 */
-			end: function(event, options) {
+			end: function( event, options ) {
 				options.transcriptRead();
 			}
 		};
