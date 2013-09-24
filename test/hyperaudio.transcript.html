@@ -6,40 +6,83 @@
 
 <style>
 .transcript {
-	font: 14px/1.2 Arial;
-	color: #000;
+	font:14px/1.2 Arial;
+	color:#000;
+	width:640px;
+	height:360px;
+	overflow-y:scroll;
 }
 .transcript-grey {
-	color: #666;
+	color:#666;
 }
 .transcript a {
-	cursor: pointer;
+	cursor:pointer;
 }
 .transcript a:hover {
-	color: orange;
+	color:orange;
+}
+.transcript-video,
+.transcript-video video {
+	width:640px;
+	height:360px;
+}
+.transcript-choice a {
+	text-decoration:underline;
+	font-weight:bold;
+	cursor:pointer;
 }
 </style>
 
 </head>
 <body>
 
-<video id="source-video" controls>
-	<source src="http://happyworm.com/video/internetindians.mp4" type="video/mp4" />
-</video>
+<div id="source-video" class="transcript-video"></div>
 
-<div id="trans" class="transcript"></div>
+<p class="transcript-choice">
+	<a id="source-1">Internet Indians</a>
+	| <a id="source-2">Clapper Responds</a>
+</p>
+
+<div id="source-transcript" class="transcript"></div>
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.js"></script>
 <script type="text/javascript" src="../lib/popcorn-1.4.0.js"></script>
 <script type="text/javascript" src="../src/popcorn.transcript.js"></script>
 <script type="text/javascript" src="../src/hyperaudio.core.js"></script>
+<script type="text/javascript" src="../src/hyperaudio.player.js"></script>
 <script type="text/javascript" src="../src/hyperaudio.transcript.js"></script>
 <script type="text/javascript">
+
+	hyperaudio.register('Player', Player);
 	hyperaudio.register('Transcript', Transcript);
-	var ts = hyperaudio.Transcript({
-		target: "#trans",
-		src: "../node_modules/transcripts/ts-internetindians.htm"
+
+	var player = hyperaudio.Player({
+		target: "#source-video"
 	});
+
+	var transcript = hyperaudio.Transcript({
+		target: "#source-transcript",
+		// src: "../node_modules/transcripts/ts-internetindians.htm",
+		// video: "http://happyworm.com/video/internetindians.mp4",
+		player: player
+	});
+
+	$('#source-1').click(function(e) {
+		e.preventDefault();
+		transcript.load({
+			src: "../node_modules/transcripts/ts-internetindians.htm",
+			video: "http://happyworm.com/video/internetindians.mp4"
+		});
+	});
+
+	$('#source-2').click(function(e) {
+		e.preventDefault();
+		transcript.load({
+			src: "../node_modules/transcripts/ts-clapper-responds.htm",
+			video: "http://www.happyworm.com/video/clapper-responds.mp4"
+		});
+	});
+
 </script>
 </body>
 </html>

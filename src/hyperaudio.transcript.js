@@ -11,12 +11,14 @@ var Transcript = (function($, Popcorn) {
 			entity: 'TRANSCRIPT', // Not really an option... More like a manifest
 
 			target: '#transcript', // The selector of element where the transcript is written to.
-			src: '', // The source URL of the transcript.
+			src: '', // The URL of the transcript.
+			video: '', // The URL of the video.
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
 			timeAttr: 'm', // Attribute name that holds the timing information.
 			unit: 0.001, // Milliseconds.
-			async: true // When true, some operations are delayed by a timeout.
+			async: true, // When true, some operations are delayed by a timeout.
+			player: null
 		}, options);
 
 		if(this.options.DEBUG) {
@@ -29,12 +31,20 @@ var Transcript = (function($, Popcorn) {
 	}
 
 	Transcript.prototype = {
-		load: function(src) {
+		load: function(transcript) {
 			var self = this,
 				$target = $(this.options.target);
-			if(src) {
-				this.options.src = src;
+
+			// Could just take in a fresh set of options... Enabling other changes
+			if(transcript) {
+				if(transcript.src) {
+					this.options.src = transcript.src;
+				}
+				if(transcript.video) {
+					this.options.video = transcript.video;
+				}
 			}
+
 			if($target.length) {
 				$target.empty().load(this.options.src, function(response, status, xhr) {
 					if(status === 'error') {
@@ -43,10 +53,10 @@ var Transcript = (function($, Popcorn) {
 						self._trigger(self.event.load, {msg: 'Loaded "' + self.options.src + '"'});
 						if(self.options.async) {
 							setTimeout(function() {
-								self.parse();
+								self.setVideo();
 							}, 0);
 						} else {
-							self.parse();
+							self.setVideo();
 						}
 					}
 				});
@@ -55,28 +65,51 @@ var Transcript = (function($, Popcorn) {
 			}
 		},
 
+		setVideo: function(video) {
+			var self = this;
+			if(video) {
+				this.options.video = video;
+			}
+			if(this.options.player) {
+				this.options.player.load(this.options.video);
+				if(this.options.async) {
+					setTimeout(function() {
+						self.parse();
+					}, 0);
+				} else {
+					this.parse();
+				}
+			} else {
+				this._error('Player not defined');
+			}
+		},
+
 		// Rough code in here...
 		parse: function() {
-			var self = this;
+			var self = this,
+				opts = this.options;
 
 			this.popcorn = Popcorn("#source-video");
 
-			$(this.options.target + ' ' + this.options.word).each(function() {  
-				self.popcorn.transcript({
-					time: $(this).attr(self.options.timeAttr) * self.options.unit, // seconds
-					futureClass: "transcript-grey",
-					target: this,
-					onNewPara: function(parent) {
-						// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
-					}
-				});
-			});
+			if(opts.player && opts.player.popcorn) {
 
-			$(this.options.target).on('click', 'a', function(e) {
-				var tAttr = $(this).attr(self.options.timeAttr),
-					time = tAttr * self.options.unit;
-				self.popcorn.currentTime(time);
-			});
+				$(opts.target + ' ' + opts.word).each(function() {  
+					opts.player.popcorn.transcript({
+						time: $(this).attr(opts.timeAttr) * opts.unit, // seconds
+						futureClass: "transcript-grey",
+						target: this,
+						onNewPara: function(parent) {
+							// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+						}
+					});
+				});
+
+				$(opts.target).on('click', 'a', function(e) {
+					var tAttr = $(this).attr(opts.timeAttr),
+						time = tAttr * opts.unit;
+					opts.player.currentTime(time);
+				});
+			}
 		}
 	};
 
