@@ -36,9 +36,14 @@ var hyperaudio = (function($) {
 						return new module(options);
 					};
 				} else if(typeof module === 'object') {
-					module = $.extend({}, common, module);
+					module = $.extend({}, this.core, module);
 					this[name] = module;
 				}
+			}
+		},
+		utility: function(name, utility) {
+			if(typeof name === 'string') {
+				this[name] = utility;
 			}
 		}
 	}
