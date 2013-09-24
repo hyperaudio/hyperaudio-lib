@@ -46,5 +46,5 @@ var hyperaudio = (function($) {
 				this[name] = utility;
 			}
 		}
-	}
+	};
 }(jQuery));

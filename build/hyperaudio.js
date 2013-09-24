@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 16th September 2013 21:01:32 */
+/*! hyperaudio v0.0.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 24th September 2013 17:16:41 */
 var ha = (function(window, document) {
 
 
@@ -69,20 +69,30 @@ var DragDrop = (function (window, document) {
 	DragDrop.prototype.start = function (e) {
 		e.preventDefault();
 
-		clearTimeout(this.dragTimeout);
-		this.initiated = false;
-		this.lastTarget = null;
-
-		this.dragTimeout = setTimeout(this.init.bind(this, this.options.html, e), this.options.timeout);
-	};
-
-	DragDrop.prototype.init = function (html, e) {
 		if ( this.options.touch ) {
 			document.addEventListener('touchend', this, false);
 		}
 
 		if ( this.options.mouse ) {
 			document.addEventListener('mouseup', this, false);
+		}
+
+		clearTimeout(this.dragTimeout);
+		this.initiated = false;
+		this.lastTarget = null;
+
+		this.dragTimeout = setTimeout(this.init.bind(this, this.options.html || this.handle.innerHTML, e), this.options.timeout);
+	};
+
+	DragDrop.prototype.init = function (html, e) {
+		if ( !this.options.init ) {
+			if ( this.options.touch ) {
+				document.addEventListener('touchend', this, false);
+			}
+
+			if ( this.options.mouse ) {
+				document.addEventListener('mouseup', this, false);
+			}
 		}
 
 		// Create draggable
@@ -130,6 +140,7 @@ var DragDrop = (function (window, document) {
 
 	DragDrop.prototype.move = function (e) {
 		e.preventDefault();
+		e.stopPropagation();
 
 		var point = e.changedTouches ? e.changedTouches[0] : e;
 		var target = e.touches ? document.elementFromPoint(point.pageX, point.pageY) : point.target;
@@ -151,7 +162,7 @@ var DragDrop = (function (window, document) {
 			return;
 		}
 
-		if ( target.className == 'item' ) {
+		if ( /(^|\s)item(\s|$)/.test(target.className) ) {
 			var items = this.list.querySelectorAll('.item'),
 				i = 0, l = items.length;
 			for ( ; i < l; i++ ) {
@@ -459,7 +470,7 @@ var WordSelect = (function (window, document) {
 		var selected = this.element.querySelectorAll('.selected');
 		var html = '';
 		for ( var i = 0, l = selected.length; i < l; i++ ) {
-			html += selected[i].innerHTML;
+			html += selected[i].outerHTML.replace(/ class="[\d\w\s\-]*\s?"/gi, ' ');
 		}
 
 		return html;
@@ -499,79 +510,271 @@ var WordSelect = (function (window, document) {
 
 })(window, document);
 
+var hyperaudio = (function($) {
+
+	return {
+		core: {
+			options: {
+				DEBUG: true,
+				entity: 'core'
+			},
+			event: {
+				load: 'ha:load',
+				error: 'ha:error'
+			},
+			_trigger: function(eventType, eventData) {
+				var eventObject = $.extend({options: this.options}, eventData),
+					event = $.Event(eventType, {ha: eventObject});
+				$(this).trigger(event);
+			},
+			_error: function(msg) {
+				var data = {msg: this.options.entity + ' Error : ' + msg};
+				this._trigger(this.event.error, data);
+			},
+			_debug: function() {
+				var self = this;
+				$.each(this.event, function(eventName, eventType) {
+					$(self).on(eventType, function(event) {
+						console.log(self.options.entity + ' triggered "' + eventType + '" event : ' + event.ha.msg);
+					});
+				});
+			}
+		},
+		register: function(name, module) {
+			if(typeof name === 'string') {
+				if(typeof module === 'function') {
+					module.prototype = $.extend({}, this.core, module.prototype);
+					this[name] = function(options) {
+						return new module(options);
+					};
+				} else if(typeof module === 'object') {
+					module = $.extend({}, this.core, module);
+					this[name] = module;
+				}
+			}
+		},
+		utility: function(name, utility) {
+			if(typeof name === 'string') {
+				this[name] = utility;
+			}
+		}
+	};
+}(jQuery));
+
+
+/* Player
+ *
+ */
+
+var Player = (function($, Popcorn) {
+
+	function Player(options) {
+
+		this.options = $.extend({}, this.options, {
+
+			entity: 'PLAYER', // Not really an option... More like a manifest
+
+			target: '#transcript-video', // The selector of element where the video is generated
+			src: '', // The URL of the video.
+			async: true // When true, some operations are delayed by a timeout.
+		}, options);
+
+		if(this.options.DEBUG) {
+			this._debug();
+		}
+
+		// Probably want a media object, instead of a single SRC
+
+		if(this.options.target) {
+			this.create();
+		}
+	}
+
+	Player.prototype = {
+		create: function(target) {
+			var self = this,
+				$target;
+			if(target) {
+				this.options.target = target;
+			}
+			$target = $(this.options.target);
+			if($target.length) {
+				this.video = document.createElement('video');
+				this.video.controls = true;
+				// Will want to create some event listeners on the video... For errors and timeupdate in the least.
+				$(this.options.target).empty().append(this.video);
+				if(this.options.src) {
+					this.load();
+				}
+			} else {
+				this._error('Target not found : ' + this.options.target);
+			}
+		},
+		load: function(src) {
+			var self = this;
+			if(src) {
+				this.options.src = src;
+			}
+			if(this.video) {
+				this.killPopcorn();
+				// this.initPopcorn();
+				this.video.src = this.options.src;
+				this.initPopcorn();
+			} else {
+				this._error('Video player not created : ' + this.options.target);
+			}
+		},
+		initPopcorn: function() {
+			this.killPopcorn();
+			// this.popcorn = Popcorn(this.options.target); // Wrong target!
+			this.popcorn = Popcorn(this.video); // Wrong target!
+		},
+		killPopcorn: function() {
+			if(this.popcorn) {
+				this.popcorn.destroy();
+				delete this.popcorn;
+			}
+		},
+		play: function(time) {
+			// Maybe should use the popcorn commands here
+			this.video.currentTime = time;
+			this.video.play();
+		},
+		currentTime: function(time) {
+			// Maybe should use the popcorn commands here
+			this.video.currentTime = time;
+		}
+	};
+
+	return Player;
+}(jQuery, Popcorn));
+
+
 /* Transcript
  *
  */
 
-var Transcript = (function($) {
-
-	var DEBUG = true;
+var Transcript = (function($, Popcorn) {
 
 	function Transcript(options) {
 
-		this.options = {
-			target: '#transcript', // The selector of element where the transcript is written to.
-			src: '', // The source URL of the transcript.
-			group: 'p', // Element type used to group paragraphs.
-			element: 'a', // Element type used per word.
-			attribute: 'm', // Attribute name that holds the timing information.
-			unit: 0.001 // Milliseconds.
-		};
+		this.options = $.extend({}, this.options, {
 
-		for(var i in options) {
-			if(options.hasOwnProperty(i)) {
-				this.options[i] = options[i];
-			}
+			entity: 'TRANSCRIPT', // Not really an option... More like a manifest
+
+			target: '#transcript', // The selector of element where the transcript is written to.
+			src: '', // The URL of the transcript.
+			video: '', // The URL of the video.
+			group: 'p', // Element type used to group paragraphs.
+			word: 'a', // Element type used per word.
+			timeAttr: 'm', // Attribute name that holds the timing information.
+			unit: 0.001, // Milliseconds.
+			async: true, // When true, some operations are delayed by a timeout.
+			player: null
+		}, options);
+
+		if(this.options.DEBUG) {
+			this._debug();
 		}
 
-		if(options.src) {
+		if(this.options.src) {
 			this.load();
 		}
 	}
 
 	Transcript.prototype = {
-		load: function(src) {
+		load: function(transcript) {
 			var self = this,
 				$target = $(this.options.target);
-			if(src) {
-				this.options.src = src;
+
+			// Could just take in a fresh set of options... Enabling other changes
+			if(transcript) {
+				if(transcript.src) {
+					this.options.src = transcript.src;
+				}
+				if(transcript.video) {
+					this.options.video = transcript.video;
+				}
 			}
+
 			if($target.length) {
 				$target.empty().load(this.options.src, function(response, status, xhr) {
 					if(status === 'error') {
-						self.error(xhr.status + ' ' + xhr.statusText);
+						self._error(xhr.status + ' ' + xhr.statusText + ' : "' + self.options.src + '"');
 					} else {
-						// Sweet
+						self._trigger(self.event.load, {msg: 'Loaded "' + self.options.src + '"'});
+						if(self.options.async) {
+							setTimeout(function() {
+								self.setVideo();
+							}, 0);
+						} else {
+							self.setVideo();
+						}
 					}
 				});
 			} else {
-				this.error('target not found');
+				this._error('Target not found : ' + this.options.target);
 			}
 		},
+
+		setVideo: function(video) {
+			var self = this;
+			if(video) {
+				this.options.video = video;
+			}
+			if(this.options.player) {
+				this.options.player.load(this.options.video);
+				if(this.options.async) {
+					setTimeout(function() {
+						self.parse();
+					}, 0);
+				} else {
+					this.parse();
+				}
+			} else {
+				this._error('Player not defined');
+			}
+		},
+
+		// Rough code in here...
 		parse: function() {
-			//
-		},
-		save: function() {
-			// Doubt we save transcripts from here.
-		},
-		error: function(msg) {
-			console.log('Transcript Error: ' + msg);
+			var self = this,
+				opts = this.options;
+
+			this.popcorn = Popcorn("#source-video");
+
+			if(opts.player && opts.player.popcorn) {
+
+				$(opts.target + ' ' + opts.word).each(function() {  
+					opts.player.popcorn.transcript({
+						time: $(this).attr(opts.timeAttr) * opts.unit, // seconds
+						futureClass: "transcript-grey",
+						target: this,
+						onNewPara: function(parent) {
+							// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+						}
+					});
+				});
+
+				$(opts.target).on('click', 'a', function(e) {
+					var tAttr = $(this).attr(opts.timeAttr),
+						time = tAttr * opts.unit;
+					opts.player.currentTime(time);
+				});
+			}
 		}
 	};
 
 	return Transcript;
-}(jQuery));
+}(jQuery, Popcorn));
 
 
-var hyperaudio = {
-	Transcript: Transcript
-};
+hyperaudio.register('Player', Player);
+hyperaudio.register('Transcript', Transcript);
 
 
-hyperaudio.utils = {
-	DragDrop: DragDrop,
-	WordSelect: WordSelect
-};
+hyperaudio.utility('DragDrop', DragDrop);
+hyperaudio.utility('WordSelect', WordSelect);
 
 
 	return hyperaudio;

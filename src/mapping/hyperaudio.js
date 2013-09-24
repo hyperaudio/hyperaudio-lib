@@ -1,3 +1,2 @@
-var hyperaudio = {
-	Transcript: Transcript
-};
+hyperaudio.register('Player', Player);
+hyperaudio.register('Transcript', Transcript);

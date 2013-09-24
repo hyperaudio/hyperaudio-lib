@@ -22,7 +22,9 @@ module.exports = function(grunt) {
 						'node_modules/dragdrop/dragdrop.js',
 						'node_modules/wordselect/wordselect.js',
 						// Modules that form the Hyperaudio Lib
-						'src/*.js',
+						'src/hyperaudio.core.js',
+						'src/hyperaudio.player.js',
+						'src/hyperaudio.transcript.js',
 						// Mapping objects onto the Hyperaudio Lib
 						'src/mapping/hyperaudio.js',
 						'src/mapping/utilities.js',

@@ -1,4 +1,2 @@
-hyperaudio.utils = {
-	DragDrop: DragDrop,
-	WordSelect: WordSelect
-};
+hyperaudio.utility('DragDrop', DragDrop);
+hyperaudio.utility('WordSelect', WordSelect);

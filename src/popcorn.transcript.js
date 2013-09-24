@@ -17,7 +17,7 @@
 	 * @param {Object} options
 	 * 
 	 * Example:
-		 var p = Popcorn('#video')
+		var p = Popcorn('#video')
 			.transcript({
 				time:        5,                  // seconds, mandatory
 				target:      'word-42',          // mandatory
@@ -76,7 +76,7 @@
 				options.end = options.time;
 
 				if(!options.futureClass) {
-					options.futureClass = "transcript-future"
+					options.futureClass = "transcript-future";
 				}
 
 				parent = options.target.parentNode;
