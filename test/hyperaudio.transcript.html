@@ -5,10 +5,6 @@
 	<title>Transcript demo</title>
 	<link rel="stylesheet" type="text/css" href="../src/css/hyperaudio.transcript.css" />
 <style>
-body {
-	font:14px/1.2 Arial;
-	color:#000;
-}
 .transcript-choice a {
 	text-decoration:underline;
 	font-weight:bold;
@@ -19,16 +15,18 @@ body {
 </head>
 <body>
 
-<div id="source-video" class="transcript-video"></div>
+<div id="wrapper">
+	<div id="source-video" class="transcript-video"></div>
 
-<p class="transcript-choice">
-	<a id="source-1">Internet Indians</a>
-	| <a id="source-2">Clapper Responds</a>
-</p>
+	<p class="transcript-choice">
+		<a id="source-1">Internet Indians</a>
+		| <a id="source-2">Clapper Responds</a>
+	</p>
 
-<div id="source-transcript" class="transcript"></div>
+	<div id="source-transcript" class="transcript"></div>
 
-<div id="stage" class="transcript"></div>
+	<div id="target-stage" class="stage"></div>
+</div>
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.js"></script>
 <script type="text/javascript" src="../lib/popcorn-1.4.0.js"></script>
@@ -49,6 +47,7 @@ body {
 
 	var transcript = hyperaudio.Transcript({
 		transcript: "#source-transcript",
+		stage: "#target-stage",
 		// src: "../node_modules/transcripts/ts-internetindians.htm",
 		// video: "http://happyworm.com/video/internetindians.mp4",
 		player: player

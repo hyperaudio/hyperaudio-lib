@@ -125,30 +125,47 @@ var Transcript = (function($, Popcorn) {
 		},
 
 		selecterize: function() {
+
 			var self = this,
-				opts = this.options;
+				opts = this.options,
+				$stage = $(opts.stage),
+				dropped = function(el) {
 
-			this.selectable = true;
-
-			this.stage = "WIP";
-
-			this.textSelect = new WordSelect(opts.transcript, {
-				addHelpers: true,
-				onDragStart: function(e) {
-					// self.stage.className = 'dragdrop';
-					var dragdrop = new DragDrop(null, opts.stage, {
-						init: false,
-						onDrop: function(el) {
-							self.textSelect.clearSelection();
-							this.destroy();
-							// APP.dropped(el);
-						}
+					$stage.removeClass('dragdrop');
+/*
+					// add edit action
+					var actions = el.querySelector('.actions');
+					actions._tap = new APP.Tap(actions);
+					actions.addEventListener('tap', APP.editBlock, false);
+*/
+					el._dragInstance = new DragDrop(el, opts.stage, {
+						onDragStart: function () {
+							$stage.addClass('dragdrop');
+							el.style.display = 'none';
+							// actions._tap.destroy();
+						},
+						onDrop: dropped
 					});
+				},
+				textSelect = new WordSelect(opts.transcript, {
+					addHelpers: true,
+					onDragStart: function(e) {
+						$stage.addClass('dragdrop');
+						var dragdrop = new DragDrop(null, opts.stage, {
+							init: false,
+							onDrop: function(el) {
+								textSelect.clearSelection();
+								this.destroy();
+								dropped(el);
+							}
+						});
 
-					var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
-					dragdrop.init(html, e);
-				}
-			});
+						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
+						dragdrop.init(html, e);
+					}
+				});
+
+			this.selectable = true; // TMP - seem to have to apply this again in some way, but will look at that later/next
 		},
 
 		enable: function() {
