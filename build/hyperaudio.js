@@ -1,5 +1,5 @@
-/*! hyperaudio v0.0.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 24th September 2013 17:16:41 */
-var ha = (function(window, document) {
+/*! hyperaudio v0.0.2 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th September 2013 11:18:42 */
+var HA = (function(window, document) {
 
 
 var DragDrop = (function (window, document) {
