@@ -17,19 +17,19 @@ module.exports = function(grunt) {
 				files: {
 					'build/<%= pkg.name %>.js': [
 						// Top closure wrapper
-						'src/wrapper/top.js',
+						'src/js/wrapper/top.js',
 						// Utilities read from: npm install
 						'node_modules/dragdrop/dragdrop.js',
 						'node_modules/wordselect/wordselect.js',
 						// Modules that form the Hyperaudio Lib
-						'src/hyperaudio.core.js',
-						'src/hyperaudio.player.js',
-						'src/hyperaudio.transcript.js',
+						'src/js/hyperaudio.core.js',
+						'src/js/hyperaudio.player.js',
+						'src/js/hyperaudio.transcript.js',
 						// Mapping objects onto the Hyperaudio Lib
-						'src/mapping/hyperaudio.js',
-						'src/mapping/utilities.js',
+						'src/js/mapping/hyperaudio.js',
+						'src/js/mapping/utilities.js',
 						// Bottom closure wrapper
-						'src/wrapper/bot.js'
+						'src/js/wrapper/bot.js'
 					]
 				}
 			}
