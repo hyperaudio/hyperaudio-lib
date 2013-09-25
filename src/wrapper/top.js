@@ -1,1 +1,1 @@
-var ha = (function(window, document) {
+var HA = (function(window, document) {
