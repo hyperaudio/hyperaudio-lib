@@ -152,7 +152,7 @@ var Transcript = (function($, Popcorn) {
 					});
 				},
 				textSelect = new WordSelect(opts.transcript, {
-					addHelpers: true,
+					// addHelpers: true,
 					onDragStart: function(e) {
 						$stage.addClass('dragdrop');
 						var dragdrop = new DragDrop(null, opts.stage, {

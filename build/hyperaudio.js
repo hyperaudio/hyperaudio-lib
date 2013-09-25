@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.3 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th September 2013 19:15:19 */
+/*! hyperaudio v0.0.5 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th September 2013 20:20:13 */
 var HA = (function(window, document) {
 
 
@@ -805,7 +805,7 @@ var Transcript = (function($, Popcorn) {
 					});
 				},
 				textSelect = new WordSelect(opts.transcript, {
-					addHelpers: true,
+					// addHelpers: true,
 					onDragStart: function(e) {
 						$stage.addClass('dragdrop');
 						var dragdrop = new DragDrop(null, opts.stage, {
