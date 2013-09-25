@@ -18,7 +18,9 @@ var Transcript = (function($, Popcorn) {
 
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
-			timeAttr: 'm', // Attribute name that holds the timing information.
+
+			// Since now using data-m, we can use the $().data('m') later instead of $().attr('data-m')
+			timeAttr: 'data-m', // Attribute name that holds the timing information.
 			unit: 0.001, // Milliseconds.
 
 			async: true, // When true, some operations are delayed by a timeout.
@@ -119,12 +121,14 @@ var Transcript = (function($, Popcorn) {
 				});
 			}
 
+			// TMP - will need to destroy and redo the WordSelect and DragDrop system when transcript changes.
 			if(!this.selectable) {
-				this.selecterize();
+				this.selectorize();
 			}
 		},
 
-		selecterize: function() {
+		// OK, I made up this word - selectorize
+		selectorize: function() {
 
 			var self = this,
 				opts = this.options,
@@ -165,7 +169,9 @@ var Transcript = (function($, Popcorn) {
 					}
 				});
 
-			this.selectable = true; // TMP - seem to have to apply this again in some way, but will look at that later/next
+			this.selectable = true; // TMP - seem to have to apply this script again in some way, but will look at that later/next.
+
+			// Need a destroy system for the WordSelect and DragDrop for when we change transcript.
 		},
 
 		enable: function() {
