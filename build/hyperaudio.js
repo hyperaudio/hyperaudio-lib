@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.2 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th September 2013 11:18:42 */
+/*! hyperaudio v0.0.3 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th September 2013 19:15:19 */
 var HA = (function(window, document) {
 
 
@@ -30,6 +30,7 @@ var DragDrop = (function (window, document) {
 
 		if ( this.options.init ) {
 			this.handle = typeof handle == 'string' ? document.querySelector(handle) : handle;
+			this.handleClassName = this.handle.className;
 
 			// Are we reordering the list?
 			this.reordering = this.handle.parentNode == this.list;
@@ -210,7 +211,7 @@ var DragDrop = (function (window, document) {
 		}
 
 		var el = document.createElement('li');
-		el.className = 'item';
+		el.className = this.handleClassName || 'item';
 		el.innerHTML = html;
 
 		this.list.insertBefore(el, this.placeholder);
@@ -662,16 +663,27 @@ var Transcript = (function($, Popcorn) {
 
 			entity: 'TRANSCRIPT', // Not really an option... More like a manifest
 
-			target: '#transcript', // The selector of element where the transcript is written to.
+			transcript: '#transcript', // The selector of element where the transcript is written to.
+			stage: '#stage',
+
 			src: '', // The URL of the transcript.
 			video: '', // The URL of the video.
+
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
-			timeAttr: 'm', // Attribute name that holds the timing information.
+
+			// Since now using data-m, we can use the $().data('m') later instead of $().attr('data-m')
+			timeAttr: 'data-m', // Attribute name that holds the timing information.
 			unit: 0.001, // Milliseconds.
+
 			async: true, // When true, some operations are delayed by a timeout.
 			player: null
 		}, options);
+
+		// Probably want some flags...
+		this.ready = false;
+		this.enabled = false;
+		this.selectable = false;
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -685,7 +697,7 @@ var Transcript = (function($, Popcorn) {
 	Transcript.prototype = {
 		load: function(transcript) {
 			var self = this,
-				$target = $(this.options.target);
+				$transcript = $(this.options.transcript);
 
 			// Could just take in a fresh set of options... Enabling other changes
 			if(transcript) {
@@ -697,8 +709,8 @@ var Transcript = (function($, Popcorn) {
 				}
 			}
 
-			if($target.length) {
-				$target.empty().load(this.options.src, function(response, status, xhr) {
+			if($transcript.length) {
+				$transcript.empty().load(this.options.src, function(response, status, xhr) {
 					if(status === 'error') {
 						self._error(xhr.status + ' ' + xhr.statusText + ' : "' + self.options.src + '"');
 					} else {
@@ -713,7 +725,7 @@ var Transcript = (function($, Popcorn) {
 					}
 				});
 			} else {
-				this._error('Target not found : ' + this.options.target);
+				this._error('Target not found : ' + this.options.transcript);
 			}
 		},
 
@@ -736,7 +748,6 @@ var Transcript = (function($, Popcorn) {
 			}
 		},
 
-		// Rough code in here...
 		parse: function() {
 			var self = this,
 				opts = this.options;
@@ -745,7 +756,7 @@ var Transcript = (function($, Popcorn) {
 
 			if(opts.player && opts.player.popcorn) {
 
-				$(opts.target + ' ' + opts.word).each(function() {  
+				$(opts.transcript + ' ' + opts.word).each(function() {  
 					opts.player.popcorn.transcript({
 						time: $(this).attr(opts.timeAttr) * opts.unit, // seconds
 						futureClass: "transcript-grey",
@@ -756,12 +767,71 @@ var Transcript = (function($, Popcorn) {
 					});
 				});
 
-				$(opts.target).on('click', 'a', function(e) {
+				$(opts.transcript).on('click', 'a', function(e) {
 					var tAttr = $(this).attr(opts.timeAttr),
 						time = tAttr * opts.unit;
 					opts.player.currentTime(time);
 				});
 			}
+
+			// TMP - will need to destroy and redo the WordSelect and DragDrop system when transcript changes.
+			if(!this.selectable) {
+				this.selectorize();
+			}
+		},
+
+		// OK, I made up this word - selectorize
+		selectorize: function() {
+
+			var self = this,
+				opts = this.options,
+				$stage = $(opts.stage),
+				dropped = function(el) {
+
+					$stage.removeClass('dragdrop');
+/*
+					// add edit action
+					var actions = el.querySelector('.actions');
+					actions._tap = new APP.Tap(actions);
+					actions.addEventListener('tap', APP.editBlock, false);
+*/
+					el._dragInstance = new DragDrop(el, opts.stage, {
+						onDragStart: function () {
+							$stage.addClass('dragdrop');
+							el.style.display = 'none';
+							// actions._tap.destroy();
+						},
+						onDrop: dropped
+					});
+				},
+				textSelect = new WordSelect(opts.transcript, {
+					addHelpers: true,
+					onDragStart: function(e) {
+						$stage.addClass('dragdrop');
+						var dragdrop = new DragDrop(null, opts.stage, {
+							init: false,
+							onDrop: function(el) {
+								textSelect.clearSelection();
+								this.destroy();
+								dropped(el);
+							}
+						});
+
+						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
+						dragdrop.init(html, e);
+					}
+				});
+
+			this.selectable = true; // TMP - seem to have to apply this script again in some way, but will look at that later/next.
+
+			// Need a destroy system for the WordSelect and DragDrop for when we change transcript.
+		},
+
+		enable: function() {
+			this.enabled = true;
+		},
+		disable: function() {
+			this.enabled = false;
 		}
 	};
 
