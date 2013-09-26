@@ -122,9 +122,9 @@ var Transcript = (function($, Popcorn) {
 			}
 
 			// TMP - will need to destroy and redo the WordSelect and DragDrop system when transcript changes.
-			if(!this.selectable) {
+			//  if(!this.selectable) {
 				this.selectorize();
-			}
+			// }
 		},
 
 		// OK, I made up this word - selectorize
