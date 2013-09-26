@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.5 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th September 2013 20:20:13 */
+/*! hyperaudio v0.0.6 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 26th September 2013 22:44:48 */
 var HA = (function(window, document) {
 
 
@@ -10,7 +10,8 @@ var DragDrop = (function (window, document) {
 			touch: true,
 			mouse: true,
 			timeout: 500,
-			html: ''
+			html: '',
+			draggableClass: ''
 		};
 
 		for ( var i in options ) {
@@ -68,6 +69,10 @@ var DragDrop = (function (window, document) {
 	};
 
 	DragDrop.prototype.start = function (e) {
+		if ( /INPUT/.test(e.target.tagName) ) {
+			return;
+		}
+
 		e.preventDefault();
 
 		if ( this.options.touch ) {
@@ -98,7 +103,7 @@ var DragDrop = (function (window, document) {
 
 		// Create draggable
 		this.draggable = document.createElement('div');
-		this.draggable.className = 'draggable';
+		this.draggable.className = 'draggable' + ' ' + this.options.draggableClass;
 		this.draggableStyle = this.draggable.style;
 		this.draggableStyle.cssText = 'position:absolute;z-index:1000;pointer-events:none;left:-99999px';
 		this.draggable.innerHTML = html;
@@ -191,7 +196,7 @@ var DragDrop = (function (window, document) {
 		var point = e.changedTouches ? e.changedTouches[0] : e;
 		var target = e.touches ? document.elementFromPoint(point.pageX, point.pageY) : point.target;
 
-		var html = this.draggable.innerHTML;
+		var html = this.options.html ? this.handle.innerHTML : this.draggable.innerHTML;
 		this.draggable.parentNode.removeChild(this.draggable);
 		this.draggable = null;
 
@@ -775,9 +780,9 @@ var Transcript = (function($, Popcorn) {
 			}
 
 			// TMP - will need to destroy and redo the WordSelect and DragDrop system when transcript changes.
-			if(!this.selectable) {
+			//  if(!this.selectable) {
 				this.selectorize();
-			}
+			// }
 		},
 
 		// OK, I made up this word - selectorize
@@ -817,7 +822,8 @@ var Transcript = (function($, Popcorn) {
 							}
 						});
 
-						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
+						// var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
+						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, ''); // + '<div class="actions"></div>';
 						dragdrop.init(html, e);
 					}
 				});
