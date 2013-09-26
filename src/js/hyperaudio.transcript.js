@@ -164,7 +164,8 @@ var Transcript = (function($, Popcorn) {
 							}
 						});
 
-						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
+						// var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
+						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, ''); // + '<div class="actions"></div>';
 						dragdrop.init(html, e);
 					}
 				});
