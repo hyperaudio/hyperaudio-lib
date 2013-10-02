@@ -10,8 +10,9 @@ var Transcript = (function($, Popcorn) {
 
 			entity: 'TRANSCRIPT', // Not really an option... More like a manifest
 
-			transcript: '#transcript', // The selector of element where the transcript is written to.
-			stage: '#stage',
+			target: '#transcript', // The selector of element where the transcript is written to.
+
+			stage: '#stage', // TMP till Stage() written.
 
 			src: '', // The URL of the transcript.
 			video: '', // The URL of the video.
@@ -44,7 +45,7 @@ var Transcript = (function($, Popcorn) {
 	Transcript.prototype = {
 		load: function(transcript) {
 			var self = this,
-				$transcript = $(this.options.transcript);
+				$target = $(this.options.target);
 
 			// Could just take in a fresh set of options... Enabling other changes
 			if(transcript) {
@@ -56,8 +57,8 @@ var Transcript = (function($, Popcorn) {
 				}
 			}
 
-			if($transcript.length) {
-				$transcript.empty().load(this.options.src, function(response, status, xhr) {
+			if($target.length) {
+				$target.empty().load(this.options.src, function(response, status, xhr) {
 					if(status === 'error') {
 						self._error(xhr.status + ' ' + xhr.statusText + ' : "' + self.options.src + '"');
 					} else {
@@ -72,7 +73,7 @@ var Transcript = (function($, Popcorn) {
 					}
 				});
 			} else {
-				this._error('Target not found : ' + this.options.transcript);
+				this._error('Target not found : ' + this.options.target);
 			}
 		},
 
@@ -103,7 +104,7 @@ var Transcript = (function($, Popcorn) {
 
 			if(opts.player && opts.player.popcorn) {
 
-				$(opts.transcript + ' ' + opts.word).each(function() {  
+				$(opts.target + ' ' + opts.word).each(function() {  
 					opts.player.popcorn.transcript({
 						time: $(this).attr(opts.timeAttr) * opts.unit, // seconds
 						futureClass: "transcript-grey",
@@ -114,7 +115,7 @@ var Transcript = (function($, Popcorn) {
 					});
 				});
 
-				$(opts.transcript).on('click', 'a', function(e) {
+				$(opts.target).on('click', 'a', function(e) {
 					var tAttr = $(this).attr(opts.timeAttr),
 						time = tAttr * opts.unit;
 					opts.player.currentTime(time);
@@ -151,7 +152,7 @@ var Transcript = (function($, Popcorn) {
 						onDrop: dropped
 					});
 				},
-				textSelect = new WordSelect(opts.transcript, {
+				textSelect = new WordSelect(opts.target, {
 					// addHelpers: true,
 					onDragStart: function(e) {
 						$stage.addClass('dragdrop');
