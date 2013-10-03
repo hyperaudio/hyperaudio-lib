@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.6 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 26th September 2013 22:44:48 */
+/*! hyperaudio v0.0.7 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 3rd October 2013 20:52:28 */
 var HA = (function(window, document) {
 
 
@@ -337,12 +337,12 @@ var WordSelect = (function (window, document) {
 
 		if ( this.options.mouse ) {
 			this.element.addEventListener('mousemove', this, false);
-			this.element.addEventListener('mouseup', this, false);
+			window.addEventListener('mouseup', this, false);
 		}
 
 		if ( this.options.touch ) {
 			this.element.addEventListener('touchmove', this, false);
-			this.element.addEventListener('touchend', this, false);
+			window.addEventListener('touchend', this, false);
 		}
 
 		if ( hasClass(e.target, 'selected') ) {
@@ -354,7 +354,7 @@ var WordSelect = (function (window, document) {
 		var target = e.target,
 			tmp;
 
-		if ( target == this.element ) {
+		if ( target == this.element || target.tagName != 'A' ) {
 			return;
 		}
 
@@ -406,7 +406,11 @@ var WordSelect = (function (window, document) {
 			return;
 		}
 
-		if ( target == this.element || target == this.currentWord ) {
+		if ( target.tagName == 'P' ) {
+			target = target.querySelector('a:last-child');
+		}
+
+		if ( target == this.element || target == this.currentWord || target.tagName != 'A' ) {
 			return;
 		}
 
@@ -442,6 +446,10 @@ var WordSelect = (function (window, document) {
 		}
 
 		if ( !this.selectStarted ) {
+			if ( e.target == this.element ) {
+				this.clearSelection();
+			}
+
 			return;
 		}
 
@@ -453,6 +461,10 @@ var WordSelect = (function (window, document) {
 	};
 
 	WordSelect.prototype.clearSelection = function () {
+		this.currentWord = null;
+		this.startPosition = null;
+		this.endPosition = null;
+
 		removeClass(this.element.querySelector('.first'), 'first');
 		removeClass(this.element.querySelector('.last'), 'last');
 
@@ -474,9 +486,18 @@ var WordSelect = (function (window, document) {
 
 	WordSelect.prototype.getSelection = function () {
 		var selected = this.element.querySelectorAll('.selected');
+		var prevParent;
 		var html = '';
 		for ( var i = 0, l = selected.length; i < l; i++ ) {
+			if ( selected[i].parentNode !== prevParent ) {
+				prevParent = selected[i].parentNode;
+				html += ( i === 0 ? '<p>' : '</p><p>' );
+			}
 			html += selected[i].outerHTML.replace(/ class="[\d\w\s\-]*\s?"/gi, ' ');
+		}
+
+		if ( html ) {
+			html += '</p>';
 		}
 
 		return html;
@@ -668,8 +689,9 @@ var Transcript = (function($, Popcorn) {
 
 			entity: 'TRANSCRIPT', // Not really an option... More like a manifest
 
-			transcript: '#transcript', // The selector of element where the transcript is written to.
-			stage: '#stage',
+			target: '#transcript', // The selector of element where the transcript is written to.
+
+			// stage: '#stage', // TMP till Stage() written.
 
 			src: '', // The URL of the transcript.
 			video: '', // The URL of the video.
@@ -682,6 +704,8 @@ var Transcript = (function($, Popcorn) {
 			unit: 0.001, // Milliseconds.
 
 			async: true, // When true, some operations are delayed by a timeout.
+
+			stage: null,
 			player: null
 		}, options);
 
@@ -702,7 +726,7 @@ var Transcript = (function($, Popcorn) {
 	Transcript.prototype = {
 		load: function(transcript) {
 			var self = this,
-				$transcript = $(this.options.transcript);
+				$target = $(this.options.target);
 
 			// Could just take in a fresh set of options... Enabling other changes
 			if(transcript) {
@@ -714,8 +738,8 @@ var Transcript = (function($, Popcorn) {
 				}
 			}
 
-			if($transcript.length) {
-				$transcript.empty().load(this.options.src, function(response, status, xhr) {
+			if($target.length) {
+				$target.empty().load(this.options.src, function(response, status, xhr) {
 					if(status === 'error') {
 						self._error(xhr.status + ' ' + xhr.statusText + ' : "' + self.options.src + '"');
 					} else {
@@ -730,7 +754,7 @@ var Transcript = (function($, Popcorn) {
 					}
 				});
 			} else {
-				this._error('Target not found : ' + this.options.transcript);
+				this._error('Target not found : ' + this.options.target);
 			}
 		},
 
@@ -761,7 +785,7 @@ var Transcript = (function($, Popcorn) {
 
 			if(opts.player && opts.player.popcorn) {
 
-				$(opts.transcript + ' ' + opts.word).each(function() {  
+				$(opts.target + ' ' + opts.word).each(function() {  
 					opts.player.popcorn.transcript({
 						time: $(this).attr(opts.timeAttr) * opts.unit, // seconds
 						futureClass: "transcript-grey",
@@ -772,7 +796,7 @@ var Transcript = (function($, Popcorn) {
 					});
 				});
 
-				$(opts.transcript).on('click', 'a', function(e) {
+				$(opts.target).on('click', 'a', function(e) {
 					var tAttr = $(this).attr(opts.timeAttr),
 						time = tAttr * opts.unit;
 					opts.player.currentTime(time);
@@ -790,7 +814,7 @@ var Transcript = (function($, Popcorn) {
 
 			var self = this,
 				opts = this.options,
-				$stage = $(opts.stage),
+				$stage = $(opts.stage.options.target),
 				dropped = function(el) {
 
 					$stage.removeClass('dragdrop');
@@ -800,7 +824,7 @@ var Transcript = (function($, Popcorn) {
 					actions._tap = new APP.Tap(actions);
 					actions.addEventListener('tap', APP.editBlock, false);
 */
-					el._dragInstance = new DragDrop(el, opts.stage, {
+					el._dragInstance = new DragDrop(el, opts.stage.options.target, {
 						onDragStart: function () {
 							$stage.addClass('dragdrop');
 							el.style.display = 'none';
@@ -809,11 +833,11 @@ var Transcript = (function($, Popcorn) {
 						onDrop: dropped
 					});
 				},
-				textSelect = new WordSelect(opts.transcript, {
+				textSelect = new WordSelect(opts.target, {
 					// addHelpers: true,
 					onDragStart: function(e) {
 						$stage.addClass('dragdrop');
-						var dragdrop = new DragDrop(null, opts.stage, {
+						var dragdrop = new DragDrop(null, opts.stage.options.target, {
 							init: false,
 							onDrop: function(el) {
 								textSelect.clearSelection();
@@ -845,8 +869,81 @@ var Transcript = (function($, Popcorn) {
 }(jQuery, Popcorn));
 
 
+/* Stage
+ *
+ */
+
+var Stage = (function($, Popcorn) {
+
+	function Stage(options) {
+
+		this.options = $.extend({}, this.options, {
+
+			entity: 'STAGE', // Not really an option... More like a manifest
+
+			target: '#stage', // The selector of element for the staging area.
+
+			src: '', // The URL of the saved production.
+
+			async: true, // When true, some operations are delayed by a timeout.
+			player: null
+		}, options);
+
+		// Probably want some flags...
+		this.ready = false;
+		this.enabled = false;
+
+		if(this.options.DEBUG) {
+			this._debug();
+		}
+
+		if(this.options.src) {
+			this.load();
+		}
+	}
+
+	Stage.prototype = {
+		load: function(src) {
+			var self = this,
+				$target = $(this.options.target);
+
+			if(src) {
+				this.options.src = src;
+			}
+
+			// Would then load in the saved production from the API
+
+			// Would then need to init the dragdrop ability on each item
+		},
+
+		save: function() {
+			// Save the staged production
+
+			// Not sure how  the API works... Are we saving the HTML (easy) or translating it to json.
+		},
+
+		parse: function() {
+			var self = this,
+				opts = this.options;
+
+			// Will need the popcorn.transcript highlighting as per the source transcripts.
+		},
+
+		enable: function() {
+			this.enabled = true;
+		},
+		disable: function() {
+			this.enabled = false;
+		}
+	};
+
+	return Transcript;
+}(jQuery, Popcorn));
+
+
 hyperaudio.register('Player', Player);
 hyperaudio.register('Transcript', Transcript);
+hyperaudio.register('Stage', Stage);
 
 
 hyperaudio.utility('DragDrop', DragDrop);
