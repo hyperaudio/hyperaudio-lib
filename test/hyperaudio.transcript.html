@@ -47,20 +47,27 @@ span.code {
 <script type="text/javascript" src="../src/js/hyperaudio.core.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.player.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.transcript.js"></script>
+<script type="text/javascript" src="../src/js/hyperaudio.stage.js"></script>
 <script type="text/javascript" src="../node_modules/dragdrop/dragdrop.js"></script>
 <script type="text/javascript" src="../node_modules/wordselect/wordselect.js"></script>
 <script type="text/javascript">
 
 	hyperaudio.register('Player', Player);
 	hyperaudio.register('Transcript', Transcript);
+	hyperaudio.register('Stage', Stage);
 
 	var player = hyperaudio.Player({
 		target: "#source-video"
 	});
 
+	var stage = hyperaudio.Stage({
+		target: "#target-stage"
+	});
+
 	var transcript = hyperaudio.Transcript({
 		target: "#source-transcript",
-		stage: "#target-stage",
+		// stage: "#target-stage",
+		stage: stage,
 		// src: "../node_modules/transcripts/ts-internetindians.htm",
 		// video: "http://happyworm.com/video/internetindians.mp4",
 		player: player

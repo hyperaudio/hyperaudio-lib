@@ -12,7 +12,7 @@ var Transcript = (function($, Popcorn) {
 
 			target: '#transcript', // The selector of element where the transcript is written to.
 
-			stage: '#stage', // TMP till Stage() written.
+			// stage: '#stage', // TMP till Stage() written.
 
 			src: '', // The URL of the transcript.
 			video: '', // The URL of the video.
@@ -25,6 +25,8 @@ var Transcript = (function($, Popcorn) {
 			unit: 0.001, // Milliseconds.
 
 			async: true, // When true, some operations are delayed by a timeout.
+
+			stage: null,
 			player: null
 		}, options);
 
@@ -133,7 +135,7 @@ var Transcript = (function($, Popcorn) {
 
 			var self = this,
 				opts = this.options,
-				$stage = $(opts.stage),
+				$stage = $(opts.stage.options.target),
 				dropped = function(el) {
 
 					$stage.removeClass('dragdrop');
@@ -143,7 +145,7 @@ var Transcript = (function($, Popcorn) {
 					actions._tap = new APP.Tap(actions);
 					actions.addEventListener('tap', APP.editBlock, false);
 */
-					el._dragInstance = new DragDrop(el, opts.stage, {
+					el._dragInstance = new DragDrop(el, opts.stage.options.target, {
 						onDragStart: function () {
 							$stage.addClass('dragdrop');
 							el.style.display = 'none';
@@ -156,7 +158,7 @@ var Transcript = (function($, Popcorn) {
 					// addHelpers: true,
 					onDragStart: function(e) {
 						$stage.addClass('dragdrop');
-						var dragdrop = new DragDrop(null, opts.stage, {
+						var dragdrop = new DragDrop(null, opts.stage.options.target, {
 							init: false,
 							onDrop: function(el) {
 								textSelect.clearSelection();
