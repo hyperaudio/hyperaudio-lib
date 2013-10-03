@@ -135,7 +135,13 @@ var Transcript = (function($, Popcorn) {
 
 			var self = this,
 				opts = this.options,
-				$stage = $(opts.stage.options.target),
+				stage, $stage,
+				dropped, textSelect;
+
+			if(opts.stage) {
+				stage = opts.stage.options.target;
+				$stage = $(stage);
+
 				dropped = function(el) {
 
 					$stage.removeClass('dragdrop');
@@ -145,7 +151,7 @@ var Transcript = (function($, Popcorn) {
 					actions._tap = new APP.Tap(actions);
 					actions.addEventListener('tap', APP.editBlock, false);
 */
-					el._dragInstance = new DragDrop(el, opts.stage.options.target, {
+					el._dragInstance = new DragDrop(el, stage, {
 						onDragStart: function () {
 							$stage.addClass('dragdrop');
 							el.style.display = 'none';
@@ -153,12 +159,13 @@ var Transcript = (function($, Popcorn) {
 						},
 						onDrop: dropped
 					});
-				},
+				};
+
 				textSelect = new WordSelect(opts.target, {
 					// addHelpers: true,
 					onDragStart: function(e) {
 						$stage.addClass('dragdrop');
-						var dragdrop = new DragDrop(null, opts.stage.options.target, {
+						var dragdrop = new DragDrop(null, stage, {
 							init: false,
 							onDrop: function(el) {
 								textSelect.clearSelection();
@@ -172,9 +179,8 @@ var Transcript = (function($, Popcorn) {
 						dragdrop.init(html, e);
 					}
 				});
-
-			this.selectable = true; // TMP - seem to have to apply this script again in some way, but will look at that later/next.
-
+				this.selectable = true; // TMP - seem to have to apply this script again in some way, but will look at that later/next.
+			}
 			// Need a destroy system for the WordSelect and DragDrop for when we change transcript.
 		},
 
