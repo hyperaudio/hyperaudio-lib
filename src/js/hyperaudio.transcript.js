@@ -142,22 +142,19 @@ var Transcript = (function($, Popcorn) {
 				stage = opts.stage.options.target;
 				$stage = $(stage);
 
-				dropped = function(el) {
+				dropped = function(el, html) {
 
 					$stage.removeClass('dragdrop');
-/*
-					// add edit action
-					var actions = el.querySelector('.actions');
-					actions._tap = new APP.Tap(actions);
-					actions.addEventListener('tap', APP.editBlock, false);
-*/
+
 					el._dragInstance = new DragDrop(el, stage, {
+						html: html,
 						onDragStart: function () {
 							$stage.addClass('dragdrop');
 							el.style.display = 'none';
-							// actions._tap.destroy();
 						},
-						onDrop: dropped
+						onDrop: function(el) {
+							dropped(el, html);
+						}
 					});
 				};
 
