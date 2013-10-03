@@ -256,6 +256,9 @@ p {
 	height: 2em;
 }
 
+.stage p {
+	margin-bottom:0;
+}
 .draggable {
 	opacity: 0.8;
 	position: absolute;
