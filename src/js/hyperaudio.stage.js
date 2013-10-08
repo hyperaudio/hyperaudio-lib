@@ -15,6 +15,8 @@ var Stage = (function($, Popcorn) {
 
 			src: '', // The URL of the saved production.
 
+			idAttr: 'data-id', // Attribute name that holds the transcript ID.
+
 			async: true, // When true, some operations are delayed by a timeout.
 			player: null
 		}, options);
@@ -64,7 +66,8 @@ var Stage = (function($, Popcorn) {
 		},
 
 		_dropped: function(el, html) {
-			var self = this;
+			var self = this,
+				id = el.getAttribute(this.options.idAttr); // Store the transcript ID
 
 			if(this.target) {
 
@@ -79,6 +82,7 @@ var Stage = (function($, Popcorn) {
 						el.style.display = 'none';
 					},
 					onDrop: function(el) {
+						el.setAttribute(self.options.idAttr, id); // Maintain the transcript ID
 						self._dropped(el, html);
 					}
 				});

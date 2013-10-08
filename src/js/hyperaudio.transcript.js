@@ -18,7 +18,6 @@ var Transcript = (function($, Popcorn) {
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
 
-			// Since now using data-m, we can use the $().data('m') later instead of $().attr('data-m')
 			timeAttr: 'data-m', // Attribute name that holds the timing information.
 			unit: 0.001, // Milliseconds.
 
@@ -151,6 +150,7 @@ var Transcript = (function($, Popcorn) {
 							onDrop: function(el) {
 								self.textSelect.clearSelection();
 								this.destroy();
+								el.setAttribute(opts.stage.options.idAttr, self.options.video); // Pass the transcript ID
 								opts.stage._dropped(el);
 							}
 						});
