@@ -11,6 +11,7 @@ var Stage = (function($, Popcorn) {
 			entity: 'STAGE', // Not really an option... More like a manifest
 
 			target: '#stage', // The selector of element for the staging area.
+			dragdropClass: 'dragdrop',
 
 			src: '', // The URL of the saved production.
 
@@ -18,9 +19,13 @@ var Stage = (function($, Popcorn) {
 			player: null
 		}, options);
 
-		// Probably want some flags...
+		// State Flags.
 		this.ready = false;
-		this.enabled = false;
+		this.enabled = true;
+
+		// Properties
+		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
+		this.reDragdrop = new RegExp('\\s*'+this.options.dragdropClass, 'gi');
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -58,6 +63,28 @@ var Stage = (function($, Popcorn) {
 			// Will need the popcorn.transcript highlighting as per the source transcripts.
 		},
 
+		_dropped: function(el, html) {
+			var self = this;
+
+			if(this.target) {
+
+				// Remove class from stage
+				this.target.className = this.target.className.replace(this.reDragdrop, '');
+
+				// Setup item for future dragdrop 
+				el._dragInstance = new DragDrop(el, this.target, {
+					html: html,
+					onDragStart: function () {
+						self.target.className += ' ' + self.options.dragdropClass;
+						el.style.display = 'none';
+					},
+					onDrop: function(el) {
+						self._dropped(el, html);
+					}
+				});
+			}
+		},
+
 		enable: function() {
 			this.enabled = true;
 		},
@@ -66,5 +93,5 @@ var Stage = (function($, Popcorn) {
 		}
 	};
 
-	return Transcript;
+	return Stage;
 }(jQuery, Popcorn));

@@ -12,8 +12,6 @@ var Transcript = (function($, Popcorn) {
 
 			target: '#transcript', // The selector of element where the transcript is written to.
 
-			// stage: '#stage', // TMP till Stage() written.
-
 			src: '', // The URL of the transcript.
 			video: '', // The URL of the video.
 
@@ -30,14 +28,19 @@ var Transcript = (function($, Popcorn) {
 			player: null
 		}, options);
 
-		// Probably want some flags...
+		// State Flags
 		this.ready = false;
-		this.enabled = false;
+		this.enabled = true;
 
+		// Properties
+		this.textSelect = null;
+
+		// Setup Debug
 		if(this.options.DEBUG) {
 			this._debug();
 		}
 
+		// If we have the info, kick things off
 		if(this.options.src) {
 			this.load();
 		}
@@ -85,6 +88,7 @@ var Transcript = (function($, Popcorn) {
 			if(video) {
 				this.options.video = video;
 			}
+			// Setup the player
 			if(this.options.player) {
 				this.options.player.load(this.options.video);
 				if(this.options.async) {
@@ -96,6 +100,7 @@ var Transcript = (function($, Popcorn) {
 				}
 			} else {
 				this._error('Player not defined');
+				this.selectorize();
 			}
 		},
 
@@ -131,26 +136,22 @@ var Transcript = (function($, Popcorn) {
 		selectorize: function() {
 
 			var self = this,
-				opts = this.options,
-				stage, $stage;
-				// dropped, textSelect;
+				opts = this.options;
 
 			if(opts.stage) {
-				stage = opts.stage.options.target;
-				$stage = $(stage);
 
 				// Destroy any existing WordSelect.
 				this.deselectorize();
 
 				this.textSelect = new WordSelect(opts.target, {
 					onDragStart: function(e) {
-						$stage.addClass('dragdrop');
-						var dragdrop = new DragDrop(null, stage, {
+						opts.stage.target.className += ' ' + opts.stage.options.dragdropClass;
+						var dragdrop = new DragDrop(null, opts.stage.target, {
 							init: false,
 							onDrop: function(el) {
 								self.textSelect.clearSelection();
 								this.destroy();
-								self._dropped(el);
+								opts.stage._dropped(el);
 							}
 						});
 
@@ -170,32 +171,6 @@ var Transcript = (function($, Popcorn) {
 			}
 			delete this.textSelect;
 		},
-
-		// Want to move this to the Stage module
-		_dropped: function(el, html) {
-			var self = this,
-				opts = this.options,
-				stage, $stage;
-
-			if(opts.stage) {
-				stage = opts.stage.options.target;
-				$stage = $(stage);
-
-				$stage.removeClass('dragdrop');
-				console.log('_dropped: this = %o',this);
-				el._dragInstance = new DragDrop(el, stage, {
-					html: html,
-					onDragStart: function () {
-						$stage.addClass('dragdrop');
-						el.style.display = 'none';
-					},
-					onDrop: function(el) {
-						self._dropped(el, html);
-					}
-				});
-			}
-		},
-
 
 		enable: function() {
 			this.enabled = true;
