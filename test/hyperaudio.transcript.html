@@ -34,6 +34,7 @@ span.code {
 		Select a transcript:
 		<a id="source-1">Internet Indians</a>
 		| <a id="source-2">Clapper Responds</a>
+		| <a id="source-3">SOTU 2010</a>
 	</p>
 
 	<div id="source-transcript" class="transcript"><p>Select a transcript to begin.</p><p>You can then play the video and click/touch words to jump to that point in the video.</p><p>The transcript can be selected and then dragged to the right staging area. You will need to click/touch and hold for a second to activate the dragging operation.</p><p>Note to Matt: Adding text to this area is odd and has to all be one a single huge line otherwise all the spaces get included. I suspect that not all of the transcripts are going to be so clinical.<br />What is with the <span class="code">&lt;pre&gt;</span> usage?</p></div>
@@ -86,6 +87,14 @@ span.code {
 		transcript.load({
 			src: "../node_modules/transcripts/ts-clapper-responds.htm",
 			video: "http://www.happyworm.com/video/clapper-responds.mp4"
+		});
+	});
+
+	$('#source-3').click(function(e) {
+		e.preventDefault();
+		transcript.load({
+			src: "../node_modules/transcripts/ts-sotu2010.htm",
+			video: "http://www.happyworm.com/video/m4v/sotu-2010.mp4"
 		});
 	});
 

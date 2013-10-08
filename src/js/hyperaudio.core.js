@@ -7,6 +7,7 @@ var hyperaudio = (function($) {
 				entity: 'core'
 			},
 			event: {
+				ready: 'ha:ready',
 				load: 'ha:load',
 				error: 'ha:error'
 			},

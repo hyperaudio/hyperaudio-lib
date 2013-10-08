@@ -33,7 +33,6 @@ var Transcript = (function($, Popcorn) {
 		// Probably want some flags...
 		this.ready = false;
 		this.enabled = false;
-		this.selectable = false;
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -48,6 +47,8 @@ var Transcript = (function($, Popcorn) {
 		load: function(transcript) {
 			var self = this,
 				$target = $(this.options.target);
+
+			this.ready = false;
 
 			// Could just take in a fresh set of options... Enabling other changes
 			if(transcript) {
@@ -124,50 +125,32 @@ var Transcript = (function($, Popcorn) {
 				});
 			}
 
-			// TMP - will need to destroy and redo the WordSelect and DragDrop system when transcript changes.
-			//  if(!this.selectable) {
-				this.selectorize();
-			// }
+			this.selectorize();
 		},
 
-		// OK, I made up this word - selectorize
 		selectorize: function() {
 
 			var self = this,
 				opts = this.options,
-				stage, $stage,
-				dropped, textSelect;
+				stage, $stage;
+				// dropped, textSelect;
 
 			if(opts.stage) {
 				stage = opts.stage.options.target;
 				$stage = $(stage);
 
-				dropped = function(el, html) {
+				// Destroy any existing WordSelect.
+				this.deselectorize();
 
-					$stage.removeClass('dragdrop');
-
-					el._dragInstance = new DragDrop(el, stage, {
-						html: html,
-						onDragStart: function () {
-							$stage.addClass('dragdrop');
-							el.style.display = 'none';
-						},
-						onDrop: function(el) {
-							dropped(el, html);
-						}
-					});
-				};
-
-				textSelect = new WordSelect(opts.target, {
-					// addHelpers: true,
+				this.textSelect = new WordSelect(opts.target, {
 					onDragStart: function(e) {
 						$stage.addClass('dragdrop');
 						var dragdrop = new DragDrop(null, stage, {
 							init: false,
 							onDrop: function(el) {
-								textSelect.clearSelection();
+								self.textSelect.clearSelection();
 								this.destroy();
-								dropped(el);
+								self._dropped(el);
 							}
 						});
 
@@ -176,10 +159,43 @@ var Transcript = (function($, Popcorn) {
 						dragdrop.init(html, e);
 					}
 				});
-				this.selectable = true; // TMP - seem to have to apply this script again in some way, but will look at that later/next.
+				this.ready = true;
+				this._trigger(this.event.ready);
 			}
-			// Need a destroy system for the WordSelect and DragDrop for when we change transcript.
 		},
+
+		deselectorize: function() {
+			if(this.textSelect) {
+				this.textSelect.destroy();
+			}
+			delete this.textSelect;
+		},
+
+		// Want to move this to the Stage module
+		_dropped: function(el, html) {
+			var self = this,
+				opts = this.options,
+				stage, $stage;
+
+			if(opts.stage) {
+				stage = opts.stage.options.target;
+				$stage = $(stage);
+
+				$stage.removeClass('dragdrop');
+				console.log('_dropped: this = %o',this);
+				el._dragInstance = new DragDrop(el, stage, {
+					html: html,
+					onDragStart: function () {
+						$stage.addClass('dragdrop');
+						el.style.display = 'none';
+					},
+					onDrop: function(el) {
+						self._dropped(el, html);
+					}
+				});
+			}
+		},
+
 
 		enable: function() {
 			this.enabled = true;
