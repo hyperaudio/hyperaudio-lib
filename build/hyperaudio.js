@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.7 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 3rd October 2013 20:52:28 */
+/*! hyperaudio v0.0.8 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 8th October 2013 19:50:58 */
 var HA = (function(window, document) {
 
 
@@ -546,6 +546,7 @@ var hyperaudio = (function($) {
 				entity: 'core'
 			},
 			event: {
+				ready: 'ha:ready',
 				load: 'ha:load',
 				error: 'ha:error'
 			},
@@ -691,15 +692,12 @@ var Transcript = (function($, Popcorn) {
 
 			target: '#transcript', // The selector of element where the transcript is written to.
 
-			// stage: '#stage', // TMP till Stage() written.
-
 			src: '', // The URL of the transcript.
 			video: '', // The URL of the video.
 
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
 
-			// Since now using data-m, we can use the $().data('m') later instead of $().attr('data-m')
 			timeAttr: 'data-m', // Attribute name that holds the timing information.
 			unit: 0.001, // Milliseconds.
 
@@ -709,15 +707,19 @@ var Transcript = (function($, Popcorn) {
 			player: null
 		}, options);
 
-		// Probably want some flags...
+		// State Flags
 		this.ready = false;
-		this.enabled = false;
-		this.selectable = false;
+		this.enabled = true;
 
+		// Properties
+		this.textSelect = null;
+
+		// Setup Debug
 		if(this.options.DEBUG) {
 			this._debug();
 		}
 
+		// If we have the info, kick things off
 		if(this.options.src) {
 			this.load();
 		}
@@ -727,6 +729,8 @@ var Transcript = (function($, Popcorn) {
 		load: function(transcript) {
 			var self = this,
 				$target = $(this.options.target);
+
+			this.ready = false;
 
 			// Could just take in a fresh set of options... Enabling other changes
 			if(transcript) {
@@ -763,6 +767,7 @@ var Transcript = (function($, Popcorn) {
 			if(video) {
 				this.options.video = video;
 			}
+			// Setup the player
 			if(this.options.player) {
 				this.options.player.load(this.options.video);
 				if(this.options.async) {
@@ -774,6 +779,7 @@ var Transcript = (function($, Popcorn) {
 				}
 			} else {
 				this._error('Player not defined');
+				this.selectorize();
 			}
 		},
 
@@ -803,46 +809,29 @@ var Transcript = (function($, Popcorn) {
 				});
 			}
 
-			// TMP - will need to destroy and redo the WordSelect and DragDrop system when transcript changes.
-			//  if(!this.selectable) {
-				this.selectorize();
-			// }
+			this.selectorize();
 		},
 
-		// OK, I made up this word - selectorize
 		selectorize: function() {
 
 			var self = this,
-				opts = this.options,
-				$stage = $(opts.stage.options.target),
-				dropped = function(el) {
+				opts = this.options;
 
-					$stage.removeClass('dragdrop');
-/*
-					// add edit action
-					var actions = el.querySelector('.actions');
-					actions._tap = new APP.Tap(actions);
-					actions.addEventListener('tap', APP.editBlock, false);
-*/
-					el._dragInstance = new DragDrop(el, opts.stage.options.target, {
-						onDragStart: function () {
-							$stage.addClass('dragdrop');
-							el.style.display = 'none';
-							// actions._tap.destroy();
-						},
-						onDrop: dropped
-					});
-				},
-				textSelect = new WordSelect(opts.target, {
-					// addHelpers: true,
+			if(opts.stage) {
+
+				// Destroy any existing WordSelect.
+				this.deselectorize();
+
+				this.textSelect = new WordSelect(opts.target, {
 					onDragStart: function(e) {
-						$stage.addClass('dragdrop');
-						var dragdrop = new DragDrop(null, opts.stage.options.target, {
+						opts.stage.target.className += ' ' + opts.stage.options.dragdropClass;
+						var dragdrop = new DragDrop(null, opts.stage.target, {
 							init: false,
 							onDrop: function(el) {
-								textSelect.clearSelection();
+								self.textSelect.clearSelection();
 								this.destroy();
-								dropped(el);
+								el.setAttribute(opts.stage.options.idAttr, self.options.video); // Pass the transcript ID
+								opts.stage._dropped(el);
 							}
 						});
 
@@ -851,10 +840,16 @@ var Transcript = (function($, Popcorn) {
 						dragdrop.init(html, e);
 					}
 				});
+				this.ready = true;
+				this._trigger(this.event.ready);
+			}
+		},
 
-			this.selectable = true; // TMP - seem to have to apply this script again in some way, but will look at that later/next.
-
-			// Need a destroy system for the WordSelect and DragDrop for when we change transcript.
+		deselectorize: function() {
+			if(this.textSelect) {
+				this.textSelect.destroy();
+			}
+			delete this.textSelect;
 		},
 
 		enable: function() {
@@ -882,16 +877,23 @@ var Stage = (function($, Popcorn) {
 			entity: 'STAGE', // Not really an option... More like a manifest
 
 			target: '#stage', // The selector of element for the staging area.
+			dragdropClass: 'dragdrop',
 
 			src: '', // The URL of the saved production.
+
+			idAttr: 'data-id', // Attribute name that holds the transcript ID.
 
 			async: true, // When true, some operations are delayed by a timeout.
 			player: null
 		}, options);
 
-		// Probably want some flags...
+		// State Flags.
 		this.ready = false;
-		this.enabled = false;
+		this.enabled = true;
+
+		// Properties
+		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
+		this.reDragdrop = new RegExp('\\s*'+this.options.dragdropClass, 'gi');
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -929,6 +931,30 @@ var Stage = (function($, Popcorn) {
 			// Will need the popcorn.transcript highlighting as per the source transcripts.
 		},
 
+		_dropped: function(el, html) {
+			var self = this,
+				id = el.getAttribute(this.options.idAttr); // Store the transcript ID
+
+			if(this.target) {
+
+				// Remove class from stage
+				this.target.className = this.target.className.replace(this.reDragdrop, '');
+
+				// Setup item for future dragdrop 
+				el._dragInstance = new DragDrop(el, this.target, {
+					html: html,
+					onDragStart: function () {
+						self.target.className += ' ' + self.options.dragdropClass;
+						el.style.display = 'none';
+					},
+					onDrop: function(el) {
+						el.setAttribute(self.options.idAttr, id); // Maintain the transcript ID
+						self._dropped(el, html);
+					}
+				});
+			}
+		},
+
 		enable: function() {
 			this.enabled = true;
 		},
@@ -937,7 +963,7 @@ var Stage = (function($, Popcorn) {
 		}
 	};
 
-	return Transcript;
+	return Stage;
 }(jQuery, Popcorn));
 
 
