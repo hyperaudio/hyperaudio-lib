@@ -69,7 +69,7 @@ var Transcript = (function($, Popcorn) {
 				} else {
 					self.setVideo();
 				}
-			}
+			};
 
 			if(this.target) {
 				this.target.innerHTML = '';
@@ -121,14 +121,17 @@ var Transcript = (function($, Popcorn) {
 
 				var wordList = this.target.querySelectorAll(opts.target + ' ' + opts.word),
 					i, l = wordList.length;
+
+				var onNewPara = function(parent) {
+					// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+				};
+
 				for(i = 0; i < l; i++) {
 					opts.player.popcorn.transcript({
 						time: wordList[i].getAttribute(opts.timeAttr) * opts.unit, // seconds
 						futureClass: "transcript-grey",
 						target: wordList[i],
-						onNewPara: function(parent) {
-							// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
-						}
+						onNewPara: onNewPara
 					});
 				}
 

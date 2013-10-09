@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.8 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 8th October 2013 19:50:58 */
+/*! hyperaudio v0.0.9 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th October 2013 19:55:18 */
 var HA = (function(window, document) {
 
 
@@ -712,6 +712,7 @@ var Transcript = (function($, Popcorn) {
 		this.enabled = true;
 
 		// Properties
+		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.textSelect = null;
 
 		// Setup Debug
@@ -727,12 +728,10 @@ var Transcript = (function($, Popcorn) {
 
 	Transcript.prototype = {
 		load: function(transcript) {
-			var self = this,
-				$target = $(this.options.target);
+			var self = this;
 
 			this.ready = false;
 
-			// Could just take in a fresh set of options... Enabling other changes
 			if(transcript) {
 				if(transcript.src) {
 					this.options.src = transcript.src;
@@ -742,23 +741,34 @@ var Transcript = (function($, Popcorn) {
 				}
 			}
 
-			if($target.length) {
-				$target.empty().load(this.options.src, function(response, status, xhr) {
-					if(status === 'error') {
-						self._error(xhr.status + ' ' + xhr.statusText + ' : "' + self.options.src + '"');
-					} else {
+			var setVideo = function() {
+				if(self.options.async) {
+					setTimeout(function() {
+						self.setVideo();
+					}, 0);
+				} else {
+					self.setVideo();
+				}
+			};
+
+			if(this.target) {
+				this.target.innerHTML = '';
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', this.options.src, true);
+				xhr.addEventListener('load', function(event) {
+					if(this.status === 200) {
+						self.target.innerHTML = this.responseText;
 						self._trigger(self.event.load, {msg: 'Loaded "' + self.options.src + '"'});
-						if(self.options.async) {
-							setTimeout(function() {
-								self.setVideo();
-							}, 0);
-						} else {
-							self.setVideo();
-						}
+					} else {
+						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
 					}
-				});
-			} else {
-				this._error('Target not found : ' + this.options.target);
+					setVideo();
+				}, false);
+				xhr.addEventListener('error', function(event) {
+					self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
+					setVideo();
+				}, false);
+				xhr.send();
 			}
 		},
 
@@ -787,26 +797,32 @@ var Transcript = (function($, Popcorn) {
 			var self = this,
 				opts = this.options;
 
-			this.popcorn = Popcorn("#source-video");
+			if(this.target && opts.player && opts.player.popcorn) {
 
-			if(opts.player && opts.player.popcorn) {
+				var wordList = this.target.querySelectorAll(opts.target + ' ' + opts.word),
+					i, l = wordList.length;
 
-				$(opts.target + ' ' + opts.word).each(function() {  
+				var onNewPara = function(parent) {
+					// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+				};
+
+				for(i = 0; i < l; i++) {
 					opts.player.popcorn.transcript({
-						time: $(this).attr(opts.timeAttr) * opts.unit, // seconds
+						time: wordList[i].getAttribute(opts.timeAttr) * opts.unit, // seconds
 						futureClass: "transcript-grey",
-						target: this,
-						onNewPara: function(parent) {
-							// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
-						}
+						target: wordList[i],
+						onNewPara: onNewPara
 					});
-				});
+				}
 
-				$(opts.target).on('click', 'a', function(e) {
-					var tAttr = $(this).attr(opts.timeAttr),
-						time = tAttr * opts.unit;
-					opts.player.currentTime(time);
-				});
+				this.target.addEventListener('click', function(event) {
+					event.preventDefault();
+					if(event.target.nodeName.toLowerCase() === opts.word) {
+						var tAttr = event.target.getAttribute(opts.timeAttr),
+							time = tAttr * opts.unit;
+						opts.player.currentTime(time);
+					}
+				}, false);
 			}
 
 			this.selectorize();
