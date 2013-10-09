@@ -49,11 +49,9 @@ var Transcript = (function($, Popcorn) {
 	Transcript.prototype = {
 		load: function(transcript) {
 			var self = this;
-				// $target = $(this.options.target);
 
 			this.ready = false;
 
-			// Could just take in a fresh set of options... Enabling other changes
 			if(transcript) {
 				if(transcript.src) {
 					this.options.src = transcript.src;
@@ -92,28 +90,6 @@ var Transcript = (function($, Popcorn) {
 				}, false);
 				xhr.send();
 			}
-
-
-/*
-			if($target.length) {
-				$target.empty().load(this.options.src, function(response, status, xhr) {
-					if(status === 'error') {
-						self._error(xhr.status + ' ' + xhr.statusText + ' : "' + self.options.src + '"');
-					} else {
-						self._trigger(self.event.load, {msg: 'Loaded "' + self.options.src + '"'});
-						if(self.options.async) {
-							setTimeout(function() {
-								self.setVideo();
-							}, 0);
-						} else {
-							self.setVideo();
-						}
-					}
-				});
-			} else {
-				this._error('Target not found : ' + this.options.target);
-			}
-*/
 		},
 
 		setVideo: function(video) {
