@@ -132,19 +132,6 @@ var Transcript = (function($, Popcorn) {
 					});
 				}
 
-/*
-				$(opts.target + ' ' + opts.word).each(function() {  
-					opts.player.popcorn.transcript({
-						time: $(this).attr(opts.timeAttr) * opts.unit, // seconds
-						futureClass: "transcript-grey",
-						target: this,
-						onNewPara: function(parent) {
-							// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
-						}
-					});
-				});
-*/
-
 				this.target.addEventListener('click', function(event) {
 					event.preventDefault();
 					if(event.target.nodeName.toLowerCase() === opts.word) {
@@ -153,15 +140,6 @@ var Transcript = (function($, Popcorn) {
 						opts.player.currentTime(time);
 					}
 				}, false);
-
-
-/*
-				$(opts.target).on('click', 'a', function(e) {
-					var tAttr = $(this).attr(opts.timeAttr),
-						time = tAttr * opts.unit;
-					opts.player.currentTime(time);
-				});
-*/
 			}
 
 			this.selectorize();
