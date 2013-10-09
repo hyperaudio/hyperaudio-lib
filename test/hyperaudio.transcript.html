@@ -42,7 +42,7 @@ span.code {
 	<div id="target-stage" class="stage"></div>
 </div>
 
-<script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.js"></script>
+<script type="text/javascript" src="../lib/jquery-core-2.0.3.js"></script>
 <script type="text/javascript" src="../lib/popcorn-1.4.0.js"></script>
 <script type="text/javascript" src="../src/js/popcorn.transcript.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.core.js"></script>
@@ -74,7 +74,7 @@ span.code {
 		player: player
 	});
 
-	$('#source-1').click(function(e) {
+	$('#source-1').on('click', function(e) {
 		e.preventDefault();
 		transcript.load({
 			src: "../node_modules/transcripts/ts-internetindians.htm",
@@ -82,7 +82,7 @@ span.code {
 		});
 	});
 
-	$('#source-2').click(function(e) {
+	$('#source-2').on('click', function(e) {
 		e.preventDefault();
 		transcript.load({
 			src: "../node_modules/transcripts/ts-clapper-responds.htm",
@@ -90,7 +90,7 @@ span.code {
 		});
 	});
 
-	$('#source-3').click(function(e) {
+	$('#source-3').on('click', function(e) {
 		e.preventDefault();
 		transcript.load({
 			src: "../node_modules/transcripts/ts-sotu2010.htm",

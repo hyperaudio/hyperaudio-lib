@@ -32,6 +32,7 @@ var Transcript = (function($, Popcorn) {
 		this.enabled = true;
 
 		// Properties
+		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.textSelect = null;
 
 		// Setup Debug
@@ -47,8 +48,8 @@ var Transcript = (function($, Popcorn) {
 
 	Transcript.prototype = {
 		load: function(transcript) {
-			var self = this,
-				$target = $(this.options.target);
+			var self = this;
+				// $target = $(this.options.target);
 
 			this.ready = false;
 
@@ -62,6 +63,38 @@ var Transcript = (function($, Popcorn) {
 				}
 			}
 
+			var setVideo = function() {
+				if(self.options.async) {
+					setTimeout(function() {
+						self.setVideo();
+					}, 0);
+				} else {
+					self.setVideo();
+				}
+			}
+
+			if(this.target) {
+				this.target.innerHTML = '';
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', this.options.src, true);
+				xhr.addEventListener('load', function(event) {
+					if(this.status === 200) {
+						self.target.innerHTML = this.responseText;
+						self._trigger(self.event.load, {msg: 'Loaded "' + self.options.src + '"'});
+					} else {
+						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
+					}
+					setVideo();
+				}, false);
+				xhr.addEventListener('error', function(event) {
+					self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
+					setVideo();
+				}, false);
+				xhr.send();
+			}
+
+
+/*
 			if($target.length) {
 				$target.empty().load(this.options.src, function(response, status, xhr) {
 					if(status === 'error') {
@@ -80,6 +113,7 @@ var Transcript = (function($, Popcorn) {
 			} else {
 				this._error('Target not found : ' + this.options.target);
 			}
+*/
 		},
 
 		setVideo: function(video) {
