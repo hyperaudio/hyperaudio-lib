@@ -2,7 +2,7 @@
  *
  */
 
-var Transcript = (function($, Popcorn) {
+var Transcript = (function($, document) {
 
 	function Transcript(options) {
 
@@ -197,4 +197,4 @@ var Transcript = (function($, Popcorn) {
 	};
 
 	return Transcript;
-}(jQuery, Popcorn));
+}(jQuery, document));
