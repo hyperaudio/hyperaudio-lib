@@ -73,7 +73,10 @@ module.exports = function(grunt) {
 
 			// configure JSHint (Documented at http://www/jshint.com/docs/)
 			options: {
-				// Using the jshinnt defaults
+				// Using the jshint defaults
+
+				// For the jQuery code for extend.
+				"eqnull": true
 /*
 				// lots of other options...
 				curly: true,
