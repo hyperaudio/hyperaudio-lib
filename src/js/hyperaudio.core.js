@@ -195,17 +195,14 @@ var hyperaudio = (function() {
 				DEBUG: true,
 				entity: 'core'
 			},
-			event: { // Deprecated
-				ready: 'ha:ready',
-				load: 'ha:load',
-				error: 'ha:error'
-			},
 			_trigger: function(eventType, eventData) {
-/*
-				var eventObject = hyperaudio.extend({options: this.options}, eventData),
-					event = hyperaudio.Event(eventType, {ha: eventObject});
-				hyperaudio(this).trigger(event);
-*/
+				var eventObject = hyperaudio.extend(true, {options: this.options}, eventData),
+					event = new CustomEvent(eventType, {
+						detail: eventObject,
+						bubbles: true,
+						cancelable: true
+					});
+				this.target.dispatchEvent(event);
 			},
 			_error: function(msg) {
 				var data = {msg: this.options.entity + ' Error : ' + msg};
@@ -213,13 +210,11 @@ var hyperaudio = (function() {
 			},
 			_debug: function() {
 				var self = this;
-/*
-				hyperaudio.each(this.event, function(eventName, eventType) {
-					hyperaudio(self).on(eventType, function(event) {
-						console.log(self.options.entity + ' triggered "' + eventType + '" event : ' + event.ha.msg);
-					});
+				hyperaudio.each(hyperaudio.event, function(eventName, eventType) {
+					self.target.addEventListener(eventType, function(event) {
+						console.log(self.options.entity + ' ' + eventType + ' event : %o', event);
+					}, false);
 				});
-*/
 			}
 		},
 		register: function(name, module) {

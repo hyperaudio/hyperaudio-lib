@@ -78,7 +78,7 @@ var Transcript = (function(document, hyperaudio) {
 				xhr.addEventListener('load', function(event) {
 					if(this.status === 200) {
 						self.target.innerHTML = this.responseText;
-						self._trigger(self.event.load, {msg: 'Loaded "' + self.options.src + '"'});
+						self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.src + '"'});
 					} else {
 						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
 					}
@@ -177,7 +177,7 @@ var Transcript = (function(document, hyperaudio) {
 					}
 				});
 				this.ready = true;
-				this._trigger(this.event.ready);
+				this._trigger(hyperaudio.event.ready);
 			}
 		},
 
