@@ -2,7 +2,7 @@
  *
  */
 
-var Player = (function($, Popcorn) {
+var Player = (function($, document, Popcorn) {
 
 	function Player(options) {
 
@@ -15,30 +15,31 @@ var Player = (function($, Popcorn) {
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
+		// Properties
+		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
+		this.videoElem = null;
+
 		if(this.options.DEBUG) {
 			this._debug();
 		}
 
 		// Probably want a media object, instead of a single SRC
 
-		if(this.options.target) {
+		if(this.target) {
 			this.create();
 		}
 	}
 
 	Player.prototype = {
-		create: function(target) {
-			var self = this,
-				$target;
-			if(target) {
-				this.options.target = target;
-			}
-			$target = $(this.options.target);
-			if($target.length) {
-				this.video = document.createElement('video');
-				this.video.controls = true;
+		create: function() {
+			var self = this;
+
+			if(this.target) {
+				this.videoElem = document.createElement('video');
+				this.videoElem.controls = true;
 				// Will want to create some event listeners on the video... For errors and timeupdate in the least.
-				$(this.options.target).empty().append(this.video);
+				this.target.innerHTML = '';
+				this.target.appendChild(this.videoElem);
 				if(this.options.src) {
 					this.load();
 				}
@@ -51,10 +52,9 @@ var Player = (function($, Popcorn) {
 			if(src) {
 				this.options.src = src;
 			}
-			if(this.video) {
+			if(this.videoElem) {
 				this.killPopcorn();
-				// this.initPopcorn();
-				this.video.src = this.options.src;
+				this.videoElem.src = this.options.src;
 				this.initPopcorn();
 			} else {
 				this._error('Video player not created : ' + this.options.target);
@@ -62,8 +62,7 @@ var Player = (function($, Popcorn) {
 		},
 		initPopcorn: function() {
 			this.killPopcorn();
-			// this.popcorn = Popcorn(this.options.target); // Wrong target!
-			this.popcorn = Popcorn(this.video); // Wrong target!
+			this.popcorn = Popcorn(this.videoElem);
 		},
 		killPopcorn: function() {
 			if(this.popcorn) {
@@ -73,14 +72,14 @@ var Player = (function($, Popcorn) {
 		},
 		play: function(time) {
 			// Maybe should use the popcorn commands here
-			this.video.currentTime = time;
-			this.video.play();
+			this.videoElem.currentTime = time;
+			this.videoElem.play();
 		},
 		currentTime: function(time) {
 			// Maybe should use the popcorn commands here
-			this.video.currentTime = time;
+			this.videoElem.currentTime = time;
 		}
 	};
 
 	return Player;
-}(jQuery, Popcorn));
+}(jQuery, document, Popcorn));
