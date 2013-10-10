@@ -2,11 +2,11 @@
  *
  */
 
-var Transcript = (function($, document) {
+var Transcript = (function(document, hyperaudio) {
 
 	function Transcript(options) {
 
-		this.options = $.extend({}, this.options, {
+		this.options = hyperaudio.extend({}, this.options, {
 
 			entity: 'TRANSCRIPT', // Not really an option... More like a manifest
 
@@ -197,4 +197,4 @@ var Transcript = (function($, document) {
 	};
 
 	return Transcript;
-}(jQuery, document));
+}(document, hyperaudio));

@@ -2,11 +2,11 @@
  *
  */
 
-var Player = (function($, document, Popcorn) {
+var Player = (function(document, hyperaudio, Popcorn) {
 
 	function Player(options) {
 
-		this.options = $.extend({}, this.options, {
+		this.options = hyperaudio.extend({}, this.options, {
 
 			entity: 'PLAYER', // Not really an option... More like a manifest
 
@@ -82,4 +82,4 @@ var Player = (function($, document, Popcorn) {
 	};
 
 	return Player;
-}(jQuery, document, Popcorn));
+}(document, hyperaudio, Popcorn));

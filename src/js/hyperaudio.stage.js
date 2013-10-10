@@ -2,11 +2,11 @@
  *
  */
 
-var Stage = (function($, document) {
+var Stage = (function(document, hyperaudio) {
 
 	function Stage(options) {
 
-		this.options = $.extend({}, this.options, {
+		this.options = hyperaudio.extend({}, this.options, {
 
 			entity: 'STAGE', // Not really an option... More like a manifest
 
@@ -97,4 +97,4 @@ var Stage = (function($, document) {
 	};
 
 	return Stage;
-}(jQuery, document));
+}(document, hyperaudio));
