@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.9 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th October 2013 19:55:18 */
+/*! hyperaudio v0.0.10 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 10th October 2013 20:34:01 */
 var HA = (function(window, document) {
 
 
@@ -11,7 +11,9 @@ var DragDrop = (function (window, document) {
 			mouse: true,
 			timeout: 500,
 			html: '',
-			draggableClass: ''
+			draggableClass: '',
+			containerTag: 'article',
+			blockTag: 'section'
 		};
 
 		for ( var i in options ) {
@@ -21,12 +23,12 @@ var DragDrop = (function (window, document) {
 		this.droppable = typeof droppable == 'string' ? document.querySelector(droppable) : droppable;
 
 		// Create the list and the placeholder
-		this.list = this.droppable.querySelector('ul');
+		this.list = this.droppable.querySelector(this.options.containerTag);
 		if ( !this.list ) {
-			this.list = document.createElement('ul');
+			this.list = document.createElement(this.options.containerTag);
 			this.droppable.appendChild(this.list);
 		}
-		this.placeholder = document.createElement('li');
+		this.placeholder = document.createElement(this.options.blockTag);
 		this.placeholder.className = 'placeholder';
 
 		if ( this.options.init ) {
@@ -159,10 +161,6 @@ var DragDrop = (function (window, document) {
 
 		this.lastTarget = target;
 
-		if ( this.list.querySelector('.placeholder') ) {
-			this.list.removeChild(this.placeholder);
-		}
-
 		if ( target == this.droppable ) {
 			this.list.appendChild(this.placeholder);
 			return;
@@ -200,24 +198,22 @@ var DragDrop = (function (window, document) {
 		this.draggable.parentNode.removeChild(this.draggable);
 		this.draggable = null;
 
-		// if we are reordering, remove the original element
-		if ( this.reordering ) {
-			if ( this.handle._dragInstance ) {
-				this.handle._dragInstance.destroy();
-				this.handle._dragInstance = null;
-			}
-
-			this.handle.parentNode.removeChild(this.handle);
-		}
-
 		// we dropped outside of the draggable area, so exit
 		if ( !this.list.querySelector('.placeholder') ) {
 			return;
 		}
 
-		var el = document.createElement('li');
-		el.className = this.handleClassName || 'item';
-		el.innerHTML = html;
+		var el;
+
+		// if we are reordering, reuse the original element
+		if ( this.reordering ) {
+			el = this.handle;
+			this.handle.style.display = '';
+		} else {
+			el = document.createElement(this.options.blockTag);
+			el.className = this.handleClassName || 'item';
+			el.innerHTML = html;
+		}
 
 		this.list.insertBefore(el, this.placeholder);
 		this.placeholder.parentNode.removeChild(this.placeholder);
@@ -537,23 +533,211 @@ var WordSelect = (function (window, document) {
 
 })(window, document);
 
-var hyperaudio = (function($) {
+/* Hyperaudio core
+ *
+ */
 
-	return {
+var hyperaudio = (function() {
+
+	// jQuery 2.0.3 (c) 2013 http://jquery.com/
+
+	var
+		// [[Class]] -> type pairs
+		class2type = {},
+		core_toString = class2type.toString,
+		core_hasOwn = class2type.hasOwnProperty;
+
+	function hyperaudio() {
+		// Nada
+	}
+
+	hyperaudio.extend = function() {
+		var options, name, src, copy, copyIsArray, clone,
+			target = arguments[0] || {},
+			i = 1,
+			length = arguments.length,
+			deep = false;
+
+		// Handle a deep copy situation
+		if ( typeof target === "boolean" ) {
+			deep = target;
+			target = arguments[1] || {};
+			// skip the boolean and the target
+			i = 2;
+		}
+
+		// Handle case when target is a string or something (possible in deep copy)
+		if ( typeof target !== "object" && !hyperaudio.isFunction(target) ) {
+			target = {};
+		}
+
+		// extend hyperaudio itself if only one argument is passed
+		if ( length === i ) {
+			target = this;
+			--i;
+		}
+
+		for ( ; i < length; i++ ) {
+			// Only deal with non-null/undefined values
+			if ( (options = arguments[ i ]) != null ) {
+				// Extend the base object
+				for ( name in options ) {
+					src = target[ name ];
+					copy = options[ name ];
+
+					// Prevent never-ending loop
+					if ( target === copy ) {
+						continue;
+					}
+
+					// Recurse if we're merging plain objects or arrays
+					if ( deep && copy && ( hyperaudio.isPlainObject(copy) || (copyIsArray = hyperaudio.isArray(copy)) ) ) {
+						if ( copyIsArray ) {
+							copyIsArray = false;
+							clone = src && hyperaudio.isArray(src) ? src : [];
+
+						} else {
+							clone = src && hyperaudio.isPlainObject(src) ? src : {};
+						}
+
+						// Never move original objects, clone them
+						target[ name ] = hyperaudio.extend( deep, clone, copy );
+
+					// Don't bring in undefined values
+					} else if ( copy !== undefined ) {
+						target[ name ] = copy;
+					}
+				}
+			}
+		}
+
+		// Return the modified object
+		return target;
+	};
+
+	hyperaudio.extend({
+
+		// See test/unit/core.js for details concerning isFunction.
+		// Since version 1.3, DOM methods and functions like alert
+		// aren't supported. They return false on IE (#2968).
+		isFunction: function( obj ) {
+			return hyperaudio.type(obj) === "function";
+		},
+
+		isArray: Array.isArray,
+
+		isWindow: function( obj ) {
+			return obj != null && obj === obj.window;
+		},
+
+		type: function( obj ) {
+			if ( obj == null ) {
+				return String( obj );
+			}
+			// Support: Safari <= 5.1 (functionish RegExp)
+			return typeof obj === "object" || typeof obj === "function" ?
+				class2type[ core_toString.call(obj) ] || "object" :
+				typeof obj;
+		},
+
+		isPlainObject: function( obj ) {
+			// Not plain objects:
+			// - Any object or value whose internal [[Class]] property is not "[object Object]"
+			// - DOM nodes
+			// - window
+			if ( hyperaudio.type( obj ) !== "object" || obj.nodeType || hyperaudio.isWindow( obj ) ) {
+				return false;
+			}
+
+			// Support: Firefox <20
+			// The try/catch suppresses exceptions thrown when attempting to access
+			// the "constructor" property of certain host objects, ie. |window.location|
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=814622
+			try {
+				if ( obj.constructor &&
+						!core_hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
+					return false;
+				}
+			} catch ( e ) {
+				return false;
+			}
+
+			// If the function hasn't returned already, we're confident that
+			// |obj| is a plain object, created by {} or constructed with new Object
+			return true;
+		}
+	});
+
+	function isArraylike( obj ) {
+		var length = obj.length,
+			type = hyperaudio.type( obj );
+
+		if ( hyperaudio.isWindow( obj ) ) {
+			return false;
+		}
+
+		if ( obj.nodeType === 1 && length ) {
+			return true;
+		}
+
+		return type === "array" || type !== "function" &&
+			( length === 0 ||
+			typeof length === "number" && length > 0 && ( length - 1 ) in obj );
+	}
+	// [End jQuery code]
+
+	// [Adapted from] jQuery 2.0.3 (c) 2013 http://jquery.com/
+	// - each() : removed args parameter (was for use internal to jQuery)
+
+	hyperaudio.extend({
+		each: function( obj, callback ) {
+			var value,
+				i = 0,
+				length = obj.length,
+				isArray = isArraylike( obj );
+
+			if ( isArray ) {
+				for ( ; i < length; i++ ) {
+					value = callback.call( obj[ i ], i, obj[ i ] );
+
+					if ( value === false ) {
+						break;
+					}
+				}
+			} else {
+				for ( i in obj ) {
+					value = callback.call( obj[ i ], i, obj[ i ] );
+
+					if ( value === false ) {
+						break;
+					}
+				}
+			}
+
+			return obj;
+		}
+	});
+	// [End jQuery code]
+
+	hyperaudio.extend({
+		event: {
+			ready: 'ha:ready',
+			load: 'ha:load',
+			error: 'ha:error'
+		},
 		core: {
 			options: {
 				DEBUG: true,
 				entity: 'core'
 			},
-			event: {
-				ready: 'ha:ready',
-				load: 'ha:load',
-				error: 'ha:error'
-			},
 			_trigger: function(eventType, eventData) {
-				var eventObject = $.extend({options: this.options}, eventData),
-					event = $.Event(eventType, {ha: eventObject});
-				$(this).trigger(event);
+				var eventObject = hyperaudio.extend(true, {options: this.options}, eventData),
+					event = new CustomEvent(eventType, {
+						detail: eventObject,
+						bubbles: true,
+						cancelable: true
+					});
+				this.target.dispatchEvent(event);
 			},
 			_error: function(msg) {
 				var data = {msg: this.options.entity + ' Error : ' + msg};
@@ -561,22 +745,22 @@ var hyperaudio = (function($) {
 			},
 			_debug: function() {
 				var self = this;
-				$.each(this.event, function(eventName, eventType) {
-					$(self).on(eventType, function(event) {
-						console.log(self.options.entity + ' triggered "' + eventType + '" event : ' + event.ha.msg);
-					});
+				hyperaudio.each(hyperaudio.event, function(eventName, eventType) {
+					self.target.addEventListener(eventType, function(event) {
+						console.log(self.options.entity + ' ' + eventType + ' event : %o', event);
+					}, false);
 				});
 			}
 		},
 		register: function(name, module) {
 			if(typeof name === 'string') {
 				if(typeof module === 'function') {
-					module.prototype = $.extend({}, this.core, module.prototype);
+					module.prototype = hyperaudio.extend({}, this.core, module.prototype);
 					this[name] = function(options) {
 						return new module(options);
 					};
 				} else if(typeof module === 'object') {
-					module = $.extend({}, this.core, module);
+					module = hyperaudio.extend({}, this.core, module);
 					this[name] = module;
 				}
 			}
@@ -585,20 +769,23 @@ var hyperaudio = (function($) {
 			if(typeof name === 'string') {
 				this[name] = utility;
 			}
-		}
-	};
-}(jQuery));
+		},
+
+	});
+
+	return hyperaudio;
+}());
 
 
 /* Player
  *
  */
 
-var Player = (function($, Popcorn) {
+var Player = (function(document, hyperaudio, Popcorn) {
 
 	function Player(options) {
 
-		this.options = $.extend({}, this.options, {
+		this.options = hyperaudio.extend({}, this.options, {
 
 			entity: 'PLAYER', // Not really an option... More like a manifest
 
@@ -607,30 +794,31 @@ var Player = (function($, Popcorn) {
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
+		// Properties
+		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
+		this.videoElem = null;
+
 		if(this.options.DEBUG) {
 			this._debug();
 		}
 
 		// Probably want a media object, instead of a single SRC
 
-		if(this.options.target) {
+		if(this.target) {
 			this.create();
 		}
 	}
 
 	Player.prototype = {
-		create: function(target) {
-			var self = this,
-				$target;
-			if(target) {
-				this.options.target = target;
-			}
-			$target = $(this.options.target);
-			if($target.length) {
-				this.video = document.createElement('video');
-				this.video.controls = true;
+		create: function() {
+			var self = this;
+
+			if(this.target) {
+				this.videoElem = document.createElement('video');
+				this.videoElem.controls = true;
 				// Will want to create some event listeners on the video... For errors and timeupdate in the least.
-				$(this.options.target).empty().append(this.video);
+				this.target.innerHTML = '';
+				this.target.appendChild(this.videoElem);
 				if(this.options.src) {
 					this.load();
 				}
@@ -643,10 +831,9 @@ var Player = (function($, Popcorn) {
 			if(src) {
 				this.options.src = src;
 			}
-			if(this.video) {
+			if(this.videoElem) {
 				this.killPopcorn();
-				// this.initPopcorn();
-				this.video.src = this.options.src;
+				this.videoElem.src = this.options.src;
 				this.initPopcorn();
 			} else {
 				this._error('Video player not created : ' + this.options.target);
@@ -654,8 +841,7 @@ var Player = (function($, Popcorn) {
 		},
 		initPopcorn: function() {
 			this.killPopcorn();
-			// this.popcorn = Popcorn(this.options.target); // Wrong target!
-			this.popcorn = Popcorn(this.video); // Wrong target!
+			this.popcorn = Popcorn(this.videoElem);
 		},
 		killPopcorn: function() {
 			if(this.popcorn) {
@@ -665,28 +851,28 @@ var Player = (function($, Popcorn) {
 		},
 		play: function(time) {
 			// Maybe should use the popcorn commands here
-			this.video.currentTime = time;
-			this.video.play();
+			this.videoElem.currentTime = time;
+			this.videoElem.play();
 		},
 		currentTime: function(time) {
 			// Maybe should use the popcorn commands here
-			this.video.currentTime = time;
+			this.videoElem.currentTime = time;
 		}
 	};
 
 	return Player;
-}(jQuery, Popcorn));
+}(document, hyperaudio, Popcorn));
 
 
 /* Transcript
  *
  */
 
-var Transcript = (function($, Popcorn) {
+var Transcript = (function(document, hyperaudio) {
 
 	function Transcript(options) {
 
-		this.options = $.extend({}, this.options, {
+		this.options = hyperaudio.extend({}, this.options, {
 
 			entity: 'TRANSCRIPT', // Not really an option... More like a manifest
 
@@ -758,7 +944,7 @@ var Transcript = (function($, Popcorn) {
 				xhr.addEventListener('load', function(event) {
 					if(this.status === 200) {
 						self.target.innerHTML = this.responseText;
-						self._trigger(self.event.load, {msg: 'Loaded "' + self.options.src + '"'});
+						self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.src + '"'});
 					} else {
 						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
 					}
@@ -857,7 +1043,7 @@ var Transcript = (function($, Popcorn) {
 					}
 				});
 				this.ready = true;
-				this._trigger(this.event.ready);
+				this._trigger(hyperaudio.event.ready);
 			}
 		},
 
@@ -877,18 +1063,18 @@ var Transcript = (function($, Popcorn) {
 	};
 
 	return Transcript;
-}(jQuery, Popcorn));
+}(document, hyperaudio));
 
 
 /* Stage
  *
  */
 
-var Stage = (function($, Popcorn) {
+var Stage = (function(document, hyperaudio) {
 
 	function Stage(options) {
 
-		this.options = $.extend({}, this.options, {
+		this.options = hyperaudio.extend({}, this.options, {
 
 			entity: 'STAGE', // Not really an option... More like a manifest
 
@@ -922,8 +1108,7 @@ var Stage = (function($, Popcorn) {
 
 	Stage.prototype = {
 		load: function(src) {
-			var self = this,
-				$target = $(this.options.target);
+			var self = this;
 
 			if(src) {
 				this.options.src = src;
@@ -980,7 +1165,7 @@ var Stage = (function($, Popcorn) {
 	};
 
 	return Stage;
-}(jQuery, Popcorn));
+}(document, hyperaudio));
 
 
 hyperaudio.register('Player', Player);
