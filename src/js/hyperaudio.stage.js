@@ -2,7 +2,7 @@
  *
  */
 
-var Stage = (function($, Popcorn) {
+var Stage = (function($, document) {
 
 	function Stage(options) {
 
@@ -40,8 +40,7 @@ var Stage = (function($, Popcorn) {
 
 	Stage.prototype = {
 		load: function(src) {
-			var self = this,
-				$target = $(this.options.target);
+			var self = this;
 
 			if(src) {
 				this.options.src = src;
@@ -98,4 +97,4 @@ var Stage = (function($, Popcorn) {
 	};
 
 	return Stage;
-}(jQuery, Popcorn));
+}(jQuery, document));
