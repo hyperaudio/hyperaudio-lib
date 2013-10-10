@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.10 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 10th October 2013 20:34:01 */
+/*! hyperaudio v0.0.11 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 10th October 2013 20:52:55 */
 var HA = (function(window, document) {
 
 
@@ -1133,25 +1133,12 @@ var Stage = (function(document, hyperaudio) {
 		},
 
 		_dropped: function(el, html) {
-			var self = this,
-				id = el.getAttribute(this.options.idAttr); // Store the transcript ID
+			var self = this;
 
 			if(this.target) {
-
-				// Remove class from stage
-				this.target.className = this.target.className.replace(this.reDragdrop, '');
-
 				// Setup item for future dragdrop 
 				el._dragInstance = new DragDrop(el, this.target, {
-					html: html,
-					onDragStart: function () {
-						self.target.className += ' ' + self.options.dragdropClass;
-						el.style.display = 'none';
-					},
-					onDrop: function(el) {
-						el.setAttribute(self.options.idAttr, id); // Maintain the transcript ID
-						self._dropped(el, html);
-					}
+					html: el.innerHTML
 				});
 			}
 		},
