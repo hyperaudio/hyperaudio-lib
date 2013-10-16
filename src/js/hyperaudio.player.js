@@ -13,7 +13,7 @@ var Player = (function(document, hyperaudio, Popcorn) {
 			target: '#transcript-video', // The selector of element where the video is generated
 			src: '', // The URL of the video.
 
-			gui: true, // True to add a gui, or flase for native controls.
+			gui: false, // True to add a gui, or flase for native controls.
 			cssClassPrefix: 'ha-player-', // Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
