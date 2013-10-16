@@ -1,0 +1,73 @@
+@font-face {
+	font-family: 'entypo';
+	src: url('../font/entypo.eot?26969370');
+	src: url('../font/entypo.eot?26969370#iefix') format('embedded-opentype'),
+		url('../font/entypo.woff?26969370') format('woff'),
+		url('../font/entypo.ttf?26969370') format('truetype'),
+		url('../font/entypo.svg?26969370#entypo') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.ha-player-play:before,
+.ha-player-pause:before {
+	font-family: "entypo";
+	font-style: normal;
+	font-weight: normal;
+	speak: none;
+ 
+	display: inline-block;
+	text-decoration: inherit;
+	width: 32px;
+	text-align: center;
+	/* opacity: .8; */
+
+	/* For safety - reset parent styles, that can break glyph codes*/
+	font-variant: normal;
+	text-transform: none;
+
+	/* fix buttons height, for twitter bootstrap */
+	line-height: 1em;
+
+	/* Uncomment for 3D effect */
+	text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3);
+}
+
+.ha-player-play:before { content: '\25b6'; }
+.ha-player-pause:before { content: '\2016'; }
+
+.ha-player-play,
+.ha-player-pause {
+	color:#aaa;
+	cursor:pointer;
+}
+
+/* Taken care of in the player class
+.ha-player-pause {
+	display:none;
+}
+*/
+
+.ha-player-play:hover,
+.ha-player-pause:hover {
+	color:#ccc;
+}
+
+.ha-player-wrapper {
+	position:absolute;
+	bottom:0;
+	left:0;
+	/* width:480px; */
+	width:32px;
+	height:32px;
+	font-size:16px;
+	line-height:32px;
+	/* background-color:#aaa; */
+	/* display:none; */
+}
+
+.ha-player-controls {
+	width:32px;
+	height:100%;
+	background-color:#666;
+}

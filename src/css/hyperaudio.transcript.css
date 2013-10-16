@@ -43,11 +43,24 @@ p {
 }
 
 .transcript-video,
-.transcript-video video {
+.transcript-video video,
+.stage-video,
+.stage-video video {
 	width:480px;
 	height:270px;
 }
 
+.transcript-video {
+	position:absolute;
+	top:0;
+	left:0;
+}
+
+.stage-video {
+	position:absolute;
+	top:0;
+	left:480px;
+}
 .transcript {
 	position: absolute;
 	top: 300px;
