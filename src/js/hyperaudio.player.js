@@ -2,7 +2,7 @@
  *
  */
 
-var Player = (function(document, hyperaudio, Popcorn) {
+var Player = (function(window, document, hyperaudio, Popcorn) {
 
 	function Player(options) {
 
@@ -21,6 +21,8 @@ var Player = (function(document, hyperaudio, Popcorn) {
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.videoElem = null;
+		this.timeout = {};
+		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -40,9 +42,18 @@ var Player = (function(document, hyperaudio, Popcorn) {
 			if(this.target) {
 				this.videoElem = document.createElement('video');
 				this.videoElem.controls = !this.options.gui;
-				// Will want to create some event listeners on the video... For errors and timeupdate in the least.
+
+				// Add listeners to the video element
+				this.videoElem.addEventListener('progress', function(e) {
+					if(this.readyState > 0) {
+						this.commandsIgnored = false;
+					}
+				}, false);
+
+				// Clear the target element and add the video
 				this.target.innerHTML = '';
 				this.target.appendChild(this.videoElem);
+
 				if(this.options.gui) {
 					this.addGUI();
 				}
@@ -74,29 +85,19 @@ var Player = (function(document, hyperaudio, Popcorn) {
 					self.gui.play.style.display = 'none';
 					self.gui.pause.style.display = '';
 					self.play();
-				});
+				}, false);
 				this.gui.pause.addEventListener('click', function(e) {
 					e.preventDefault();
 					self.gui.play.style.display = '';
 					self.gui.pause.style.display = 'none';
 					self.pause();
-				});
+				}, false);
 
 				// Add listeners to the video element
 				this.videoElem.addEventListener('ended', function(e) {
 					self.gui.play.style.display = '';
 					self.gui.pause.style.display = 'none';
-				});
-/*
-				this.videoElem.addEventListener('play', function(e) {
-					self.gui.play.style.display = 'none';
-					self.gui.pause.style.display = '';
-				});
-				this.videoElem.addEventListener('pause', function(e) {
-					self.gui.play.style.display = '';
-					self.gui.pause.style.display = 'none';
-				});
-*/
+				}, false);
 
 				// Hide the pause button
 				this.gui.pause.style.display = 'none';
@@ -134,24 +135,48 @@ var Player = (function(document, hyperaudio, Popcorn) {
 			}
 		},
 		play: function(time) {
-			// Maybe should use the popcorn commands here
-			if(typeof time === 'number') {
-				this.videoElem.currentTime = time;
-			}
-			this.videoElem.play();
+			this.currentTime(time, true);
 		},
 		pause: function(time) {
-			// Maybe should use the popcorn commands here
-			if(typeof time === 'number') {
-				this.videoElem.currentTime = time;
-			}
 			this.videoElem.pause();
+			this.currentTime(time);
 		},
-		currentTime: function(time) {
-			// Maybe should use the popcorn commands here
-			this.videoElem.currentTime = time;
+		currentTime: function(time, play) {
+			var self = this,
+				media = this.videoElem;
+
+			clearTimeout(this.timeout.currentTime);
+
+			if(typeof time === 'number' && !isNaN(time)) {
+
+				// Attempt to play it, since iOS has been ignoring commands
+				if(play && this.commandsIgnored) {
+					media.play();
+				}
+
+				try {
+					// !media.seekable is for old HTML5 browsers, like Firefox 3.6.
+					// Checking seekable.length is important for iOS6 to work with currentTime changes immediately after changing media
+					if(!media.seekable || typeof media.seekable === "object" && media.seekable.length > 0) {
+						media.currentTime = time;
+						if(play) {
+							media.play();
+						}
+					} else {
+						throw 1;
+					}
+				} catch(err) {
+					this.timeout.currentTime = setTimeout(function() {
+						self.currentTime(time, play);
+					}, 250);
+				}
+			} else {
+				if(play) {
+					media.play();
+				}
+			}
 		}
 	};
 
 	return Player;
-}(document, hyperaudio, Popcorn));
+}(window, document, hyperaudio, Popcorn));
