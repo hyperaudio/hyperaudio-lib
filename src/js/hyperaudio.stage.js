@@ -11,14 +11,13 @@ var Stage = (function(document, hyperaudio) {
 			entity: 'STAGE', // Not really an option... More like a manifest
 
 			target: '#stage', // The selector of element for the staging area.
-			dragdropClass: 'dragdrop',
 
 			src: '', // The URL of the saved production.
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
 
 			async: true, // When true, some operations are delayed by a timeout.
-			player: null
+			projector: null
 		}, options);
 
 		// State Flags.
@@ -27,10 +26,13 @@ var Stage = (function(document, hyperaudio) {
 
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
-		this.reDragdrop = new RegExp('\\s*'+this.options.dragdropClass, 'gi');
 
 		if(this.options.DEBUG) {
 			this._debug();
+		}
+
+		if(this.options.projector) {
+			this.options.projector.setStage(this);
 		}
 
 		if(this.options.src) {
