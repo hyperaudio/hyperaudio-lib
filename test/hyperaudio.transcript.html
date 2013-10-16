@@ -30,6 +30,8 @@ span.code {
 <div id="wrapper">
 	<div id="source-video" class="transcript-video"></div>
 
+	<div id="target-video" class="stage-video"></div>
+
 	<p class="transcript-choice">
 		Select a transcript:
 		<a id="source-1">Internet Indians</a>
@@ -48,6 +50,7 @@ span.code {
 <script type="text/javascript" src="../src/js/hyperaudio.player.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.transcript.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.stage.js"></script>
+<script type="text/javascript" src="../src/js/hyperaudio.projector.js"></script>
 <script type="text/javascript" src="../node_modules/dragdrop/dragdrop.js"></script>
 <script type="text/javascript" src="../node_modules/wordselect/wordselect.js"></script>
 <script type="text/javascript">
@@ -55,13 +58,19 @@ span.code {
 	hyperaudio.register('Player', Player);
 	hyperaudio.register('Transcript', Transcript);
 	hyperaudio.register('Stage', Stage);
+	hyperaudio.register('Projector', Projector);
 
 	var player = hyperaudio.Player({
 		target: "#source-video"
 	});
 
+	var projector = hyperaudio.Projector({
+		target: "#target-video"
+	});
+
 	var stage = hyperaudio.Stage({
-		target: "#target-stage"
+		target: "#target-stage",
+		projector: projector
 	});
 
 	var transcript = hyperaudio.Transcript({
