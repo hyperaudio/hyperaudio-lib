@@ -263,7 +263,7 @@ p {
 	height: 2em;
 }
 
-.stage p {
+.stage p:last-child {
 	margin-bottom:0;
 }
 .draggable {
