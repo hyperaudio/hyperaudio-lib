@@ -86,12 +86,6 @@ p {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-
-	white-space: pre-wrap;
-	white-space: -moz-pre-wrap;
-	white-space: -pre-wrap;
-	white-space: -o-pre-wrap;
-	word-wrap: break-word;
 }
 
 .transcript-grey {
@@ -103,6 +97,12 @@ p {
 	position: relative;
 	z-index: 1;
 	cursor:pointer;
+
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
 }
 
 .transcript a:hover {
