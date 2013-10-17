@@ -13,6 +13,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			target: '#transcript-video', // The selector of element where the video is generated
 			src: '', // The URL of the video.
 
+			tPadding: 1, // (Seconds) Time added to end word timings.
+
 			gui: true, // True to add a gui, or flase for native controls.
 			cssClassPrefix: 'ha-player-', // Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
@@ -24,6 +26,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.stage = null;
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
+
+		this.current = {};
 
 		// State Flags
 		this.paused = true;
@@ -92,14 +96,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				// Add listeners to controls
 				this.gui.play.addEventListener('click', function(e) {
 					e.preventDefault();
-					self.gui.play.style.display = 'none';
-					self.gui.pause.style.display = '';
 					self.play();
 				}, false);
 				this.gui.pause.addEventListener('click', function(e) {
 					e.preventDefault();
-					self.gui.play.style.display = '';
-					self.gui.pause.style.display = 'none';
 					self.pause();
 				}, false);
 
@@ -144,10 +144,49 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				delete this.popcorn;
 			}
 		},
-		play: function(time) {
+		play: function() {
+
+			// ATM, we always play fromm the start.
+
+			if(this.stage && this.stage.target) {
+				// Get the staged contents wrapper elem
+				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
+
+				// Get the sections
+				this.current.sections = this.stageArticle.getElementsByTagName('section');
+				this.current.index = 0;
+
+				// Get the first section
+				this.current.section = this.current.sections[this.current.index];
+
+				// Get the ID (the src for now)
+				this.current.src = this.current.section.getAttribute('data-id');
+
+				var words = this.current.section.getElementsByTagName('a');
+				this.current.start = words[0].getAttribute('data-m') * 0.001;
+				this.current.end = words[words.length-1].getAttribute('data-m') * 0.001;
+
+				this.paused = false;
+
+				this.load(this.current.src);
+				this._play(this.current.start);
+
+			} else {
+				this.paused = true;
+			}
+			console.log('this.current: %o', this.current);
+		},
+		pause: function() {
+			//
+		},
+		_play: function(time) {
+			this.gui.play.style.display = 'none';
+			this.gui.pause.style.display = '';
 			this.currentTime(time, true);
 		},
-		pause: function(time) {
+		_pause: function(time) {
+			this.gui.play.style.display = '';
+			this.gui.pause.style.display = 'none';
 			this.videoElem.pause();
 			this.currentTime(time);
 		},
@@ -190,7 +229,30 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 
 			if(!this.paused) {
-				//
+				if(this.videoElem.currentTime > this.current.end + this.options.tPadding) {
+					// Goto the next section
+					this.current.index++;
+					this.current.section = this.current.sections[this.current.index];
+					if(this.current.section) {
+						// duplication here with the play() method... Refactor
+
+						// Get the ID (the src for now)
+						this.current.src = this.current.section.getAttribute('data-id');
+
+						var words = this.current.section.getElementsByTagName('a');
+						this.current.start = words[0].getAttribute('data-m') * 0.001;
+						this.current.end = words[words.length-1].getAttribute('data-m') * 0.001;
+
+						this.paused = false; // redundant here
+
+						this.load(this.current.src);
+						this._play(this.current.start);
+
+					} else {
+						this.paused = true;
+						this._pause();
+					}
+				}
 			}
 		}
 	};
