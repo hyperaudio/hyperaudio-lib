@@ -160,7 +160,7 @@ var Transcript = (function(document, hyperaudio) {
 
 				this.textSelect = new WordSelect(opts.target, {
 					onDragStart: function(e) {
-						opts.stage.target.className += ' ' + opts.stage.options.dragdropClass;
+						// opts.stage.target.className += ' ' + opts.stage.options.dragdropClass;
 						var dragdrop = new DragDrop(null, opts.stage.target, {
 							init: false,
 							onDrop: function(el) {

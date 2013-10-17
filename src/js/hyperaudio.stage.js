@@ -16,6 +16,7 @@ var Stage = (function(document, hyperaudio) {
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
 
+			dragdropClass: 'dragdrop',
 			async: true, // When true, some operations are delayed by a timeout.
 			projector: null
 		}, options);
