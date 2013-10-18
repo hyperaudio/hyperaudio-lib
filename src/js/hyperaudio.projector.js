@@ -16,7 +16,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			tPadding: 1, // (Seconds) Time added to end word timings.
 
 			gui: true, // True to add a gui, or flase for native controls.
-			cssClassPrefix: 'ha-player-', // Prefix of the class added to the GUI created.
+			cssClassPrefix: 'hyperaudio-player-', // Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
@@ -82,7 +82,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 			if(this.target) {
 				this.gui = {
-					wrapper: document.createElement('div'),
+					container: this.target, // To add a class to the player target
+					gui: document.createElement('div'),
 					controls: document.createElement('div'),
 					play: document.createElement('a'),
 					pause: document.createElement('a')
@@ -90,7 +91,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				// Add a class to each element
 				hyperaudio.each(this.gui, function(name) {
-					this.className = self.options.cssClassPrefix + name;
+					// this.className = self.options.cssClassPrefix + name;
+					this.classList.add(self.options.cssClassPrefix + name);
 				});
 
 				// Add listeners to controls
@@ -113,10 +115,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.gui.pause.style.display = 'none';
 
 				// Build the GUI structure
-				this.gui.wrapper.appendChild(this.gui.controls);
+				this.gui.gui.appendChild(this.gui.controls);
 				this.gui.controls.appendChild(this.gui.play);
 				this.gui.controls.appendChild(this.gui.pause);
-				this.target.appendChild(this.gui.wrapper);
+				this.target.appendChild(this.gui.gui);
 			} else {
 				this._error('Target not found : ' + this.options.target);
 			}

@@ -13,8 +13,10 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			target: '#transcript-video', // The selector of element where the video is generated
 			src: '', // The URL of the video.
 
-			gui: false, // True to add a gui, or flase for native controls.
-			cssClassPrefix: 'ha-player-', // Prefix of the class added to the GUI created.
+			guiNative: false, // TMP during dev. Either we have a gui or we are chomeless.
+
+			gui: false, // True to add a gui
+			cssClassPrefix: 'hyperaudio-player-', // Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
@@ -23,6 +25,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		this.videoElem = null;
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
+		this.gui = null;
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -41,7 +44,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 			if(this.target) {
 				this.videoElem = document.createElement('video');
-				this.videoElem.controls = !this.options.gui;
+				this.videoElem.controls = this.options.guiNative; // TMP during dev. Either we have a gui or we are chomeless.
 
 				// Add listeners to the video element
 				this.videoElem.addEventListener('progress', function(e) {
@@ -68,7 +71,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 			if(this.target) {
 				this.gui = {
-					wrapper: document.createElement('div'),
+					container: this.target, // To add a class to the player target
+					gui: document.createElement('div'),
 					controls: document.createElement('div'),
 					play: document.createElement('a'),
 					pause: document.createElement('a')
@@ -76,20 +80,17 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				// Add a class to each element
 				hyperaudio.each(this.gui, function(name) {
-					this.className = self.options.cssClassPrefix + name;
+					// this.className = self.options.cssClassPrefix + name;
+					this.classList.add(self.options.cssClassPrefix + name);
 				});
 
 				// Add listeners to controls
 				this.gui.play.addEventListener('click', function(e) {
 					e.preventDefault();
-					self.gui.play.style.display = 'none';
-					self.gui.pause.style.display = '';
 					self.play();
 				}, false);
 				this.gui.pause.addEventListener('click', function(e) {
 					e.preventDefault();
-					self.gui.play.style.display = '';
-					self.gui.pause.style.display = 'none';
 					self.pause();
 				}, false);
 
@@ -103,10 +104,10 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this.gui.pause.style.display = 'none';
 
 				// Build the GUI structure
-				this.gui.wrapper.appendChild(this.gui.controls);
+				this.gui.gui.appendChild(this.gui.controls);
 				this.gui.controls.appendChild(this.gui.play);
 				this.gui.controls.appendChild(this.gui.pause);
-				this.target.appendChild(this.gui.wrapper);
+				this.target.appendChild(this.gui.gui);
 			} else {
 				this._error('Target not found : ' + this.options.target);
 			}
@@ -135,9 +136,17 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 		play: function(time) {
+			if(this.gui) {
+				this.gui.play.style.display = 'none';
+				this.gui.pause.style.display = '';
+			}
 			this.currentTime(time, true);
 		},
 		pause: function(time) {
+			if(this.gui) {
+				this.gui.play.style.display = '';
+				this.gui.pause.style.display = 'none';
+			}
 			this.videoElem.pause();
 			this.currentTime(time);
 		},

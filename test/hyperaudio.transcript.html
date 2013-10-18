@@ -71,7 +71,8 @@ span.code {
 	hyperaudio.register('Projector', Projector);
 
 	var player = hyperaudio.Player({
-		target: "#source-video"
+		target: "#source-video",
+		guiNative: true // TMP while gui in dev
 	});
 
 	var projector = hyperaudio.Projector({

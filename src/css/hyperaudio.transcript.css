@@ -43,9 +43,7 @@ p {
 }
 
 .transcript-video,
-.transcript-video video,
-.stage-video,
-.stage-video video {
+.stage-video {
 	width:480px;
 	height:270px;
 }
@@ -61,6 +59,16 @@ p {
 	top:0;
 	left:480px;
 }
+
+/* Following rule only required when native controls being used.
+ * The Player CSS deals with this when its GUI is inserted.
+ */
+.transcript-video video,
+.stage-video video {
+	width:100%;
+	height:100%;
+}
+
 .transcript {
 	position: absolute;
 	top: 300px;

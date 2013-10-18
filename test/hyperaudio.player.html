@@ -3,10 +3,18 @@
 <head>
 	<meta charset="utf-8" />
 	<title>Player demo</title>
+	<link rel="stylesheet" type="text/css" href="../src/css/hyperaudio.player.css" />
+<style>
+.hyperaudio-player {
+	position:relative; /* The Player target must be relative or absolute - for the GUI CSS to work */
+	width:480px;
+	height:270px;
+}
+</style>
 </head>
 <body>
 
-<div id="source-video"></div>
+<div id="source-video" class="hyperaudio-player"></div>
 
 <script type="text/javascript" src="../lib/popcorn-1.4.0.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.core.js"></script>
@@ -17,7 +25,8 @@
 
 	var player = hyperaudio.Player({
 		target: "#source-video",
-		src: "http://hyperaud.io/video/internetindians.mp4"
+		src: "http://hyperaud.io/video/internetindians.mp4",
+		gui: true
 	});
 
 </script>
