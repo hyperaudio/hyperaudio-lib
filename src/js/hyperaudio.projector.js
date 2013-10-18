@@ -177,7 +177,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			console.log('this.current: %o', this.current);
 		},
 		pause: function() {
-			//
+			this.paused = true;
+			this._pause();
 		},
 		_play: function(time) {
 			this.gui.play.style.display = 'none';
