@@ -18,16 +18,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			players: 1, // Number of Players to use. Mobile: 1, Desktop: 2.
 
 			gui: true, // True to add a gui.
-			cssClassPrefix: 'hyperaudio-player-', // Prefix of the class added to the GUI created.
+			cssClassPrefix: 'hyperaudio-player-', // (See Player.addGUI) Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
-		this.videoElem = null;
 		this.stage = null;
-		this.timeout = {};
-		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
+		// this.timeout = {};
 
 		this.player = [];
 		this.current = {};
@@ -71,24 +69,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.target.appendChild(player);
 				}
 
-/*
-				this.videoElem = document.createElement('video');
-				this.videoElem.controls = !this.options.gui;
-
-				// Add listeners to the video element
-				this.videoElem.addEventListener('progress', function(e) {
-					if(this.readyState > 0) {
-						this.commandsIgnored = false;
-					}
-				}, false);
-				this.videoElem.addEventListener('timeupdate', function(e) {
-					self.manager(e);
-				}, false);
-
-				// Clear the target element and add the video
-				this.target.innerHTML = '';
-				this.target.appendChild(this.videoElem);
-*/
 				if(this.options.gui) {
 					this.addGUI();
 				}
@@ -110,25 +90,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.player[0].load(this.options.src);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
-			}
-/*
-			if(this.videoElem) {
-				this.killPopcorn();
-				this.videoElem.src = this.options.src;
-				this.initPopcorn();
-			} else {
-				this._error('Video player not created : ' + this.options.target);
-			}
-*/
-		},
-		initPopcorn: function() {
-			this.killPopcorn();
-			this.popcorn = Popcorn(this.videoElem);
-		},
-		killPopcorn: function() {
-			if(this.popcorn) {
-				this.popcorn.destroy();
-				delete this.popcorn;
 			}
 		},
 		play: function() {
@@ -172,7 +133,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.gui.play.style.display = 'none';
 				this.gui.pause.style.display = '';
 			}
-			// this.currentTime(time, true);
 			this.player[0].play(time);
 		},
 		_pause: function(time) {
@@ -180,56 +140,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.gui.play.style.display = '';
 				this.gui.pause.style.display = 'none';
 			}
-			// this.videoElem.pause();
-			// this.currentTime(time);
 			this.player[0].pause(time);
 		},
 		currentTime: function(time, play) {
-
 			this.player[0].currentTime(time, play);
-
-
-/*
-			var self = this,
-				media = this.videoElem;
-
-			clearTimeout(this.timeout.currentTime);
-
-			if(typeof time === 'number' && !isNaN(time)) {
-
-				// Attempt to play it, since iOS has been ignoring commands
-				if(play && this.commandsIgnored) {
-					media.play();
-				}
-
-				try {
-					// !media.seekable is for old HTML5 browsers, like Firefox 3.6.
-					// Checking seekable.length is important for iOS6 to work with currentTime changes immediately after changing media
-					if(!media.seekable || typeof media.seekable === "object" && media.seekable.length > 0) {
-						media.currentTime = time;
-						if(play) {
-							media.play();
-						}
-					} else {
-						throw 1;
-					}
-				} catch(err) {
-					this.timeout.currentTime = setTimeout(function() {
-						self.currentTime(time, play);
-					}, 250);
-				}
-			} else {
-				if(play) {
-					media.play();
-				}
-			}
-*/
 		},
 		manager: function(event) {
 			var self = this;
 
 			if(!this.paused) {
-				// if(this.videoElem.currentTime > this.current.end + this.options.tPadding) {
 				if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
 					// Goto the next section
 					this.current.index++;
