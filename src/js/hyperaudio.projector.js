@@ -15,7 +15,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			tPadding: 1, // (Seconds) Time added to end word timings.
 
-			gui: true, // True to add a gui, or flase for native controls.
+			players: 1, // Number of Players to use. Mobile: 1, Desktop: 2.
+
+			gui: true, // True to add a gui.
 			cssClassPrefix: 'hyperaudio-player-', // Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -27,7 +29,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 
+		this.player = [];
 		this.current = {};
+		this.gui = null;
 
 		// State Flags
 		this.paused = true;
@@ -51,6 +55,23 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 
 			if(this.target) {
+
+				// Making it work with a single player. Will dev 2 later.
+
+				for(var i = 0; i < this.options.players; i++ ) {
+					var player = document.createElement('div');
+					this.player[i] = hyperaudio.Player({
+						target: player
+					});
+
+					this.player[i].videoElem.addEventListener('timeupdate', function(event) {
+						self.manager(event);
+					}, false);
+
+					this.target.appendChild(player);
+				}
+
+/*
 				this.videoElem = document.createElement('video');
 				this.videoElem.controls = !this.options.gui;
 
@@ -67,7 +88,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				// Clear the target element and add the video
 				this.target.innerHTML = '';
 				this.target.appendChild(this.videoElem);
-
+*/
 				if(this.options.gui) {
 					this.addGUI();
 				}
@@ -78,56 +99,19 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this._error('Target not found : ' + this.options.target);
 			}
 		},
-		addGUI: function() {
-			var self = this;
-			if(this.target) {
-				this.gui = {
-					container: this.target, // To add a class to the player target
-					gui: document.createElement('div'),
-					controls: document.createElement('div'),
-					play: document.createElement('a'),
-					pause: document.createElement('a')
-				};
-
-				// Add a class to each element
-				hyperaudio.each(this.gui, function(name) {
-					// this.className = self.options.cssClassPrefix + name;
-					this.classList.add(self.options.cssClassPrefix + name);
-				});
-
-				// Add listeners to controls
-				this.gui.play.addEventListener('click', function(e) {
-					e.preventDefault();
-					self.play();
-				}, false);
-				this.gui.pause.addEventListener('click', function(e) {
-					e.preventDefault();
-					self.pause();
-				}, false);
-
-				// Add listeners to the video element
-				this.videoElem.addEventListener('ended', function(e) {
-					self.gui.play.style.display = '';
-					self.gui.pause.style.display = 'none';
-				}, false);
-
-				// Hide the pause button
-				this.gui.pause.style.display = 'none';
-
-				// Build the GUI structure
-				this.gui.gui.appendChild(this.gui.controls);
-				this.gui.controls.appendChild(this.gui.play);
-				this.gui.controls.appendChild(this.gui.pause);
-				this.target.appendChild(this.gui.gui);
-			} else {
-				this._error('Target not found : ' + this.options.target);
-			}
-		},
+		addGUI: Player.prototype.addGUI,
 		load: function(src) {
 			var self = this;
 			if(src) {
 				this.options.src = src;
 			}
+
+			if(this.player[0]) {
+				this.player[0].load(this.options.src);
+			} else {
+				this._error('Video player not created : ' + this.options.target);
+			}
+/*
 			if(this.videoElem) {
 				this.killPopcorn();
 				this.videoElem.src = this.options.src;
@@ -135,6 +119,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
+*/
 		},
 		initPopcorn: function() {
 			this.killPopcorn();
@@ -183,17 +168,28 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this._pause();
 		},
 		_play: function(time) {
-			this.gui.play.style.display = 'none';
-			this.gui.pause.style.display = '';
-			this.currentTime(time, true);
+			if(this.gui) {
+				this.gui.play.style.display = 'none';
+				this.gui.pause.style.display = '';
+			}
+			// this.currentTime(time, true);
+			this.player[0].play(time);
 		},
 		_pause: function(time) {
-			this.gui.play.style.display = '';
-			this.gui.pause.style.display = 'none';
-			this.videoElem.pause();
-			this.currentTime(time);
+			if(this.gui) {
+				this.gui.play.style.display = '';
+				this.gui.pause.style.display = 'none';
+			}
+			// this.videoElem.pause();
+			// this.currentTime(time);
+			this.player[0].pause(time);
 		},
 		currentTime: function(time, play) {
+
+			this.player[0].currentTime(time, play);
+
+
+/*
 			var self = this,
 				media = this.videoElem;
 
@@ -227,12 +223,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					media.play();
 				}
 			}
+*/
 		},
 		manager: function(event) {
 			var self = this;
 
 			if(!this.paused) {
-				if(this.videoElem.currentTime > this.current.end + this.options.tPadding) {
+				// if(this.videoElem.currentTime > this.current.end + this.options.tPadding) {
+				if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
 					// Goto the next section
 					this.current.index++;
 					this.current.section = this.current.sections[this.current.index];

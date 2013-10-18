@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 						'src/js/hyperaudio.player.js',
 						'src/js/hyperaudio.transcript.js',
 						'src/js/hyperaudio.stage.js',
-						'src/js/hyperaudio.projector.js',
+						'src/js/hyperaudio.projector.js', // Must be after Player module
 						// Mapping objects onto the Hyperaudio Lib
 						'src/js/mapping/hyperaudio.js',
 						'src/js/mapping/utilities.js',

@@ -59,6 +59,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				if(this.options.gui) {
 					this.addGUI();
+					this.addGUIListeners();
 				}
 				if(this.options.src) {
 					this.load();
@@ -93,13 +94,13 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					e.preventDefault();
 					self.pause();
 				}, false);
-
+/*
 				// Add listeners to the video element
 				this.videoElem.addEventListener('ended', function(e) {
 					self.gui.play.style.display = '';
 					self.gui.pause.style.display = 'none';
 				}, false);
-
+*/
 				// Hide the pause button
 				this.gui.pause.style.display = 'none';
 
@@ -110,6 +111,19 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this.target.appendChild(this.gui.gui);
 			} else {
 				this._error('Target not found : ' + this.options.target);
+			}
+		},
+		addGUIListeners: function() {
+			var self = this;
+			if(this.gui) {
+				// Add listeners to the video element
+				this.videoElem.addEventListener('ended', function(e) {
+					self.gui.play.style.display = '';
+					self.gui.pause.style.display = 'none';
+				}, false);
+
+			} else {
+				this._error('GUI not used: gui = ' + this.options.gui);
 			}
 		},
 		load: function(src) {
