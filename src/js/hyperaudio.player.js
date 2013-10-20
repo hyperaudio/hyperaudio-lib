@@ -81,8 +81,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				// Add a class to each element
 				hyperaudio.each(this.gui, function(name) {
-					// this.className = self.options.cssClassPrefix + name;
-					this.classList.add(self.options.cssClassPrefix + name);
+					hyperaudio.addClass(this, self.options.cssClassPrefix + name);
 				});
 
 				// Add listeners to controls
