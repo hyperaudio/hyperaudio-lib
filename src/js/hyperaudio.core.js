@@ -236,8 +236,22 @@ var hyperaudio = (function() {
 			}
 		},
 
-		jsonp: function() {
+		// TMP - This fn is WIP and left in as started making code for JSONP and then put it on hold.
+		jsonp: function(url, scope, callback) {
 			//
+			var head = document.getElementsByTagName('head')[0];
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+
+			var jsonp_i = 0; // TMP - would be in scope of core code as a static.
+
+			// Need to make the callback run in the correct scope.
+			callback[jsonp_i++] = function(json) {
+				callback.call(scope, data);
+			};
+
+			script.src = url;
+
 		},
 
 		hasClass: function(e, c) {
