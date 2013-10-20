@@ -236,6 +236,30 @@ var hyperaudio = (function() {
 			}
 		},
 
+		hasClass: function(e, c) {
+			if ( !e ) return false;
+
+			var re = new RegExp("(^|\\s)" + c + "(\\s|$)");
+			return re.test(e.className);
+		},
+		addClass: function(e, c) {
+			if ( this.hasClass(e, c) ) {
+				return;
+			}
+
+			var newclass = e.className.split(' ');
+			newclass.push(c);
+			e.className = newclass.join(' ');
+		},
+		removeClass: function (e, c) {
+			if ( !this.hasClass(e, c) ) {
+				return;
+			}
+
+			var re = new RegExp("(^|\\s)" + c + "(\\s|$)", 'g');
+			e.className = e.className.replace(re, ' ');
+		}
+
 	});
 
 	return hyperaudio;
