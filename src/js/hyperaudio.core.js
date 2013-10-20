@@ -190,7 +190,7 @@ var hyperaudio = (function() {
 			load: 'ha:load',
 			error: 'ha:error'
 		},
-		core: {
+		_commonMethods: {
 			options: {
 				DEBUG: true,
 				entity: 'core'
@@ -220,12 +220,12 @@ var hyperaudio = (function() {
 		register: function(name, module) {
 			if(typeof name === 'string') {
 				if(typeof module === 'function') {
-					module.prototype = hyperaudio.extend({}, this.core, module.prototype);
+					module.prototype = hyperaudio.extend({}, this._commonMethods, module.prototype);
 					this[name] = function(options) {
 						return new module(options);
 					};
 				} else if(typeof module === 'object') {
-					module = hyperaudio.extend({}, this.core, module);
+					module = hyperaudio.extend({}, this._commonMethods, module);
 					this[name] = module;
 				}
 			}
@@ -234,6 +234,10 @@ var hyperaudio = (function() {
 			if(typeof name === 'string') {
 				this[name] = utility;
 			}
+		},
+
+		jsonp: function() {
+			//
 		},
 
 		hasClass: function(e, c) {
