@@ -17,6 +17,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			players: 1, // Number of Players to use. Mobile: 1, Desktop: 2.
 
+			unit: 0.001, // Unit used if not given in section attr of stage.
+
 			gui: true, // True to add a gui.
 			cssClassPrefix: 'hyperaudio-player-', // (See Player.addGUI) Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
@@ -142,11 +144,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.current.section = this.current.sections[this.current.index];
 
 			// Get the ID (the src for now)
-			this.current.src = this.current.section.getAttribute('data-id');
+			this.current.src = this.current.section.getAttribute(this.stage.options.idAttr);
+
+			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);
+			this.current.unit = unit = unit > 0 ? unit : this.options.unit;
 
 			var words = this.current.section.getElementsByTagName('a');
-			this.current.start = words[0].getAttribute('data-m') * 0.001;
-			this.current.end = words[words.length-1].getAttribute('data-m') * 0.001;
+			this.current.start = words[0].getAttribute('data-m') * unit;
+			this.current.end = words[words.length-1].getAttribute('data-m') * unit;
 		},
 		manager: function(event) {
 			var self = this;

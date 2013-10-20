@@ -166,7 +166,8 @@ var Transcript = (function(document, hyperaudio) {
 							onDrop: function(el) {
 								self.textSelect.clearSelection();
 								this.destroy();
-								el.setAttribute(opts.stage.options.idAttr, self.options.video); // Pass the transcript ID
+								el.setAttribute(opts.stage.options.idAttr, opts.video); // Pass the transcript ID
+								el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
 								opts.stage._dropped(el);
 							}
 						});

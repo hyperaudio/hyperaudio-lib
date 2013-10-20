@@ -15,6 +15,7 @@ var Stage = (function(document, hyperaudio) {
 			src: '', // The URL of the saved production.
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
+			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
 			dragdropClass: 'dragdrop',
 			async: true, // When true, some operations are delayed by a timeout.
