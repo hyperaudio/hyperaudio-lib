@@ -102,17 +102,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				// Get the sections
 				this.current.sections = this.stageArticle.getElementsByTagName('section');
-				this.current.index = 0;
 
-				// Get the first section
-				this.current.section = this.current.sections[this.current.index];
-
-				// Get the ID (the src for now)
-				this.current.src = this.current.section.getAttribute('data-id');
-
-				var words = this.current.section.getElementsByTagName('a');
-				this.current.start = words[0].getAttribute('data-m') * 0.001;
-				this.current.end = words[words.length-1].getAttribute('data-m') * 0.001;
+				this.setCurrent(0);
 
 				this.paused = false;
 
@@ -122,7 +113,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			} else {
 				this.paused = true;
 			}
-			console.log('this.current: %o', this.current);
 		},
 		pause: function() {
 			this.paused = true;
@@ -145,30 +135,34 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		currentTime: function(time, play) {
 			this.player[0].currentTime(time, play);
 		},
+		setCurrent: function(index) {
+			this.current.index = index;
+
+			// Get the first section
+			this.current.section = this.current.sections[this.current.index];
+
+			// Get the ID (the src for now)
+			this.current.src = this.current.section.getAttribute('data-id');
+
+			var words = this.current.section.getElementsByTagName('a');
+			this.current.start = words[0].getAttribute('data-m') * 0.001;
+			this.current.end = words[words.length-1].getAttribute('data-m') * 0.001;
+		},
 		manager: function(event) {
 			var self = this;
 
 			if(!this.paused) {
 				if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
 					// Goto the next section
-					this.current.index++;
-					this.current.section = this.current.sections[this.current.index];
-					if(this.current.section) {
-						// duplication here with the play() method... Refactor
 
-						// Get the ID (the src for now)
-						this.current.src = this.current.section.getAttribute('data-id');
-
-						var words = this.current.section.getElementsByTagName('a');
-						this.current.start = words[0].getAttribute('data-m') * 0.001;
-						this.current.end = words[words.length-1].getAttribute('data-m') * 0.001;
-
-						this.paused = false; // redundant here
+					if(++this.current.index < this.current.sections.length) {
+						this.setCurrent(this.current.index);
 
 						this.load(this.current.src);
 						this._play(this.current.start);
-
 					} else {
+						this.current.index = 0;
+
 						this.paused = true;
 						this._pause();
 					}
