@@ -149,6 +149,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);
 			this.current.unit = unit = unit > 0 ? unit : this.options.unit;
 
+			// Still have attributes hard coded in here. Would need to pass from the transcript to stage and then to here.
 			var words = this.current.section.getElementsByTagName('a');
 			this.current.start = words[0].getAttribute('data-m') * unit;
 			this.current.end = words[words.length-1].getAttribute('data-m') * unit;
