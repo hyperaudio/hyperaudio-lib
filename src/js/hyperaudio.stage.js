@@ -72,9 +72,18 @@ var Stage = (function(document, hyperaudio) {
 			var self = this;
 
 			if(this.target) {
+				hyperaudio.removeClass(this.target, this.options.dragdropClass);
+
 				// Setup item for future dragdrop 
 				el._dragInstance = new DragDrop(el, this.target, {
-					html: el.innerHTML
+					html: el.innerHTML,
+					// draggableClass: draggableClass,
+					onDragStart: function () {
+						hyperaudio.addClass(self.target, self.options.dragdropClass);
+					},
+					onDrop: function () {
+						hyperaudio.removeClass(self.target, self.options.dragdropClass);
+					}
 				});
 			}
 		},
