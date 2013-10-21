@@ -20,12 +20,16 @@ module.exports = function(grunt) {
 						'src/js/wrapper/top.js',
 						// The Hyperaudio Lib Core
 						'src/js/hyperaudio.core.js',
+
 						// Utilities used by the Hyperaudio Lib
+						'src/js/utility.dragdrop.js',
+						//'src/js/utility.editblock.js',
+						//'src/js/utility.fadeFX.js',
+						//'src/js/utility.sidemenu.js',
+						//'src/js/utility.tap.js',
+						'src/js/utility.wordselect.js',
 						'src/js/utility.xhr.js',
-						// Utilities read from: npm install
-						'node_modules/dragdrop/dragdrop.js',
-						'node_modules/wordselect/wordselect.js',
-						// Modules that form the Hyperaudio Lib
+
 						'src/js/hyperaudio.player.js',
 						'src/js/hyperaudio.transcript.js',
 						'src/js/hyperaudio.stage.js',

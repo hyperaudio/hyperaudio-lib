@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.16 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 21st October 2013 20:29:42 */
+/*! hyperaudio v0.0.16 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 21st October 2013 18:59:16 */
 var HA = (function(window, document) {
 
 
@@ -288,65 +288,14 @@ var hyperaudio = (function() {
 }());
 
 
-/* xhr
- *
- */
+var DragDrop = (function (window, document, hyperaudio) {
 
-var xhr = (function(hyperaudio) {
+	function DragDrop (options) {
 
-	return function(options) {
-
-		options = hyperaudio.extend({
-			url: '',
-			data: '', // Only valid for POST types
-			type: 'GET',
-			responseType: '',
-			async: true,
-			cache: true
-
-			// complete: function()
-			// error: function()
-		}, options);
-
-		var xhr = new XMLHttpRequest();
-
-		if(!options.cache) {
-			options.url = options.url + ((/\?/).test(options.url) ? "&" : "?") + (new Date()).getTime();
-		}
-
-		xhr.open(options.type, options.url, options.async);
-		xhr.responseType = options.responseType;
-
-		xhr.addEventListener('load', function(event) {
-			if(this.status === 200) {
-				if(typeof options.complete === 'function') {
-					options.complete.call(this, event);
-				}
-			} else {
-				if(typeof options.error === 'function') {
-					options.error.call(this, event);
-				}
-			}
-		}, false);
-
-		if(typeof options.error === 'function') {
-			xhr.addEventListener('error', function(event) {
-				options.error.call(this, event);
-			}, false);
-		}
-
-		xhr.send(options.data);
-
-		return xhr;
-	};
-
-}(hyperaudio));
-
-
-var DragDrop = (function (window, document) {
-
-	function DragDrop (handle, droppable, options) {
 		this.options = {
+			handle: null,
+			dropArea: null,
+
 			init: true,
 			touch: true,
 			mouse: true,
@@ -361,19 +310,19 @@ var DragDrop = (function (window, document) {
 			this.options[i] = options[i];
 		}
 
-		this.droppable = typeof droppable == 'string' ? document.querySelector(droppable) : droppable;
+		this.dropArea = typeof this.options.dropArea == 'string' ? document.querySelector(this.options.dropArea) : this.options.dropArea;
 
 		// Create the list and the placeholder
-		this.list = this.droppable.querySelector(this.options.containerTag);
+		this.list = this.dropArea.querySelector(this.options.containerTag);
 		if ( !this.list ) {
 			this.list = document.createElement(this.options.containerTag);
-			this.droppable.appendChild(this.list);
+			this.dropArea.appendChild(this.list);
 		}
 		this.placeholder = document.createElement(this.options.blockTag);
 		this.placeholder.className = 'placeholder';
 
 		if ( this.options.init ) {
-			this.handle = typeof handle == 'string' ? document.querySelector(handle) : handle;
+			this.handle = typeof this.options.handle == 'string' ? document.querySelector(this.options.handle) : this.options.handle;
 			this.handleClassName = this.handle.className;
 
 			// Are we reordering the list?
@@ -505,12 +454,12 @@ var DragDrop = (function (window, document) {
 
 		this.lastTarget = target;
 
-		if ( target == this.droppable ) {
+		if ( target == this.dropArea ) {
 			this.list.appendChild(this.placeholder);
 			return;
 		}
 
-		if ( /(^|\s)item(\s|$)/.test(target.className) ) {
+		if ( hyperaudio.hasClass(target, 'item') ) {
 			var items = this.list.querySelectorAll('.item'),
 				i = 0, l = items.length;
 
@@ -594,46 +543,21 @@ var DragDrop = (function (window, document) {
 	};
 
 	return DragDrop;
-})(window, document);
+})(window, document, hyperaudio);
 
-var WordSelect = (function (window, document) {
+var WordSelect = (function (window, document, hyperaudio) {
 
+	// used just in dev environment
 	function addTagHelpers (el) {
 		var text = (el.innerText || el.textContent).split(' ');
 
 		el.innerHTML = '<a>' + text.join(' </a><a>') + '</a>';
 	}
 
-	function hasClass (e, c) {
-		if ( !e ) return false;
-
-		var re = new RegExp("(^|\\s)" + c + "(\\s|$)");
-		return re.test(e.className);
-	}
-
-	function addClass (e, c) {
-		if ( hasClass(e, c) ) {
-			return;
-		}
-
-		var newclass = e.className.split(' ');
-		newclass.push(c);
-		e.className = newclass.join(' ');
-	}
-
-	function removeClass (e, c) {
-		if ( !hasClass(e, c) ) {
-			return;
-		}
-
-		var re = new RegExp("(^|\\s)" + c + "(\\s|$)", 'g');
-		e.className = e.className.replace(re, ' ');
-	}
-
-	function WordSelect (el, options) {
-		this.element = document.querySelector(el);
+	function WordSelect (options) {
 
 		this.options = {
+			el: null,
 			addHelpers: false,
 			touch: true,
 			mouse: true,
@@ -643,6 +567,8 @@ var WordSelect = (function (window, document) {
 		for ( var i in options ) {
 			this.options[i] = options[i];
 		}
+
+		this.element = typeof this.options.el == 'string' ? document.querySelector(this.options.el) : this.options.el;
 
 		if ( this.options.addHelpers ) {
 			addTagHelpers(this.element);
@@ -701,7 +627,7 @@ var WordSelect = (function (window, document) {
 			window.addEventListener('touchend', this, false);
 		}
 
-		if ( hasClass(e.target, 'selected') ) {
+		if ( hyperaudio.hasClass(e.target, 'selected') ) {
 			this.dragTimeout = setTimeout(this.dragStart.bind(this, e), 500);
 		}
 	};
@@ -718,8 +644,8 @@ var WordSelect = (function (window, document) {
 
 		this.currentWord = target;
 
-		removeClass(this.element.querySelector('.first'), 'first');
-		removeClass(this.element.querySelector('.last'), 'last');
+		hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
+		hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
 
 		if ( this.words[this.startPosition] === target ) {
 			tmp = this.startPosition;
@@ -737,12 +663,12 @@ var WordSelect = (function (window, document) {
 				this.startPosition = i;
 			}
 
-			removeClass(this.words[i], 'selected');
+			hyperaudio.removeClass(this.words[i], 'selected');
 		}
 
 		this.endPosition = this.startPosition;
 
-		addClass(target, 'selected');
+		hyperaudio.addClass(target, 'selected');
 	};
 
 	WordSelect.prototype.move = function (e) {
@@ -778,9 +704,9 @@ var WordSelect = (function (window, document) {
 			if ( ( endPosition === undefined && i >= this.startPosition ) ||
 				( endPosition !== undefined && i <= this.startPosition ) ||
 				endPosition == i ) {
-				addClass(this.words[i], 'selected');
+				hyperaudio.addClass(this.words[i], 'selected');
 			} else {
-				removeClass(this.words[i], 'selected');
+				hyperaudio.removeClass(this.words[i], 'selected');
 			}
 		}
 
@@ -812,8 +738,8 @@ var WordSelect = (function (window, document) {
 		var start = Math.min(this.startPosition, this.endPosition),
 			end = Math.max(this.startPosition, this.endPosition);
 
-		addClass(this.words[start], 'first');
-		addClass(this.words[end], 'last');
+		hyperaudio.addClass(this.words[start], 'first');
+		hyperaudio.addClass(this.words[end], 'last');
 	};
 
 	WordSelect.prototype.clearSelection = function () {
@@ -821,8 +747,8 @@ var WordSelect = (function (window, document) {
 		this.startPosition = null;
 		this.endPosition = null;
 
-		removeClass(this.element.querySelector('.first'), 'first');
-		removeClass(this.element.querySelector('.last'), 'last');
+		hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
+		hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
 
 		if ( this.options.touch ) {
 			this.element.removeEventListener('touchmove', this, false);
@@ -836,7 +762,7 @@ var WordSelect = (function (window, document) {
 
 		var selected = this.element.querySelectorAll('.selected');
 		for ( var i = 0, l = selected.length; i < l; i++ ) {
-			removeClass(selected[i], 'selected');
+			hyperaudio.removeClass(selected[i], 'selected');
 		}
 	};
 
@@ -891,7 +817,62 @@ var WordSelect = (function (window, document) {
 
 	return WordSelect;
 
-})(window, document);
+})(window, document, hyperaudio);
+
+/* xhr
+ *
+ */
+
+var xhr = (function(hyperaudio) {
+
+	return function(options) {
+
+		options = hyperaudio.extend({
+			url: '',
+			data: '', // Only valid for POST types
+			type: 'GET',
+			responseType: '',
+			async: true,
+			cache: true
+
+			// complete: function()
+			// error: function()
+		}, options);
+
+		var xhr = new XMLHttpRequest();
+
+		if(!options.cache) {
+			options.url = options.url + ((/\?/).test(options.url) ? "&" : "?") + (new Date()).getTime();
+		}
+
+		xhr.open(options.type, options.url, options.async);
+		xhr.responseType = options.responseType;
+
+		xhr.addEventListener('load', function(event) {
+			if(this.status === 200) {
+				if(typeof options.complete === 'function') {
+					options.complete.call(this, event);
+				}
+			} else {
+				if(typeof options.error === 'function') {
+					options.error.call(this, event);
+				}
+			}
+		}, false);
+
+		if(typeof options.error === 'function') {
+			xhr.addEventListener('error', function(event) {
+				options.error.call(this, event);
+			}, false);
+		}
+
+		xhr.send(options.data);
+
+		return xhr;
+	};
+
+}(hyperaudio));
+
 
 /* Player
  *
@@ -1257,10 +1238,12 @@ var Transcript = (function(document, hyperaudio) {
 				// Destroy any existing WordSelect.
 				this.deselectorize();
 
-				this.textSelect = new WordSelect(opts.target, {
+				this.textSelect = new WordSelect({
+					el: opts.target,
 					onDragStart: function(e) {
 						hyperaudio.addClass(opts.stage.target, opts.stage.options.dragdropClass);
-						var dragdrop = new DragDrop(null, opts.stage.target, {
+						var dragdrop = new DragDrop({
+							dropArea: opts.stage.target,
 							init: false,
 							onDrop: function(el) {
 								self.textSelect.clearSelection();
@@ -1377,7 +1360,9 @@ var Stage = (function(document, hyperaudio) {
 				hyperaudio.removeClass(this.target, this.options.dragdropClass);
 
 				// Setup item for future dragdrop 
-				el._dragInstance = new DragDrop(el, this.target, {
+				el._dragInstance = new DragDrop({
+					handle: el,
+					dropArea: this.target,
 					html: el.innerHTML,
 					// draggableClass: draggableClass,
 					onDragStart: function () {
