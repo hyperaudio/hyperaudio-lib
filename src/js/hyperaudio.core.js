@@ -188,6 +188,7 @@ var hyperaudio = (function() {
 		event: {
 			ready: 'ha:ready',
 			load: 'ha:load',
+			save: 'ha:save',
 			error: 'ha:error'
 		},
 		_commonMethods: {

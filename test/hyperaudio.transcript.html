@@ -12,11 +12,16 @@
 	top:280px;
 	left:10px;
 }
-.transcript-choice a {
+.stage-command {
+	position:absolute;
+	top:280px;
+	right:10px;
+}
+.demo-buttons a {
 	font-weight:bold;
 	cursor:pointer;
 }
-.transcript-choice a:hover {
+.demo-buttons a:hover {
 	text-decoration:underline;
 }
 span.code {
@@ -35,12 +40,17 @@ span.code {
 
 	<div id="target-video" class="stage-video"></div>
 
-	<div class="transcript-choice">
+	<div class="transcript-choice demo-buttons">
 		Select a transcript:
 		<a id="source-1">Internet Indians</a>
 		| <a id="source-2">Clapper Responds</a>
 		| <a id="source-3">SOTU 2010</a>
 		| <a id="source-4">Broken URL</a>
+	</div>
+
+	<div class="stage-command demo-buttons">
+		Command:
+		<a id="stage-save">save</a>
 	</div>
 
 	<div id="source-transcript" class="transcript">
@@ -124,6 +134,11 @@ span.code {
 			src: "broken/transcript.url.htm",
 			video: "broken/video.url.mp4"
 		});
+	});
+
+	document.querySelector('#stage-save').addEventListener('click', function(e) {
+		e.preventDefault();
+		stage.save();
 	});
 
 </script>

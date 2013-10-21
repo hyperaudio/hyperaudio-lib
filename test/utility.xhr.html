@@ -82,7 +82,7 @@ span.code {
 		hyperaudio.xhr({
 			url: "https://data.hyperaud.io/media/525e63376a3013426b000007",
 			type: 'POST',
-			data: 'json=' + JSON.stringify([{num:4, str:'mp', obj:{n1:1,s1:'1'}}]),
+			data: 'json=' + JSON.stringify({num:4, str:'mp', obj:{n1:1,s1:'1'}}),
 			complete: function(event) {
 				var json = JSON.parse(this.responseText);
 				console.log('json = %o', json);

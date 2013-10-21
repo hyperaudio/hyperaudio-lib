@@ -12,7 +12,10 @@ var Stage = (function(document, hyperaudio) {
 
 			target: '#stage', // The selector of element for the staging area.
 
-			src: '', // The URL of the saved production.
+			src: '', // [Obsolete] The URL of the saved production.
+
+			// api: 'https://data.hyperaud.io/', // The URL of the API
+			api: 'api/', // TMP - The URL of the API
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
 			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
@@ -58,7 +61,33 @@ var Stage = (function(document, hyperaudio) {
 		save: function() {
 			// Save the staged production
 
-			// Not sure how  the API works... Are we saving the HTML (easy) or translating it to json.
+			// PUT to update, POST to create.
+			// PUT/POST to /user/mixes/ with {label: "", content ""}
+
+			// var user = hyperaudio.user.getUser(), // WIP
+			var self = this,
+				user = 'mp', // TMP
+				label = 'Not Yet Defined',
+				url = this.options.api + user + '/mixes/';
+
+			// Check we have at least 1 section
+			if(this.target && (this.target.getElementsByTagName('section')).length) {
+
+				xhr({
+					url: url,
+					type: 'POST',
+					data: 'json=' + JSON.stringify({
+						label: label,
+						content: this.target.innerHTML
+					}),
+					complete: function(event) {
+						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
+					},
+					error: function(event) {
+						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+					}
+				});
+			}
 		},
 
 		parse: function() {
