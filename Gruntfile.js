@@ -18,12 +18,14 @@ module.exports = function(grunt) {
 					'build/<%= pkg.name %>.js': [
 						// Top closure wrapper
 						'src/js/wrapper/top.js',
+						// The Hyperaudio Lib Core
+						'src/js/hyperaudio.core.js',
+						// Utilities used by the Hyperaudio Lib
+						'src/js/utility.xhr.js',
 						// Utilities read from: npm install
 						'node_modules/dragdrop/dragdrop.js',
 						'node_modules/wordselect/wordselect.js',
 						// Modules that form the Hyperaudio Lib
-						'src/js/hyperaudio.core.js',
-						'src/js/hyperaudio.xhr.js',
 						'src/js/hyperaudio.player.js',
 						'src/js/hyperaudio.transcript.js',
 						'src/js/hyperaudio.stage.js',
