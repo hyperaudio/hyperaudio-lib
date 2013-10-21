@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>XHR demo</title>
+<style>
+.xhr-choice {
+/*
+	position:absolute;
+	top:280px;
+	left:10px;
+*/
+}
+.xhr-choice a {
+	font-weight:bold;
+	cursor:pointer;
+}
+.xhr-choice a:hover {
+	text-decoration:underline;
+}
+span.code {
+	padding:0 4px;
+	border:2px #666 solid;
+	border-radius:8px;
+	background-color:#ccc;
+}
+</style>
+</head>
+<body>
+
+<div class="xhr-choice">
+	Select an xhr test:
+	<a id="test-1">Get and insert string</a>
+	| <a id="test-2">No Cache</a>
+	| <a id="test-3">Post json and parse json</a>
+	| <a id="test-4">Get and parse json</a>
+</div>
+
+<div id="target-xhr">Clicky a thingie.</div>
+
+<script type="text/javascript" src="../src/js/hyperaudio.core.js"></script>
+<script type="text/javascript" src="../src/js/utility.xhr.js"></script>
+<script type="text/javascript">
+
+	hyperaudio.utility('xhr', xhr);
+
+	var target = document.querySelector('#target-xhr');
+/*
+	hyperaudio.xhr({
+		url: "https://data.hyperaud.io/media/525e63376a3013426b000007",
+		complete: function(event) {
+			target.innerHTML = this.responseText;
+		}
+	});
+*/
+	document.querySelector('#test-1').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = '';
+		hyperaudio.xhr({
+			url: "https://data.hyperaud.io/media/525e63376a3013426b000007",
+			complete: function(event) {
+				target.innerHTML = this.responseText;
+			}
+		});
+	});
+
+	document.querySelector('#test-2').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = '';
+		hyperaudio.xhr({
+			url: "https://data.hyperaud.io/media/525e63376a3013426b000007",
+			cache: false,
+			complete: function(event) {
+				target.innerHTML = this.responseText;
+			}
+		});
+	});
+
+	document.querySelector('#test-3').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = 'See console - The current url does not work with POST, so update when API in place.';
+		hyperaudio.xhr({
+			url: "https://data.hyperaud.io/media/525e63376a3013426b000007",
+			type: 'POST',
+			data: 'json=' + JSON.stringify([{num:4, str:'mp', obj:{n1:1,s1:'1'}}]),
+			complete: function(event) {
+				var json = JSON.parse(this.responseText);
+				console.log('json = %o', json);
+			}
+		});
+	});
+
+	document.querySelector('#test-4').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = 'See console.';
+		hyperaudio.xhr({
+			url: "https://data.hyperaud.io/media/525e63376a3013426b000007",
+			complete: function(event) {
+				var json = JSON.parse(this.responseText);
+				console.log('json = %o', json);
+			}
+		});
+	});
+
+</script>
+</body>
+</html>
