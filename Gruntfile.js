@@ -30,10 +30,12 @@ module.exports = function(grunt) {
 						'src/js/utility.wordselect.js',
 						'src/js/utility.xhr.js',
 
+						// Modules that form the Hyperaudio Lib
 						'src/js/hyperaudio.player.js',
 						'src/js/hyperaudio.transcript.js',
 						'src/js/hyperaudio.stage.js',
 						'src/js/hyperaudio.projector.js', // Must be after Player module
+
 						// Mapping objects onto the Hyperaudio Lib
 						'src/js/mapping/hyperaudio.js',
 						'src/js/mapping/utilities.js',
