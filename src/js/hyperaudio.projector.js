@@ -58,15 +58,17 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				// Making it work with a single player. Will dev 2 later.
 
+				var manager = function(event) {
+					self.manager(event);
+				};
+
 				for(var i = 0; i < this.options.players; i++ ) {
 					var player = document.createElement('div');
 					this.player[i] = hyperaudio.Player({
 						target: player
 					});
 
-					this.player[i].videoElem.addEventListener('timeupdate', function(event) {
-						self.manager(event);
-					}, false);
+					this.player[i].videoElem.addEventListener('timeupdate', manager, false);
 
 					this.target.appendChild(player);
 				}

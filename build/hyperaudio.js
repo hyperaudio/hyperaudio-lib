@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.12 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 18th October 2013 14:13:12 */
+/*! hyperaudio v0.0.14 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 21st October 2013 16:02:41 */
 var HA = (function(window, document) {
 
 
@@ -172,12 +172,19 @@ var DragDrop = (function (window, document) {
 		if ( /(^|\s)item(\s|$)/.test(target.className) ) {
 			var items = this.list.querySelectorAll('.item'),
 				i = 0, l = items.length;
+
 			for ( ; i < l; i++ ) {
 				if ( target == items[i] ) {
 					this.list.insertBefore(this.placeholder, items[i]);
 					break;
 				}
 			}
+
+			return;
+		}
+
+		if ( this.list.querySelector('.placeholder') ) {
+			this.placeholder.parentNode.removeChild(this.placeholder);
 		}
 	};
 
@@ -201,8 +208,17 @@ var DragDrop = (function (window, document) {
 		this.draggable.parentNode.removeChild(this.draggable);
 		this.draggable = null;
 
-		// we dropped outside of the draggable area, so exit
+		// we dropped outside of the draggable area
 		if ( !this.list.querySelector('.placeholder') ) {
+
+			if ( this.reordering ) {
+				this.handle.parentNode.removeChild(this.handle);
+			}
+
+			if ( this.options.onDrop ) {
+				this.options.onDrop.call(this, null);
+			}
+
 			return;
 		}
 
@@ -728,7 +744,7 @@ var hyperaudio = (function() {
 			load: 'ha:load',
 			error: 'ha:error'
 		},
-		core: {
+		_commonMethods: {
 			options: {
 				DEBUG: true,
 				entity: 'core'
@@ -758,12 +774,12 @@ var hyperaudio = (function() {
 		register: function(name, module) {
 			if(typeof name === 'string') {
 				if(typeof module === 'function') {
-					module.prototype = hyperaudio.extend({}, this.core, module.prototype);
+					module.prototype = hyperaudio.extend({}, this._commonMethods, module.prototype);
 					this[name] = function(options) {
 						return new module(options);
 					};
 				} else if(typeof module === 'object') {
-					module = hyperaudio.extend({}, this.core, module);
+					module = hyperaudio.extend({}, this._commonMethods, module);
 					this[name] = module;
 				}
 			}
@@ -773,6 +789,48 @@ var hyperaudio = (function() {
 				this[name] = utility;
 			}
 		},
+
+		// TMP - This fn is WIP and left in as started making code for JSONP and then put it on hold.
+		jsonp: function(url, scope, callback) {
+			//
+			var head = document.getElementsByTagName('head')[0];
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+
+			var jsonp_i = 0; // TMP - would be in scope of core code as a static.
+
+			// Need to make the callback run in the correct scope.
+			callback[jsonp_i++] = function(json) {
+				callback.call(scope, data);
+			};
+
+			script.src = url;
+
+		},
+
+		hasClass: function(e, c) {
+			if ( !e ) return false;
+
+			var re = new RegExp("(^|\\s)" + c + "(\\s|$)");
+			return re.test(e.className);
+		},
+		addClass: function(e, c) {
+			if ( this.hasClass(e, c) ) {
+				return;
+			}
+
+			var newclass = e.className.split(' ');
+			newclass.push(c);
+			e.className = newclass.join(' ');
+		},
+		removeClass: function (e, c) {
+			if ( !this.hasClass(e, c) ) {
+				return;
+			}
+
+			var re = new RegExp("(^|\\s)" + c + "(\\s|$)", 'g');
+			e.className = e.className.replace(re, ' ');
+		}
 
 	});
 
@@ -841,6 +899,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				if(this.options.gui) {
 					this.addGUI();
+					this.addGUIListeners();
 				}
 				if(this.options.src) {
 					this.load();
@@ -862,8 +921,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				// Add a class to each element
 				hyperaudio.each(this.gui, function(name) {
-					// this.className = self.options.cssClassPrefix + name;
-					this.classList.add(self.options.cssClassPrefix + name);
+					hyperaudio.addClass(this, self.options.cssClassPrefix + name);
 				});
 
 				// Add listeners to controls
@@ -875,13 +933,13 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					e.preventDefault();
 					self.pause();
 				}, false);
-
+/*
 				// Add listeners to the video element
 				this.videoElem.addEventListener('ended', function(e) {
 					self.gui.play.style.display = '';
 					self.gui.pause.style.display = 'none';
 				}, false);
-
+*/
 				// Hide the pause button
 				this.gui.pause.style.display = 'none';
 
@@ -892,6 +950,19 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this.target.appendChild(this.gui.gui);
 			} else {
 				this._error('Target not found : ' + this.options.target);
+			}
+		},
+		addGUIListeners: function() {
+			var self = this;
+			if(this.gui) {
+				// Add listeners to the video element
+				this.videoElem.addEventListener('ended', function(e) {
+					self.gui.play.style.display = '';
+					self.gui.pause.style.display = 'none';
+				}, false);
+
+			} else {
+				this._error('GUI not used: gui = ' + this.options.gui);
 			}
 		},
 		load: function(src) {
@@ -1135,13 +1206,14 @@ var Transcript = (function(document, hyperaudio) {
 
 				this.textSelect = new WordSelect(opts.target, {
 					onDragStart: function(e) {
-						// opts.stage.target.className += ' ' + opts.stage.options.dragdropClass;
+						hyperaudio.addClass(opts.stage.target, opts.stage.options.dragdropClass);
 						var dragdrop = new DragDrop(null, opts.stage.target, {
 							init: false,
 							onDrop: function(el) {
 								self.textSelect.clearSelection();
 								this.destroy();
-								el.setAttribute(opts.stage.options.idAttr, self.options.video); // Pass the transcript ID
+								el.setAttribute(opts.stage.options.idAttr, opts.video); // Pass the transcript ID
+								el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
 								opts.stage._dropped(el);
 							}
 						});
@@ -1192,6 +1264,7 @@ var Stage = (function(document, hyperaudio) {
 			src: '', // The URL of the saved production.
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
+			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
 			dragdropClass: 'dragdrop',
 			async: true, // When true, some operations are delayed by a timeout.
@@ -1248,9 +1321,18 @@ var Stage = (function(document, hyperaudio) {
 			var self = this;
 
 			if(this.target) {
+				hyperaudio.removeClass(this.target, this.options.dragdropClass);
+
 				// Setup item for future dragdrop 
 				el._dragInstance = new DragDrop(el, this.target, {
-					html: el.innerHTML
+					html: el.innerHTML,
+					// draggableClass: draggableClass,
+					onDragStart: function () {
+						hyperaudio.addClass(self.target, self.options.dragdropClass);
+					},
+					onDrop: function () {
+						hyperaudio.removeClass(self.target, self.options.dragdropClass);
+					}
 				});
 			}
 		},
@@ -1284,19 +1366,23 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			tPadding: 1, // (Seconds) Time added to end word timings.
 
-			gui: true, // True to add a gui, or flase for native controls.
-			cssClassPrefix: 'hyperaudio-player-', // Prefix of the class added to the GUI created.
+			players: 1, // Number of Players to use. Mobile: 1, Desktop: 2.
+
+			unit: 0.001, // Unit used if not given in section attr of stage.
+
+			gui: true, // True to add a gui.
+			cssClassPrefix: 'hyperaudio-player-', // (See Player.addGUI) Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
-		this.videoElem = null;
 		this.stage = null;
-		this.timeout = {};
-		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
+		// this.timeout = {};
 
+		this.player = [];
 		this.current = {};
+		this.gui = null;
 
 		// State Flags
 		this.paused = true;
@@ -1320,22 +1406,23 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 
 			if(this.target) {
-				this.videoElem = document.createElement('video');
-				this.videoElem.controls = !this.options.gui;
 
-				// Add listeners to the video element
-				this.videoElem.addEventListener('progress', function(e) {
-					if(this.readyState > 0) {
-						this.commandsIgnored = false;
-					}
-				}, false);
-				this.videoElem.addEventListener('timeupdate', function(e) {
-					self.manager(e);
-				}, false);
+				// Making it work with a single player. Will dev 2 later.
 
-				// Clear the target element and add the video
-				this.target.innerHTML = '';
-				this.target.appendChild(this.videoElem);
+				var manager = function(event) {
+					self.manager(event);
+				};
+
+				for(var i = 0; i < this.options.players; i++ ) {
+					var player = document.createElement('div');
+					this.player[i] = hyperaudio.Player({
+						target: player
+					});
+
+					this.player[i].videoElem.addEventListener('timeupdate', manager, false);
+
+					this.target.appendChild(player);
+				}
 
 				if(this.options.gui) {
 					this.addGUI();
@@ -1347,72 +1434,17 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this._error('Target not found : ' + this.options.target);
 			}
 		},
-		addGUI: function() {
-			var self = this;
-			if(this.target) {
-				this.gui = {
-					container: this.target, // To add a class to the player target
-					gui: document.createElement('div'),
-					controls: document.createElement('div'),
-					play: document.createElement('a'),
-					pause: document.createElement('a')
-				};
-
-				// Add a class to each element
-				hyperaudio.each(this.gui, function(name) {
-					// this.className = self.options.cssClassPrefix + name;
-					this.classList.add(self.options.cssClassPrefix + name);
-				});
-
-				// Add listeners to controls
-				this.gui.play.addEventListener('click', function(e) {
-					e.preventDefault();
-					self.play();
-				}, false);
-				this.gui.pause.addEventListener('click', function(e) {
-					e.preventDefault();
-					self.pause();
-				}, false);
-
-				// Add listeners to the video element
-				this.videoElem.addEventListener('ended', function(e) {
-					self.gui.play.style.display = '';
-					self.gui.pause.style.display = 'none';
-				}, false);
-
-				// Hide the pause button
-				this.gui.pause.style.display = 'none';
-
-				// Build the GUI structure
-				this.gui.gui.appendChild(this.gui.controls);
-				this.gui.controls.appendChild(this.gui.play);
-				this.gui.controls.appendChild(this.gui.pause);
-				this.target.appendChild(this.gui.gui);
-			} else {
-				this._error('Target not found : ' + this.options.target);
-			}
-		},
+		addGUI: Player.prototype.addGUI,
 		load: function(src) {
 			var self = this;
 			if(src) {
 				this.options.src = src;
 			}
-			if(this.videoElem) {
-				this.killPopcorn();
-				this.videoElem.src = this.options.src;
-				this.initPopcorn();
+
+			if(this.player[0]) {
+				this.player[0].load(this.options.src);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
-			}
-		},
-		initPopcorn: function() {
-			this.killPopcorn();
-			this.popcorn = Popcorn(this.videoElem);
-		},
-		killPopcorn: function() {
-			if(this.popcorn) {
-				this.popcorn.destroy();
-				delete this.popcorn;
 			}
 		},
 		play: function() {
@@ -1425,17 +1457,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				// Get the sections
 				this.current.sections = this.stageArticle.getElementsByTagName('section');
-				this.current.index = 0;
 
-				// Get the first section
-				this.current.section = this.current.sections[this.current.index];
-
-				// Get the ID (the src for now)
-				this.current.src = this.current.section.getAttribute('data-id');
-
-				var words = this.current.section.getElementsByTagName('a');
-				this.current.start = words[0].getAttribute('data-m') * 0.001;
-				this.current.end = words[words.length-1].getAttribute('data-m') * 0.001;
+				this.setCurrent(0);
 
 				this.paused = false;
 
@@ -1445,82 +1468,60 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			} else {
 				this.paused = true;
 			}
-			console.log('this.current: %o', this.current);
 		},
 		pause: function() {
 			this.paused = true;
 			this._pause();
 		},
 		_play: function(time) {
-			this.gui.play.style.display = 'none';
-			this.gui.pause.style.display = '';
-			this.currentTime(time, true);
+			if(this.gui) {
+				this.gui.play.style.display = 'none';
+				this.gui.pause.style.display = '';
+			}
+			this.player[0].play(time);
 		},
 		_pause: function(time) {
-			this.gui.play.style.display = '';
-			this.gui.pause.style.display = 'none';
-			this.videoElem.pause();
-			this.currentTime(time);
+			if(this.gui) {
+				this.gui.play.style.display = '';
+				this.gui.pause.style.display = 'none';
+			}
+			this.player[0].pause(time);
 		},
 		currentTime: function(time, play) {
-			var self = this,
-				media = this.videoElem;
+			this.player[0].currentTime(time, play);
+		},
+		setCurrent: function(index) {
+			this.current.index = index;
 
-			clearTimeout(this.timeout.currentTime);
+			// Get the first section
+			this.current.section = this.current.sections[this.current.index];
 
-			if(typeof time === 'number' && !isNaN(time)) {
+			// Get the ID (the src for now)
+			this.current.src = this.current.section.getAttribute(this.stage.options.idAttr);
 
-				// Attempt to play it, since iOS has been ignoring commands
-				if(play && this.commandsIgnored) {
-					media.play();
-				}
+			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);
+			this.current.unit = unit = unit > 0 ? unit : this.options.unit;
 
-				try {
-					// !media.seekable is for old HTML5 browsers, like Firefox 3.6.
-					// Checking seekable.length is important for iOS6 to work with currentTime changes immediately after changing media
-					if(!media.seekable || typeof media.seekable === "object" && media.seekable.length > 0) {
-						media.currentTime = time;
-						if(play) {
-							media.play();
-						}
-					} else {
-						throw 1;
-					}
-				} catch(err) {
-					this.timeout.currentTime = setTimeout(function() {
-						self.currentTime(time, play);
-					}, 250);
-				}
-			} else {
-				if(play) {
-					media.play();
-				}
-			}
+			// Still have attributes hard coded in here. Would need to pass from the transcript to stage and then to here.
+			var words = this.current.section.getElementsByTagName('a');
+			this.current.start = words[0].getAttribute('data-m') * unit;
+			this.current.end = words[words.length-1].getAttribute('data-m') * unit;
 		},
 		manager: function(event) {
 			var self = this;
 
 			if(!this.paused) {
-				if(this.videoElem.currentTime > this.current.end + this.options.tPadding) {
+				if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
 					// Goto the next section
-					this.current.index++;
-					this.current.section = this.current.sections[this.current.index];
-					if(this.current.section) {
-						// duplication here with the play() method... Refactor
 
-						// Get the ID (the src for now)
-						this.current.src = this.current.section.getAttribute('data-id');
-
-						var words = this.current.section.getElementsByTagName('a');
-						this.current.start = words[0].getAttribute('data-m') * 0.001;
-						this.current.end = words[words.length-1].getAttribute('data-m') * 0.001;
-
-						this.paused = false; // redundant here
+					if(++this.current.index < this.current.sections.length) {
+						this.setCurrent(this.current.index);
 
 						this.load(this.current.src);
 						this._play(this.current.start);
-
 					} else {
+						this.current.index = 0;
+
 						this.paused = true;
 						this._pause();
 					}
