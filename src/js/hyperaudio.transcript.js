@@ -156,10 +156,12 @@ var Transcript = (function(document, hyperaudio) {
 				// Destroy any existing WordSelect.
 				this.deselectorize();
 
-				this.textSelect = new WordSelect(opts.target, {
+				this.textSelect = new WordSelect({
+					el: opts.target,
 					onDragStart: function(e) {
 						hyperaudio.addClass(opts.stage.target, opts.stage.options.dragdropClass);
-						var dragdrop = new DragDrop(null, opts.stage.target, {
+						var dragdrop = new DragDrop({
+							dropArea: opts.stage.target,
 							init: false,
 							onDrop: function(el) {
 								self.textSelect.clearSelection();

@@ -75,7 +75,9 @@ var Stage = (function(document, hyperaudio) {
 				hyperaudio.removeClass(this.target, this.options.dragdropClass);
 
 				// Setup item for future dragdrop 
-				el._dragInstance = new DragDrop(el, this.target, {
+				el._dragInstance = new DragDrop({
+					handle: el,
+					dropArea: this.target,
 					html: el.innerHTML,
 					// draggableClass: draggableClass,
 					onDragStart: function () {
