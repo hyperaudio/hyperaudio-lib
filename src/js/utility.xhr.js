@@ -1,14 +1,14 @@
-/* Transcript
+/* xhr
  *
  */
 
-var xhr = (function(document, hyperaudio) {
+var xhr = (function(hyperaudio) {
 
 	return function(options) {
 
 		options = hyperaudio.extend({
 			url: '',
-			data: '',
+			data: '', // Only valid for POST types
 			type: 'GET',
 			responseType: '',
 			async: true,
@@ -50,4 +50,4 @@ var xhr = (function(document, hyperaudio) {
 		return xhr;
 	};
 
-}(document, hyperaudio));
+}(hyperaudio));
