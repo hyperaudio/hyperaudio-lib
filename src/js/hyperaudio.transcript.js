@@ -73,22 +73,20 @@ var Transcript = (function(document, hyperaudio) {
 
 			if(this.target) {
 				this.target.innerHTML = '';
-				var xhr = new XMLHttpRequest();
-				xhr.open('GET', this.options.src, true);
-				xhr.addEventListener('load', function(event) {
-					if(this.status === 200) {
+
+				xhr({
+					url: this.options.src,
+					complete: function(event) {
 						self.target.innerHTML = this.responseText;
 						self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.src + '"'});
-					} else {
+						setVideo();
+					},
+					error: function(event) {
+						self.target.innerHTML = 'Problem with transcript URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
 						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
+						setVideo();
 					}
-					setVideo();
-				}, false);
-				xhr.addEventListener('error', function(event) {
-					self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
-					setVideo();
-				}, false);
-				xhr.send();
+				});
 			}
 		},
 

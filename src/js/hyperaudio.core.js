@@ -206,7 +206,7 @@ var hyperaudio = (function() {
 			},
 			_error: function(msg) {
 				var data = {msg: this.options.entity + ' Error : ' + msg};
-				this._trigger(this.event.error, data);
+				this._trigger(hyperaudio.event.error, data);
 			},
 			_debug: function() {
 				var self = this;

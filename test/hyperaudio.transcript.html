@@ -40,6 +40,7 @@ span.code {
 		<a id="source-1">Internet Indians</a>
 		| <a id="source-2">Clapper Responds</a>
 		| <a id="source-3">SOTU 2010</a>
+		| <a id="source-4">Broken URL</a>
 	</div>
 
 	<div id="source-transcript" class="transcript">
@@ -63,6 +64,7 @@ span.code {
 <script type="text/javascript" src="../src/js/hyperaudio.projector.js"></script>
 <script type="text/javascript" src="../node_modules/dragdrop/dragdrop.js"></script>
 <script type="text/javascript" src="../node_modules/wordselect/wordselect.js"></script>
+<script type="text/javascript" src="../src/js/utility.xhr.js"></script>
 <script type="text/javascript">
 
 	hyperaudio.register('Player', Player);
@@ -113,6 +115,14 @@ span.code {
 		transcript.load({
 			src: "../node_modules/transcripts/ts-sotu2010.htm",
 			video: "http://hyperaud.io/video/665003303001_2154491005001_012710-StateoftheUnion.mp4"
+		});
+	});
+
+	document.querySelector('#source-4').addEventListener('click', function(e) {
+		e.preventDefault();
+		transcript.load({
+			src: "broken/transcript.url.htm",
+			video: "broken/video.url.mp4"
 		});
 	});
 
