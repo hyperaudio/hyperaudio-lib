@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.14 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 21st October 2013 16:02:41 */
+/*! hyperaudio v0.0.15 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 21st October 2013 16:15:36 */
 var HA = (function(window, document) {
 
 
@@ -1537,6 +1537,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 hyperaudio.register('Player', Player);
 hyperaudio.register('Transcript', Transcript);
 hyperaudio.register('Stage', Stage);
+hyperaudio.register('Projector', Projector);
 
 
 hyperaudio.utility('DragDrop', DragDrop);
