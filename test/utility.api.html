@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>API demo</title>
+<style>
+.api-choice {
+/*
+	position:absolute;
+	top:280px;
+	left:10px;
+*/
+}
+.api-choice a {
+	font-weight:bold;
+	cursor:pointer;
+}
+.api-choice a:hover {
+	text-decoration:underline;
+}
+span.code {
+	padding:0 4px;
+	border:2px #666 solid;
+	border-radius:8px;
+	background-color:#ccc;
+}
+</style>
+</head>
+<body>
+
+<div class="api-choice">
+	Select an api test:
+	<a id="test-1">getUsername()</a>
+	| <a id="test-2">getTranscripts()</a>
+	| <a id="test-3">getTranscript(id)</a>
+	| <a id="test-4">getMixes()</a>
+	| <a id="test-5">getMix(id)</a>
+	| <a id="test-6">putMix(mix)</a>
+	| <label for="test-force">FORCE:</label><input id="test-force" type="checkbox" checked />
+	<br />
+	<label for="test-username">username:</label><input id="test-username" type="text"/>
+	<a id="test-username-override">override</a>
+	| <label for="test-id">id:</label><input id="test-id" type="text"/>
+	| <label for="test-mix">mix:</label><textarea id="test-mix">
+{
+	stuff: 42
+}
+	</textarea>
+</div>
+
+<div id="target-api">Clicky a thingie.</div>
+
+<script type="text/javascript" src="../src/js/hyperaudio.core.js"></script>
+<script type="text/javascript" src="../src/js/utility.xhr.js"></script>
+<script type="text/javascript" src="../src/js/utility.api.js"></script>
+<script type="text/javascript">
+
+	hyperaudio.utility('api', api);
+
+	var target = document.querySelector('#target-api');
+	var force = document.querySelector('#test-force');
+	var username = document.querySelector('#test-username');
+	var id = document.querySelector('#test-id');
+	var mix = document.querySelector('#test-mix');
+
+	hyperaudio.api.init(); // using default options
+
+	document.querySelector('#test-1').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = '';
+		hyperaudio.api.getUsername(function(success) {
+			if(success) {
+				target.innerHTML = 'guest:' + this.guest +
+					'<br/>username:&apos;' + this.username + '&apos;';
+				username.value = this.username;
+			}
+		}, force.checked);
+	});
+
+	document.querySelector('#test-username-override').addEventListener('click', function(e) {
+		e.preventDefault();
+		hyperaudio.api.guest = false;
+		hyperaudio.api.username = username.value;
+	});
+
+	document.querySelector('#test-2').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = '';
+		hyperaudio.api.getTranscripts(function(success) {
+			var html = '';
+			if(success) {
+				target.innerHTML = 'transcripts:' + this.transcripts.length;
+				html = 'transcripts:' + this.transcripts.length + '<ul>';
+				for(var i = 0; i < this.transcripts.length; i++) {
+					html += '<li>_id:' + this.transcripts[i]._id +
+						'<br/>desc:' + this.transcripts[i].desc +
+						'<br/>label:' + this.transcripts[i].label + '</li>';
+				}
+				html += '<ul>';
+				target.innerHTML = html;
+			} else {
+				target.innerHTML = 'Failed';
+			}
+		}, force.checked);
+	});
+
+	document.querySelector('#test-3').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = '';
+		hyperaudio.api.getTranscript(id.value, function(success) {
+			if(success) {
+				target.innerHTML = this.transcript.content;
+			} else {
+				target.innerHTML = 'Failed';
+			}
+		}, force.checked);
+	});
+
+	document.querySelector('#test-4').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = '';
+		hyperaudio.api.getMixes(function(success) {
+			var html = '';
+			if(success) {
+				html = 'mixes:' + this.mixes.length + '<ul>';
+				for(var i = 0; i < this.mixes.length; i++) {
+					html += '<li>_id:' + this.mixes[i]._id +
+						'<br/>desc:' + this.mixes[i].desc +
+						'<br/>label:' + this.mixes[i].label + '</li>';
+				}
+				html += '<ul>';
+				target.innerHTML = html;
+			} else {
+				target.innerHTML = 'Failed';
+			}
+		}, force.checked);
+	});
+
+	document.querySelector('#test-5').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = '';
+		hyperaudio.api.getMix(id.value, function(success) {
+			if(success) {
+				target.innerHTML = this.mix.content;
+			} else {
+				target.innerHTML = 'Failed';
+			}
+		}, force.checked);
+	});
+
+	document.querySelector('#test-6').addEventListener('click', function(e) {
+		e.preventDefault();
+		target.innerHTML = '';
+		hyperaudio.api.putMix(mix.value, function(success) {
+			if(success) {
+				target.innerHTML = this.mix.content;
+			} else {
+				target.innerHTML = 'Failed';
+			}
+		}, force.checked);
+	});
+
+</script>
+</body>
+</html>
