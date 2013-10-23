@@ -44,7 +44,7 @@ var hyperaudio = (function() {
 
 		for ( ; i < length; i++ ) {
 			// Only deal with non-null/undefined values
-			if ( (options = arguments[ i ]) !== null ) {
+			if ( (options = arguments[ i ]) != null ) {
 				// Extend the base object
 				for ( name in options ) {
 					src = target[ name ];
@@ -92,11 +92,11 @@ var hyperaudio = (function() {
 		isArray: Array.isArray,
 
 		isWindow: function( obj ) {
-			return obj !== null && obj === obj.window;
+			return obj != null && obj === obj.window;
 		},
 
 		type: function( obj ) {
-			if ( obj === null ) {
+			if ( obj == null ) {
 				return String( obj );
 			}
 			// Support: Safari <= 5.1 (functionish RegExp)
@@ -188,6 +188,7 @@ var hyperaudio = (function() {
 		event: {
 			ready: 'ha:ready',
 			load: 'ha:load',
+			save: 'ha:save',
 			error: 'ha:error'
 		},
 		_commonMethods: {
@@ -206,7 +207,7 @@ var hyperaudio = (function() {
 			},
 			_error: function(msg) {
 				var data = {msg: this.options.entity + ' Error : ' + msg};
-				this._trigger(this.event.error, data);
+				this._trigger(hyperaudio.event.error, data);
 			},
 			_debug: function() {
 				var self = this;
