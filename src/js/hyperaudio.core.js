@@ -44,7 +44,7 @@ var hyperaudio = (function() {
 
 		for ( ; i < length; i++ ) {
 			// Only deal with non-null/undefined values
-			if ( (options = arguments[ i ]) != null ) {
+			if ( (options = arguments[ i ]) !== null ) {
 				// Extend the base object
 				for ( name in options ) {
 					src = target[ name ];
@@ -92,11 +92,11 @@ var hyperaudio = (function() {
 		isArray: Array.isArray,
 
 		isWindow: function( obj ) {
-			return obj != null && obj === obj.window;
+			return obj !== null && obj === obj.window;
 		},
 
 		type: function( obj ) {
-			if ( obj == null ) {
+			if ( obj === null ) {
 				return String( obj );
 			}
 			// Support: Safari <= 5.1 (functionish RegExp)
@@ -188,7 +188,6 @@ var hyperaudio = (function() {
 		event: {
 			ready: 'ha:ready',
 			load: 'ha:load',
-			save: 'ha:save',
 			error: 'ha:error'
 		},
 		_commonMethods: {
@@ -207,7 +206,7 @@ var hyperaudio = (function() {
 			},
 			_error: function(msg) {
 				var data = {msg: this.options.entity + ' Error : ' + msg};
-				this._trigger(hyperaudio.event.error, data);
+				this._trigger(this.event.error, data);
 			},
 			_debug: function() {
 				var self = this;
@@ -266,9 +265,7 @@ var hyperaudio = (function() {
 				return;
 			}
 
-			var newclass = e.className.split(' ');
-			newclass.push(c);
-			e.className = newclass.join(' ');
+			e.className += ' ' + c;
 		},
 		removeClass: function (e, c) {
 			if ( !this.hasClass(e, c) ) {
@@ -276,7 +273,14 @@ var hyperaudio = (function() {
 			}
 
 			var re = new RegExp("(^|\\s)" + c + "(\\s|$)", 'g');
-			e.className = e.className.replace(re, ' ');
+			e.className = e.className.replace(re, ' ').replace(/\s{2,}/g, ' ');
+		},
+		toggleClass: function (e, c) {
+			if ( this.hasClass(e, c) ) {
+				this.removeClass(e, c);
+			} else {
+				this.addClass(e, c);
+			}
 		}
 
 	});
