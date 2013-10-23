@@ -12,20 +12,18 @@ var xhr = (function(hyperaudio) {
 			type: 'GET',
 			responseType: '',
 			async: true,
+			timeout: 0,
 			cache: true
 
 			// complete: function()
 			// error: function()
 		}, options);
 
-		var xhr = new XMLHttpRequest();
-
 		if(!options.cache) {
 			options.url = options.url + ((/\?/).test(options.url) ? "&" : "?") + (new Date()).getTime();
 		}
 
-		xhr.open(options.type, options.url, options.async);
-		xhr.responseType = options.responseType;
+		var xhr = new XMLHttpRequest();
 
 		xhr.addEventListener('load', function(event) {
 			if(this.status === 200) {
@@ -43,7 +41,14 @@ var xhr = (function(hyperaudio) {
 			xhr.addEventListener('error', function(event) {
 				options.error.call(this, event);
 			}, false);
+			xhr.addEventListener('abort', function(event) {
+				options.error.call(this, event);
+			}, false);
 		}
+
+		xhr.open(options.type, options.url, options.async);
+		xhr.responseType = options.responseType;
+		xhr.timeout = options.timeout;
 
 		xhr.send(options.data);
 
