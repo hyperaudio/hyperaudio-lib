@@ -1,8 +1,14 @@
 var SideMenu = (function (document, hyperaudio) {
 
-	function SideMenu (el, fn) {
-		this.el = document.querySelector(el);
-		this.mediaCallback = fn;
+	function SideMenu (options) {
+		this.options = {};
+
+		for ( var i in options ) {
+			this.options[i] = options[i];
+		}
+
+		this.el = typeof this.options.el == 'string' ? document.querySelector(this.options.el) : this.options.el;
+		this.mediaCallback = this.options.callback;
 
 		var handle = document.querySelector('#sidemenu-handle');
 		handle._tap = new Tap({el: handle});
@@ -12,7 +18,7 @@ var SideMenu = (function (document, hyperaudio) {
 
 		// handle the tab bar
 		var tabs = document.querySelectorAll('#sidemenu .tabbar li');
-		for ( var i = tabs.length-1; i >= 0; i-- ) {
+		for ( i = tabs.length-1; i >= 0; i-- ) {
 			tabs[i]._tap = new Tap({el: tabs[i]});
 			tabs[i].addEventListener('tap', this.selectPanel.bind(this), false);
 		}
@@ -29,9 +35,10 @@ var SideMenu = (function (document, hyperaudio) {
 		}
 
 		function onDrop (el) {
+			var title = el.innerHTML;
 			hyperaudio.addClass(el, 'effect');
-			el.innerHTML = '<form><label>BGM: <span class="value">1</span>s</label><input type="range" value="1" min="0.5" max="5" step="0.1" onchange="this.parentNode.querySelector(\'span\').innerHTML = this.value"></form>';
-			APP.dropped(el, 'BGM');			
+			el.innerHTML = '<form><div>' + title + '</div><label>Delay: <span class="value">1</span>s</label><input type="range" value="1" min="0.5" max="5" step="0.1" onchange="this.parentNode.querySelector(\'span\').innerHTML = this.value"></form>';
+			APP.dropped(el, title);
 		}
 
 		// add drag and drop to BGM
@@ -96,7 +103,16 @@ var SideMenu = (function (document, hyperaudio) {
 
 		var starter = e.target;
 
-		if ( !e.target.getAttribute('data-source') || !this.mediaCallback ) {
+		if ( hyperaudio.hasClass(e.target.parentNode, 'folder') ) {
+			starter = e.target.parentNode;
+		}
+
+		if ( hyperaudio.hasClass(starter, 'folder') ) {
+			hyperaudio.toggleClass(starter, 'open');
+			return;
+		}
+
+		if ( !starter.getAttribute('data-source') || !this.mediaCallback ) {
 			return;
 		}
 

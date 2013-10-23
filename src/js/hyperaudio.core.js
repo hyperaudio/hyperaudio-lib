@@ -266,9 +266,7 @@ var hyperaudio = (function() {
 				return;
 			}
 
-			var newclass = e.className.split(' ');
-			newclass.push(c);
-			e.className = newclass.join(' ');
+			e.className += ' ' + c;
 		},
 		removeClass: function (e, c) {
 			if ( !this.hasClass(e, c) ) {
@@ -276,7 +274,14 @@ var hyperaudio = (function() {
 			}
 
 			var re = new RegExp("(^|\\s)" + c + "(\\s|$)", 'g');
-			e.className = e.className.replace(re, ' ');
+			e.className = e.className.replace(re, ' ').replace(/\s{2,}/g, ' ');
+		},
+		toggleClass: function (e, c) {
+			if ( this.hasClass(e, c) ) {
+				this.removeClass(e, c);
+			} else {
+				this.addClass(e, c);
+			}
 		}
 
 	});
