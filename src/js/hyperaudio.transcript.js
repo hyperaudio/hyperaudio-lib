@@ -74,6 +74,8 @@ var Transcript = (function(document, hyperaudio) {
 			if(this.target) {
 				this.target.innerHTML = '';
 
+				hyperaudio.api.getTranscript(id, callback, force);
+/*
 				xhr({
 					url: this.options.src,
 					complete: function(event) {
@@ -87,6 +89,7 @@ var Transcript = (function(document, hyperaudio) {
 						setVideo();
 					}
 				});
+*/
 			}
 		},
 

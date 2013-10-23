@@ -63,6 +63,32 @@ span.code {
 	</div>
 
 	<div id="target-stage" class="stage"></div>
+
+	<div id="stage" class="stage">To keep the SideMenu happy FTB.</div>
+
+	<div id="sidemenu">
+		<div id="sidemenu-handle" class="icon-menu"></div>
+		<ul class="tabbar">
+			<li id="sidemenu-media" class="selected"><span class="icon-video">Video</span></li>
+			<li id="sidemenu-bgm"><span class="icon-music">BGM</span></li>
+		</ul>
+		<ul class="panel selected" id="panel-media">
+			<li class="folder"><div>Directory</div>
+				<ul>
+					<li data-source="clapper-responds">Clapper responds</li>
+					<li data-source="sen-feinstein-1212">Sen. Feinstein</li>
+				</ul>
+			</li>
+
+			<li data-source="clapper-responds">Clapper responds</li>
+			<li data-source="sen-feinstein-1212">Sen. Feinstein</li>
+		</ul>
+		<ul class="panel" id="panel-bgm">
+			<li data-source="x">Like a surgeon</li>
+			<li data-source="y">In the Navy</li>
+		</ul>
+	</div>
+
 </div>
 
 <script type="text/javascript" src="../lib/popcorn-1.4.0.js"></script>
@@ -75,12 +101,18 @@ span.code {
 <script type="text/javascript" src="../src/js/utility.dragdrop.js"></script>
 <script type="text/javascript" src="../src/js/utility.wordselect.js"></script>
 <script type="text/javascript" src="../src/js/utility.xhr.js"></script>
+<script type="text/javascript" src="../src/js/utility.api.js"></script>
+<script type="text/javascript" src="../src/js/utility.sidemenu.js"></script>
+<script type="text/javascript" src="../src/js/utility.tap.js"></script>
 <script type="text/javascript">
 
 	hyperaudio.register('Player', Player);
 	hyperaudio.register('Transcript', Transcript);
 	hyperaudio.register('Stage', Stage);
 	hyperaudio.register('Projector', Projector);
+
+	hyperaudio.utility('api', api);
+	hyperaudio.utility('SideMenu', SideMenu);
 
 	var player = hyperaudio.Player({
 		target: "#source-video",
@@ -98,11 +130,46 @@ span.code {
 
 	var transcript = hyperaudio.Transcript({
 		target: "#source-transcript",
-		// src: "../node_modules/transcripts/ts-internetindians.htm",
-		// video: "http://hyperaud.io/video/internetindians.mp4",
 		stage: stage,
 		player: player
 	});
+
+	// Init the API utility
+	hyperaudio.api.init(); // using default options
+
+	function mediaSelect (el) {
+		var source = el.getAttribute('data-source');
+
+		// document.getElementById('source-mp4').src = 'videos/' + source + '.mp4';
+		// document.getElementById('source-webm').src = 'videos/' + source + '.webm';
+		// videoSource.load();
+
+		transcript.load(el.getAttribute('data-id'));
+	}
+
+	// Init the side menu
+	// New way when lib updated:
+/*
+	var sidemenu = new SideMenu({
+		el: '#sidemenu',
+		callback: mediaSelect
+	});
+*/
+	// OLD WAY - TMP
+	var sidemenu = new SideMenu('#sidemenu', mediaSelect);
+
+	hyperaudio.api.getTranscripts(function(success) {
+		if(success) {
+			hyperaudio.each(this.transcripts, function(i) {
+				// want to add this to the side menu.
+				console.log(i);
+			});
+		}
+	});
+
+
+
+	// Some handlers for basic testing.
 
 	document.querySelector('#source-1').addEventListener('click', function(e) {
 		e.preventDefault();
