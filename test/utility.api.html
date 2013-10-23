@@ -43,7 +43,13 @@ span.code {
 	| <label for="test-id">id:</label><input id="test-id" type="text"/>
 	| <label for="test-mix">mix:</label><textarea id="test-mix">
 {
-	stuff: 42
+"content": "<ul><li>apples</li><li>bananas</li><ul>",
+"desc": "Testing",
+"label": "Test from hyperaudio utility.api.html",
+"meta": {},
+"owner": "dr_evil",
+"sort": 999,
+"type": "something"
 }
 	</textarea>
 </div>
@@ -109,7 +115,8 @@ span.code {
 		target.innerHTML = '';
 		hyperaudio.api.getTranscript(id.value, function(success) {
 			if(success) {
-				target.innerHTML = this.transcript.content;
+				target.innerHTML = '_id: ' + this.transcript._id +
+					'<br />' + this.transcript.content;
 			} else {
 				target.innerHTML = 'Failed';
 			}
@@ -141,7 +148,8 @@ span.code {
 		target.innerHTML = '';
 		hyperaudio.api.getMix(id.value, function(success) {
 			if(success) {
-				target.innerHTML = this.mix.content;
+				target.innerHTML = '_id: ' + this.mix._id +
+					'<br />' + this.mix.content;
 			} else {
 				target.innerHTML = 'Failed';
 			}
@@ -151,13 +159,15 @@ span.code {
 	document.querySelector('#test-6').addEventListener('click', function(e) {
 		e.preventDefault();
 		target.innerHTML = '';
-		hyperaudio.api.putMix(mix.value, function(success) {
+		var json = JSON.parse(mix.value);
+		hyperaudio.api.putMix(json, function(success) {
 			if(success) {
-				target.innerHTML = this.mix.content;
+				target.innerHTML = '_id: ' + this.mix._id +
+					'<br />' + this.mix.content;
 			} else {
 				target.innerHTML = 'Failed';
 			}
-		}, force.checked);
+		});
 	});
 
 </script>

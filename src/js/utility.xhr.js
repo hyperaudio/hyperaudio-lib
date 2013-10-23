@@ -50,6 +50,10 @@ var xhr = (function(hyperaudio) {
 		xhr.responseType = options.responseType;
 		xhr.timeout = options.timeout;
 
+		if(options.data) {
+			xhr.setRequestHeader('content-type', 'application/json; charset=utf-8');
+		}
+
 		xhr.send(options.data);
 
 		return xhr;

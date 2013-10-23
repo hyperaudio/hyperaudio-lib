@@ -170,17 +170,19 @@ var api = (function(hyperaudio) {
 			// The current mix data will be in the stage's HTML.
 
 			if(typeof mix === 'object') {
-				var type = 'POST';
+				var type = 'POST',
+					id = '';
 
-				if(this.mix._id && this.mix._id === mix._id) {
+				if(this.mix && this.mix._id && this.mix._id === mix._id) {
 					type = 'PUT';
+					id = this.mix._id;
 					// Check some stuff?
 				} else {
 					// Check some stuff?
 				}
 
 				xhr({
-					url: this.options.api + this.username + '/' + this.options.mixes,
+					url: this.options.api + this.username + '/' + this.options.mixes + id,
 					type: type,
 					data: JSON.stringify(mix),
 					complete: function(event) {
