@@ -25,8 +25,8 @@ module.exports = function(grunt) {
 						'src/js/utility.dragdrop.js',
 						//'src/js/utility.editblock.js',
 						//'src/js/utility.fadeFX.js',
-						//'src/js/utility.sidemenu.js',
-						//'src/js/utility.tap.js',
+						'src/js/utility.sidemenu.js',
+						'src/js/utility.tap.js',
 						'src/js/utility.wordselect.js',
 						'src/js/utility.xhr.js',
 						'src/js/utility.api.js', // After xhr
@@ -87,7 +87,16 @@ module.exports = function(grunt) {
 				// Using the jshint defaults
 
 				// For the jQuery code for extend.
-				"eqnull": true
+				eqnull: true,
+
+				// Prevent leaky vars
+				// undef: true,  // Turn that on later since lots of errors!
+				browser: true,
+
+				globals: {
+					hyperaudio: true
+				}
+
 /*
 				// lots of other options...
 				curly: true,

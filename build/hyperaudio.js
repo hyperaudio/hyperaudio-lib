@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.17 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 23rd October 2013 18:22:46 */
+/*! hyperaudio v0.0.18 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 24th October 2013 00:54:48 */
 var HA = (function(window, document) {
 
 
@@ -270,9 +270,7 @@ var hyperaudio = (function() {
 				return;
 			}
 
-			var newclass = e.className.split(' ');
-			newclass.push(c);
-			e.className = newclass.join(' ');
+			e.className += ' ' + c;
 		},
 		removeClass: function (e, c) {
 			if ( !this.hasClass(e, c) ) {
@@ -280,14 +278,20 @@ var hyperaudio = (function() {
 			}
 
 			var re = new RegExp("(^|\\s)" + c + "(\\s|$)", 'g');
-			e.className = e.className.replace(re, ' ');
+			e.className = e.className.replace(re, ' ').replace(/\s{2,}/g, ' ');
+		},
+		toggleClass: function (e, c) {
+			if ( this.hasClass(e, c) ) {
+				this.removeClass(e, c);
+			} else {
+				this.addClass(e, c);
+			}
 		}
 
 	});
 
 	return hyperaudio;
 }());
-
 
 var DragDrop = (function (window, document, hyperaudio) {
 
@@ -544,6 +548,267 @@ var DragDrop = (function (window, document, hyperaudio) {
 	};
 
 	return DragDrop;
+})(window, document, hyperaudio);
+
+var SideMenu = (function (document, hyperaudio) {
+
+	function SideMenu (options) {
+		this.options = {
+			el: '#sidemenu',
+			transcripts: '#panel-media',
+			music: '#panel-bgm',
+			stage: null // Points at a Stage instance
+		};
+
+		for ( var i in options ) {
+			this.options[i] = options[i];
+		}
+
+		// Might rename the transcripts and music vars/options since rather ambiguous.
+
+		this.el = typeof this.options.el == 'string' ? document.querySelector(this.options.el) : this.options.el;
+		this.transcripts = typeof this.options.transcripts == 'string' ? document.querySelector(this.options.transcripts) : this.options.transcripts;
+		this.music = typeof this.options.music == 'string' ? document.querySelector(this.options.music) : this.options.music;
+		this.mediaCallback = this.options.callback;
+
+		var handle = document.querySelector('#sidemenu-handle');
+		handle._tap = new Tap({el: handle});
+		handle.addEventListener('tap', this.toggleMenu.bind(this), false);
+
+		this.updateStatus();
+
+		// handle the tab bar
+		var tabs = document.querySelectorAll('#sidemenu .tabbar li');
+		for ( i = tabs.length-1; i >= 0; i-- ) {
+			tabs[i]._tap = new Tap({el: tabs[i]});
+			tabs[i].addEventListener('tap', this.selectPanel.bind(this), false);
+		}
+
+		this.initTranscripts();
+		this.initMusic();
+	}
+
+	SideMenu.prototype.initTranscripts = function () {
+		var self = this;
+
+		hyperaudio.api.getTranscripts(function(success) {
+			if(success) {
+				var elem, trans;
+				for(var i = 0, l = this.transcripts.length; i < l; i++) {
+					trans = this.transcripts[i];
+					elem = document.createElement('li');
+					elem.setAttribute('data-id', trans._id);
+					elem.innerHTML = trans.label;
+					self.transcripts.appendChild(elem);
+				}
+
+				self.transcripts._tap = new Tap({el: self.transcripts});
+				self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
+			}
+		});
+	};
+
+	SideMenu.prototype.initMusic = function () {
+		var stage = this.options.stage;
+
+		function onDragStart (e) {
+			hyperaudio.addClass(stage.target, 'dragdrop');
+		}
+
+		function onDrop (el) {
+			var title = el.innerHTML;
+			hyperaudio.addClass(el, 'effect');
+			el.innerHTML = '<form><div>' + title + '</div><label>Delay: <span class="value">1</span>s</label><input type="range" value="1" min="0.5" max="5" step="0.1" onchange="this.parentNode.querySelector(\'span\').innerHTML = this.value"></form>';
+			stage.dropped(el, title);
+		}
+
+		if(stage.target) {
+			// add drag and drop to BGM
+			var items = document.querySelectorAll('#panel-bgm li');
+			for (var i = items.length-1; i >= 0; i-- ) {
+				items[i]._dragInstance = new DragDrop({
+					handle: items[i],
+					dropArea: stage.target,
+					draggableClass: 'draggableEffect',
+					onDragStart: onDragStart,
+					onDrop: onDrop
+				});
+			}
+		}
+	};
+
+	SideMenu.prototype.updateStatus = function () {
+		this.opened = hyperaudio.hasClass(this.el, 'opened');
+	};
+
+	SideMenu.prototype.toggleMenu = function () {
+		if ( this.opened ) {
+			this.close();
+		} else {
+			this.open();
+		}
+	};
+
+	SideMenu.prototype.open = function () {
+		if ( this.opened ) {
+			return;
+		}
+
+		hyperaudio.addClass(this.el, 'opened');
+		this.opened = true;
+	};
+
+	SideMenu.prototype.close = function () {
+		if ( !this.opened ) {
+			return;
+		}
+
+		hyperaudio.removeClass(this.el, 'opened');
+		this.opened = false;
+	};
+
+	SideMenu.prototype.selectPanel = function (e) {
+		var current = document.querySelector('#sidemenu .tabbar li.selected');
+		var incoming = e.currentTarget;
+		hyperaudio.removeClass(current, 'selected');
+		hyperaudio.addClass(incoming, 'selected');
+
+		var panelID = 'panel' + incoming.id.replace('sidemenu', '');
+		current = document.querySelector('#sidemenu .panel.selected');
+		hyperaudio.removeClass(current, 'selected');
+		incoming = document.querySelector('#' + panelID);
+		hyperaudio.addClass(incoming, 'selected');
+	};
+
+	SideMenu.prototype.selectMedia = function (e) {
+		e.stopPropagation();	// just in case
+
+		var starter = e.target;
+
+		if ( hyperaudio.hasClass(e.target.parentNode, 'folder') ) {
+			starter = e.target.parentNode;
+		}
+
+		if ( hyperaudio.hasClass(starter, 'folder') ) {
+			hyperaudio.toggleClass(starter, 'open');
+			return;
+		}
+
+		if ( !starter.getAttribute('data-id') || !this.mediaCallback ) {
+			return;
+		}
+
+		this.mediaCallback(starter);
+	};
+
+	return SideMenu;
+})(document, hyperaudio);
+
+var Tap = (function (window, document, hyperaudio) {
+
+	function Tap (options) {
+		this.options = {};
+
+		for ( var i in options ) {
+			this.options[i] = options[i];
+		}
+
+		this.el = typeof this.options.el == 'string' ? document.querySelector(this.options.el) : this.options.el;
+
+		this.el.addEventListener('touchstart', this, false);
+		this.el.addEventListener('mousedown', this, false);
+	}
+
+	Tap.prototype = {
+		handleEvent: function (e) {
+			// jshint -W086
+			switch (e.type) {
+				case 'mousedown':
+					if ( e.which !== 1 ) {
+						break;
+					}
+				case 'touchstart':
+					this._start(e);
+					break;
+				case 'touchmove':
+				case 'mousemove':
+					this._move(e);
+					break;
+				case 'touchend':
+				case 'mouseup':
+				case 'touchcancel':
+				case 'mousecancel':
+					this._end(e);
+					break;
+			}
+			// jshint +W086
+		},
+
+		_start: function (e) {
+			if ( e.touches && e.touches.length > 1 ) return;
+
+			var point = e.touches ? e.touches[0] : e;
+			
+			this.moved = false;
+			this.startX = point.pageX;
+			this.startY = point.pageY;
+			this.target = e.target;
+
+			hyperaudio.addClass(this.target, 'tapPressed');
+
+			this.el.addEventListener('touchmove', this, false);
+			this.el.addEventListener('touchend', this, false);
+			this.el.addEventListener('touchcancel', this, false);
+			this.el.addEventListener('mousemove', this, false);
+			this.el.addEventListener('mouseup', this, false);
+			this.el.addEventListener('mousecancel', this, false);
+		},
+
+		_move: function (e) {
+			var point = e.changedTouches ? e.changedTouches[0] : e,
+				x = point.pageX,
+				y = point.pageY;
+
+			if ( Math.abs( x - this.startX ) > 10 || Math.abs( y - this.startY ) > 10 ) {
+				hyperaudio.removeClass(this.target, 'tapPressed');
+				this.moved = true;
+			}
+		},
+
+		_end: function (e) {
+			hyperaudio.removeClass(this.target, 'tapPressed');
+
+			if ( !this.moved ) {
+				var ev = document.createEvent('Event'),
+					point = e.changedTouches ? e.changedTouches[0] : e;
+
+				ev.initEvent('tap', true, true);
+				ev.pageX = point.pageX;
+				ev.pageY = point.pageY;
+				this.target.dispatchEvent(ev);
+			}
+
+			this.el.removeEventListener('touchmove', this, false);
+			this.el.removeEventListener('touchend', this, false);
+			this.el.removeEventListener('touchcancel', this, false);
+			this.el.removeEventListener('mousemove', this, false);
+			this.el.removeEventListener('mouseup', this, false);
+			this.el.removeEventListener('mousecancel', this, false);
+		},
+		
+		destroy: function () {
+			this.el.removeEventListener('touchstart', this, false);
+			this.el.removeEventListener('touchmove', this, false);
+			this.el.removeEventListener('touchend', this, false);
+			this.el.removeEventListener('touchcancel', this, false);
+			this.el.removeEventListener('mousedown', this, false);
+			this.el.removeEventListener('mousemove', this, false);
+			this.el.removeEventListener('mouseup', this, false);
+			this.el.removeEventListener('mousecancel', this, false);
+		}
+	};
+	
+	return Tap;
 })(window, document, hyperaudio);
 
 var WordSelect = (function (window, document, hyperaudio) {
@@ -1313,8 +1578,10 @@ var Transcript = (function(document, hyperaudio) {
 
 			target: '#transcript', // The selector of element where the transcript is written to.
 
-			src: '', // The URL of the transcript.
-			video: '', // The URL of the video.
+			id: '', // The ID of the transcript.
+
+			src: '', // [obsolete] The URL of the transcript.
+			video: '', // [obsolete] The URL of the video.
 
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
@@ -1342,17 +1609,22 @@ var Transcript = (function(document, hyperaudio) {
 		}
 
 		// If we have the info, kick things off
-		if(this.options.src) {
+		if(this.options.id) {
 			this.load();
 		}
 	}
 
 	Transcript.prototype = {
-		load: function(transcript) {
+		// load: function(transcript) {
+		load: function(id) {
 			var self = this;
 
 			this.ready = false;
 
+			if(id) {
+				this.options.id = id;
+			}
+/*
 			if(transcript) {
 				if(transcript.src) {
 					this.options.src = transcript.src;
@@ -1361,7 +1633,7 @@ var Transcript = (function(document, hyperaudio) {
 					this.options.video = transcript.video;
 				}
 			}
-
+*/
 			var setVideo = function() {
 				if(self.options.async) {
 					setTimeout(function() {
@@ -1375,6 +1647,17 @@ var Transcript = (function(document, hyperaudio) {
 			if(this.target) {
 				this.target.innerHTML = '';
 
+				hyperaudio.api.getTranscript(this.options.id, function(success) {
+					if(success) {
+						self.target.innerHTML = this.transcript.content;
+						self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.id + '"'});
+					} else {
+						self.target.innerHTML = 'Problem with transcript URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
+						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.id + '"');
+					}
+					setVideo();
+				});
+/*
 				xhr({
 					url: this.options.src,
 					complete: function(event) {
@@ -1388,17 +1671,23 @@ var Transcript = (function(document, hyperaudio) {
 						setVideo();
 					}
 				});
+*/
 			}
 		},
 
-		setVideo: function(video) {
+		setVideo: function() {
 			var self = this;
-			if(video) {
-				this.options.video = video;
-			}
+
 			// Setup the player
-			if(this.options.player) {
-				this.options.player.load(this.options.video);
+			if(this.options.player && hyperaudio.api.transcript) {
+				var hapi = hyperaudio.api,
+					path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename,
+					media = {
+						mp4: path
+						// webm: path.replace();
+					};
+				this.options.video = media.mp4; // TMP so Stage and projector still do something.
+				this.options.player.load(media.mp4);
 				if(this.options.async) {
 					setTimeout(function() {
 						self.parse();
@@ -1468,8 +1757,9 @@ var Transcript = (function(document, hyperaudio) {
 								self.textSelect.clearSelection();
 								this.destroy();
 								el.setAttribute(opts.stage.options.idAttr, opts.video); // Pass the transcript ID
+								// el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
 								el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
-								opts.stage._dropped(el);
+								opts.stage.dropped(el);
 							}
 						});
 
@@ -1601,7 +1891,7 @@ var Stage = (function(document, hyperaudio) {
 			// Will need the popcorn.transcript highlighting as per the source transcripts.
 		},
 
-		_dropped: function(el, html) {
+		dropped: function(el, html) {
 			var self = this;
 
 			if(this.target) {
@@ -1611,7 +1901,7 @@ var Stage = (function(document, hyperaudio) {
 				el._dragInstance = new DragDrop({
 					handle: el,
 					dropArea: this.target,
-					html: el.innerHTML,
+					html: html ? html : el.innerHTML,
 					// draggableClass: draggableClass,
 					onDragStart: function () {
 						hyperaudio.addClass(self.target, self.options.dragdropClass);

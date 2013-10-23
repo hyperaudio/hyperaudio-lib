@@ -12,8 +12,10 @@ var Transcript = (function(document, hyperaudio) {
 
 			target: '#transcript', // The selector of element where the transcript is written to.
 
-			src: '', // The URL of the transcript.
-			video: '', // The URL of the video.
+			id: '', // The ID of the transcript.
+
+			src: '', // [obsolete] The URL of the transcript.
+			video: '', // [obsolete] The URL of the video.
 
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
@@ -41,17 +43,22 @@ var Transcript = (function(document, hyperaudio) {
 		}
 
 		// If we have the info, kick things off
-		if(this.options.src) {
+		if(this.options.id) {
 			this.load();
 		}
 	}
 
 	Transcript.prototype = {
-		load: function(transcript) {
+		// load: function(transcript) {
+		load: function(id) {
 			var self = this;
 
 			this.ready = false;
 
+			if(id) {
+				this.options.id = id;
+			}
+/*
 			if(transcript) {
 				if(transcript.src) {
 					this.options.src = transcript.src;
@@ -60,7 +67,7 @@ var Transcript = (function(document, hyperaudio) {
 					this.options.video = transcript.video;
 				}
 			}
-
+*/
 			var setVideo = function() {
 				if(self.options.async) {
 					setTimeout(function() {
@@ -74,7 +81,16 @@ var Transcript = (function(document, hyperaudio) {
 			if(this.target) {
 				this.target.innerHTML = '';
 
-				hyperaudio.api.getTranscript(id, callback, force);
+				hyperaudio.api.getTranscript(this.options.id, function(success) {
+					if(success) {
+						self.target.innerHTML = this.transcript.content;
+						self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.id + '"'});
+					} else {
+						self.target.innerHTML = 'Problem with transcript URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
+						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.id + '"');
+					}
+					setVideo();
+				});
 /*
 				xhr({
 					url: this.options.src,
@@ -93,14 +109,19 @@ var Transcript = (function(document, hyperaudio) {
 			}
 		},
 
-		setVideo: function(video) {
+		setVideo: function() {
 			var self = this;
-			if(video) {
-				this.options.video = video;
-			}
+
 			// Setup the player
-			if(this.options.player) {
-				this.options.player.load(this.options.video);
+			if(this.options.player && hyperaudio.api.transcript) {
+				var hapi = hyperaudio.api,
+					path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename,
+					media = {
+						mp4: path
+						// webm: path.replace();
+					};
+				this.options.video = media.mp4; // TMP so Stage and projector still do something.
+				this.options.player.load(media.mp4);
 				if(this.options.async) {
 					setTimeout(function() {
 						self.parse();
@@ -170,8 +191,9 @@ var Transcript = (function(document, hyperaudio) {
 								self.textSelect.clearSelection();
 								this.destroy();
 								el.setAttribute(opts.stage.options.idAttr, opts.video); // Pass the transcript ID
+								// el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
 								el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
-								opts.stage._dropped(el);
+								opts.stage.dropped(el);
 							}
 						});
 

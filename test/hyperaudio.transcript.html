@@ -40,6 +40,7 @@ span.code {
 
 	<div id="target-video" class="stage-video"></div>
 
+<!--
 	<div class="transcript-choice demo-buttons">
 		Select a transcript:
 		<a id="source-1">Internet Indians</a>
@@ -47,6 +48,7 @@ span.code {
 		| <a id="source-3">SOTU 2010</a>
 		| <a id="source-4">Broken URL</a>
 	</div>
+-->
 
 	<div class="stage-command demo-buttons">
 		Command:
@@ -64,8 +66,6 @@ span.code {
 
 	<div id="target-stage" class="stage"></div>
 
-	<div id="stage" class="stage">To keep the SideMenu happy FTB.</div>
-
 	<div id="sidemenu">
 		<div id="sidemenu-handle" class="icon-menu"></div>
 		<ul class="tabbar">
@@ -73,6 +73,7 @@ span.code {
 			<li id="sidemenu-bgm"><span class="icon-music">BGM</span></li>
 		</ul>
 		<ul class="panel selected" id="panel-media">
+<!--
 			<li class="folder"><div>Directory</div>
 				<ul>
 					<li data-source="clapper-responds">Clapper responds</li>
@@ -82,10 +83,13 @@ span.code {
 
 			<li data-source="clapper-responds">Clapper responds</li>
 			<li data-source="sen-feinstein-1212">Sen. Feinstein</li>
+-->
 		</ul>
 		<ul class="panel" id="panel-bgm">
+
 			<li data-source="x">Like a surgeon</li>
 			<li data-source="y">In the Navy</li>
+
 		</ul>
 	</div>
 
@@ -138,37 +142,23 @@ span.code {
 	hyperaudio.api.init(); // using default options
 
 	function mediaSelect (el) {
-		var source = el.getAttribute('data-source');
+		var id = el.getAttribute('data-id');
 
 		// document.getElementById('source-mp4').src = 'videos/' + source + '.mp4';
 		// document.getElementById('source-webm').src = 'videos/' + source + '.webm';
 		// videoSource.load();
 
-		transcript.load(el.getAttribute('data-id'));
+		transcript.load(id);
 	}
 
 	// Init the side menu
-	// New way when lib updated:
-/*
 	var sidemenu = new SideMenu({
 		el: '#sidemenu',
+		stage: stage,
 		callback: mediaSelect
 	});
-*/
-	// OLD WAY - TMP
-	var sidemenu = new SideMenu('#sidemenu', mediaSelect);
 
-	hyperaudio.api.getTranscripts(function(success) {
-		if(success) {
-			hyperaudio.each(this.transcripts, function(i) {
-				// want to add this to the side menu.
-				console.log(i);
-			});
-		}
-	});
-
-
-
+/*
 	// Some handlers for basic testing.
 
 	document.querySelector('#source-1').addEventListener('click', function(e) {
@@ -202,6 +192,7 @@ span.code {
 			video: "broken/video.url.mp4"
 		});
 	});
+*/
 
 	document.querySelector('#stage-save').addEventListener('click', function(e) {
 		e.preventDefault();

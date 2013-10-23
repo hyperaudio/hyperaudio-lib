@@ -97,7 +97,7 @@ var Stage = (function(document, hyperaudio) {
 			// Will need the popcorn.transcript highlighting as per the source transcripts.
 		},
 
-		_dropped: function(el, html) {
+		dropped: function(el, html) {
 			var self = this;
 
 			if(this.target) {
@@ -107,7 +107,7 @@ var Stage = (function(document, hyperaudio) {
 				el._dragInstance = new DragDrop({
 					handle: el,
 					dropArea: this.target,
-					html: el.innerHTML,
+					html: html ? html : el.innerHTML,
 					// draggableClass: draggableClass,
 					onDragStart: function () {
 						hyperaudio.addClass(self.target, self.options.dragdropClass);
