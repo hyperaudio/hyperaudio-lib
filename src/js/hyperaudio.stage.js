@@ -12,10 +12,7 @@ var Stage = (function(document, hyperaudio) {
 
 			target: '#stage', // The selector of element for the staging area.
 
-			src: '', // [Obsolete] The URL of the saved production.
-
-			// api: 'https://data.hyperaud.io/', // The URL of the API
-			api: 'api/', // TMP - The URL of the API
+			id: '', // The ID of the saved mix.
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
 			mp4Attr: 'data-mp4', // Attribute name that holds the transcript mp4 URL.
@@ -33,6 +30,7 @@ var Stage = (function(document, hyperaudio) {
 
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
+		this.mix = {};
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -42,39 +40,68 @@ var Stage = (function(document, hyperaudio) {
 			this.options.projector.setStage(this);
 		}
 
-		if(this.options.src) {
+		if(this.options.id) {
 			this.load();
 		}
 	}
 
 	Stage.prototype = {
-		load: function(src) {
+		load: function(id) {
 			var self = this;
 
-			if(src) {
-				this.options.src = src;
+			if(id) {
+				this.options.id = id;
 			}
 
-			// Would then load in the saved production from the API
+			if(this.target) {
 
+				// Fudge the user system since getUsername nay works.
+				hyperaudio.api.guest = false;
+				hyperaudio.api.username = 'tester';
+
+				hyperaudio.api.getMix(id, function(success) {
+					if(success) {
+						self.mix = hyperaudio.extend({}, this.mix);
+						self.target.innerHTML = self.mix.content;
+						self.initDragDrop();
+						self._trigger(hyperaudio.event.load, {msg: 'Loaded mix'});
+					} else {
+						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+					}
+				});
+			}
 			// Would then need to init the dragdrop ability on each item
 		},
 
 		save: function() {
 			// Save the staged production
 
-			// PUT to update, POST to create.
-			// PUT/POST to /user/mixes/ with {label: "", content ""}
+			var self = this;
 
-			// var user = hyperaudio.user.getUser(), // WIP
-			var self = this,
-				user = 'mp', // TMP
-				label = 'Not Yet Defined',
-				url = this.options.api + user + '/mixes/';
+			hyperaudio.extend(this.mix, {
+				label: "Test from hyperaudio.stage.js",
+				desc: "Testing initial save system",
+				meta: {},
+				sort: 999,
+				type: "funky",
+				content: this.target.innerHTML
+			});
 
-			// Check we have at least 1 section
-			if(this.target && (this.target.getElementsByTagName('section')).length) {
+			if(this.target) {
 
+				// Fudge the user system since getUsername nay works.
+				hyperaudio.api.guest = false;
+				hyperaudio.api.username = 'tester';
+
+				hyperaudio.api.putMix(this.mix, function(success) {
+					if(success) {
+						self.mix = hyperaudio.extend({}, this.mix);
+						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
+					} else {
+						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+					}
+				});
+/*
 				xhr({
 					url: url,
 					type: 'POST',
@@ -89,6 +116,7 @@ var Stage = (function(document, hyperaudio) {
 						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
 					}
 				});
+*/
 			}
 		},
 
@@ -97,6 +125,18 @@ var Stage = (function(document, hyperaudio) {
 				opts = this.options;
 
 			// Will need the popcorn.transcript highlighting as per the source transcripts.
+		},
+
+		initDragDrop: function() {
+			var self = this,
+				i, l, sections;
+			if(this.target) {
+				sections = this.target.getElementsByTagName('section');
+				l = sections.length;
+				for(i=0; i < l; i++) {
+					self.dropped(sections[i]);
+				}
+			}
 		},
 
 		dropped: function(el, html) {

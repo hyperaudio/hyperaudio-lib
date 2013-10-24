@@ -52,7 +52,8 @@ span.code {
 
 	<div class="stage-command demo-buttons">
 		Command:
-		<a id="stage-save">save</a>
+		<a id="stage-load">load</a>
+		| <a id="stage-save">save</a>
 	</div>
 
 	<div id="source-transcript" class="transcript">
@@ -193,6 +194,11 @@ span.code {
 		});
 	});
 */
+
+	document.querySelector('#stage-load').addEventListener('click', function(e) {
+		e.preventDefault();
+		stage.load('52687f3e7fd4333218000006');
+	});
 
 	document.querySelector('#stage-save').addEventListener('click', function(e) {
 		e.preventDefault();
