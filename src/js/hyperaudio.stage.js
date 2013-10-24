@@ -14,6 +14,10 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 
+			title: 'Test from hyperaudio.stage.js',
+			desc: 'Testing initial save system',
+			type: 'beta',
+
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
 			mp4Attr: 'data-mp4', // Attribute name that holds the transcript mp4 URL.
 			webmAttr: 'data-webm', // Attribute name that holds the transcript webm URL.
@@ -49,6 +53,10 @@ var Stage = (function(document, hyperaudio) {
 	}
 
 	Stage.prototype = {
+		mixDetails: function(details) {
+			// [SHOULD] only really used to set the lebel, desc and type of the mix being saved.
+			hyperaudio.extend(this.options, details);
+		},
 		load: function(id) {
 			var self = this;
 
@@ -59,8 +67,8 @@ var Stage = (function(document, hyperaudio) {
 			if(this.target) {
 
 				// Fudge the user system since getUsername nay works.
-				hyperaudio.api.guest = false;
-				hyperaudio.api.username = 'tester';
+				// hyperaudio.api.guest = false;
+				// hyperaudio.api.username = 'tester';
 
 				hyperaudio.api.getMix(id, function(success) {
 					if(success) {
@@ -72,6 +80,8 @@ var Stage = (function(document, hyperaudio) {
 						var articleElem = tmp.querySelector('article'); // Find the article in the content.
 						// Can now insert the contents of the returned mix article into the maintained article.
 						self.article.innerHTML = articleElem.innerHTML;
+
+						// TODO: Should also clear any existing attributes on the article.
 
 						// Now copy over any attributes
 						var attr = articleElem.attributes;
@@ -96,19 +106,19 @@ var Stage = (function(document, hyperaudio) {
 			var self = this;
 
 			hyperaudio.extend(this.mix, {
-				label: "Test from hyperaudio.stage.js",
-				desc: "Testing initial save system",
+				label: this.options.title,
+				desc: this.options.desc,
 				meta: {},
 				sort: 999,
-				type: "funky",
+				type: this.options.type,
 				content: this.target.innerHTML
 			});
 
 			if(this.target) {
 
 				// Fudge the user system since getUsername nay works.
-				hyperaudio.api.guest = false;
-				hyperaudio.api.username = 'tester';
+				// hyperaudio.api.guest = false;
+				// hyperaudio.api.username = 'tester';
 
 				hyperaudio.api.putMix(this.mix, function(success) {
 					if(success) {
@@ -118,23 +128,14 @@ var Stage = (function(document, hyperaudio) {
 						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
 					}
 				});
-/*
-				xhr({
-					url: url,
-					type: 'POST',
-					data: 'json=' + JSON.stringify({
-						label: label,
-						content: this.target.innerHTML
-					}),
-					complete: function(event) {
-						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
-					},
-					error: function(event) {
-						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
-					}
-				});
-*/
 			}
+		},
+
+		clear: function() {
+			// TODO: Should also clear any existing attributes on the article.
+			this.article.innerHTML = '';
+			this.mix = {};
+			this.options.id = '';
 		},
 
 		parse: function() {

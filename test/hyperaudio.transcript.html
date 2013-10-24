@@ -7,14 +7,14 @@
 	<link rel="stylesheet" type="text/css" href="../src/css/hyperaudio.player.css" />
 	<link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
 <style>
-.transcript-choice {
+.mix-title {
 	position:absolute;
-	top:280px;
+	top:275px;
 	left:10px;
 }
 .stage-command {
 	position:absolute;
-	top:280px;
+	top:275px;
 	right:10px;
 }
 .demo-buttons a {
@@ -40,19 +40,14 @@ span.code {
 
 	<div id="target-video" class="stage-video"></div>
 
-<!--
-	<div class="transcript-choice demo-buttons">
-		Select a transcript:
-		<a id="source-1">Internet Indians</a>
-		| <a id="source-2">Clapper Responds</a>
-		| <a id="source-3">SOTU 2010</a>
-		| <a id="source-4">Broken URL</a>
+	<div class="mix-title demo-buttons">
+		Title: <input id="stage-title" type="text" placeholder="Enter the title of your hyperaudio production" style="width:400px;"/>
 	</div>
--->
 
 	<div class="stage-command demo-buttons">
 		Command:
-		<a id="stage-load">load</a>
+		<a id="stage-clear">clear</a>
+		| <a id="stage-load">load</a>(<input id="stage-id" type="text" value="52687f3e7fd4333218000006" style="width:200px;"/>)
 		| <a id="stage-save">save</a>
 	</div>
 
@@ -144,11 +139,6 @@ span.code {
 
 	function mediaSelect (el) {
 		var id = el.getAttribute('data-id');
-
-		// document.getElementById('source-mp4').src = 'videos/' + source + '.mp4';
-		// document.getElementById('source-webm').src = 'videos/' + source + '.webm';
-		// videoSource.load();
-
 		transcript.load(id);
 	}
 
@@ -159,50 +149,38 @@ span.code {
 		callback: mediaSelect
 	});
 
-/*
 	// Some handlers for basic testing.
 
-	document.querySelector('#source-1').addEventListener('click', function(e) {
+	var id = document.querySelector('#stage-id');
+	
+	var title = document.querySelector('#stage-title').addEventListener('change', function(e) {
 		e.preventDefault();
-		transcript.load({
-			src: "../node_modules/transcripts/ts-internetindians.htm",
-			video: "http://hyperaud.io/video/internetindians.mp4"
+		stage.mixDetails({
+			title:this.value
 		});
 	});
 
-	document.querySelector('#source-2').addEventListener('click', function(e) {
+	document.querySelector('#stage-clear').addEventListener('click', function(e) {
 		e.preventDefault();
-		transcript.load({
-			src: "../node_modules/transcripts/ts-clapper-responds.htm",
-			video: "http://hyperaud.io/video/clapper-responds.mp4"
-		});
+		stage.clear();
 	});
-
-	document.querySelector('#source-3').addEventListener('click', function(e) {
-		e.preventDefault();
-		transcript.load({
-			src: "../node_modules/transcripts/ts-sotu2010.htm",
-			video: "http://hyperaud.io/video/665003303001_2154491005001_012710-StateoftheUnion.mp4"
-		});
-	});
-
-	document.querySelector('#source-4').addEventListener('click', function(e) {
-		e.preventDefault();
-		transcript.load({
-			src: "broken/transcript.url.htm",
-			video: "broken/video.url.mp4"
-		});
-	});
-*/
 
 	document.querySelector('#stage-load').addEventListener('click', function(e) {
 		e.preventDefault();
-		stage.load('52687f3e7fd4333218000006');
+		stage.load(id.value);
 	});
 
 	document.querySelector('#stage-save').addEventListener('click', function(e) {
 		e.preventDefault();
 		stage.save();
+	});
+
+	stage.target.addEventListener(hyperaudio.event.load, function(e) {
+		title.value = hyperaudio.api.mix.label;
+	});
+
+	stage.target.addEventListener(hyperaudio.event.save, function(e) {
+		id.value = hyperaudio.api.mix._id;
 	});
 
 </script>
