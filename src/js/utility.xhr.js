@@ -12,6 +12,7 @@ var xhr = (function(hyperaudio) {
 			type: 'GET',
 			responseType: '',
 			async: true,
+			withCredentials: false, // Setting to true requires the CORS header Access-Control-Allow-Credentials on the server
 			timeout: 0,
 			cache: true
 
@@ -48,6 +49,7 @@ var xhr = (function(hyperaudio) {
 
 		xhr.open(options.type, options.url, options.async);
 		xhr.responseType = options.responseType;
+		xhr.withCredentials = options.withCredentials;
 		xhr.timeout = options.timeout;
 
 		if(options.data) {
