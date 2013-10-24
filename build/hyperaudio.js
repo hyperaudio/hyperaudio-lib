@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.0 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 24th October 2013 22:00:48 */
+/*! hyperaudio v0.1.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 00:34:04 */
 var HA = (function(window, document) {
 
 
@@ -1509,7 +1509,7 @@ var xhr = (function(hyperaudio) {
 			type: 'GET',
 			responseType: '',
 			async: true,
-			withCredentials: false, // Setting to true requires the CORS header Access-Control-Allow-Credentials on the server
+			withCredentials: true, // Setting to true requires the CORS header Access-Control-Allow-Credentials on the server
 			timeout: 0,
 			cache: true
 
@@ -1614,7 +1614,7 @@ var api = (function(hyperaudio) {
 						self.callback(callback, true);
 					},
 					error: function(event) {
-						this.error = true;
+						self.error = true;
 						self.callback(callback, false);
 					}
 				});
@@ -1635,7 +1635,7 @@ var api = (function(hyperaudio) {
 						self.callback(callback, true);
 					},
 					error: function(event) {
-						this.error = true;
+						self.error = true;
 						self.callback(callback, false);
 					}
 				});
@@ -1651,19 +1651,19 @@ var api = (function(hyperaudio) {
 				this.getUsername(function(success) {
 					if(success && id) {
 						xhr({
-							url: this.options.api + (this.guest ? '' : this.username + '/') + this.options.transcripts + id,
+							url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.transcripts + id,
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.transcript = json;
 								self.callback(callback, true);
 							},
 							error: function(event) {
-								this.error = true;
+								self.error = true;
 								self.callback(callback, false);
 							}
 						});
 					} else {
-						this.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
+						self.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
 						self.callback(callback, false);
 					}
 				});
@@ -1679,19 +1679,19 @@ var api = (function(hyperaudio) {
 				this.getUsername(function(success) {
 					if(success) {
 						xhr({
-							url: this.options.api + (this.guest ? '' : this.username + '/') + this.options.mixes,
+							url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.mixes,
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.mixes = json;
 								self.callback(callback, true);
 							},
 							error: function(event) {
-								this.error = true;
+								self.error = true;
 								self.callback(callback, false);
 							}
 						});
 					} else {
-						this.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
+						self.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
 						self.callback(callback, false);
 					}
 				});
@@ -1714,12 +1714,12 @@ var api = (function(hyperaudio) {
 								self.callback(callback, true);
 							},
 							error: function(event) {
-								this.error = true;
+								self.error = true;
 								self.callback(callback, false);
 							}
 						});
 					} else {
-						this.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
+						self.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
 						self.callback(callback, false);
 					}
 				});
@@ -1744,21 +1744,26 @@ var api = (function(hyperaudio) {
 					// Check some stuff?
 				}
 
-				xhr({
-					url: this.options.api + this.username + '/' + this.options.mixes + id,
-					type: type,
-					data: JSON.stringify(mix),
-					complete: function(event) {
-						var json = JSON.parse(this.responseText);
-						self.mix = json;
-						self.callback(callback, true);
-					},
-					error: function(event) {
-						this.error = true;
+				this.getUsername(function(success) {
+					if(success && !this.guest && this.username) {
+						xhr({
+							url: self.options.api + self.username + '/' + self.options.mixes + id,
+							type: type,
+							data: JSON.stringify(mix),
+							complete: function(event) {
+								var json = JSON.parse(this.responseText);
+								self.mix = json;
+								self.callback(callback, true);
+							},
+							error: function(event) {
+								self.error = true;
+								self.callback(callback, false);
+							}
+						});
+					} else {
 						self.callback(callback, false);
 					}
 				});
-
 			} else {
 				setTimeout(function() {
 					self.callback(callback, false);
@@ -2259,6 +2264,10 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 
+			title: 'Test from hyperaudio.stage.js',
+			desc: 'Testing initial save system',
+			type: 'beta',
+
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
 			mp4Attr: 'data-mp4', // Attribute name that holds the transcript mp4 URL.
 			webmAttr: 'data-webm', // Attribute name that holds the transcript webm URL.
@@ -2294,6 +2303,10 @@ var Stage = (function(document, hyperaudio) {
 	}
 
 	Stage.prototype = {
+		mixDetails: function(details) {
+			// [SHOULD] only really used to set the lebel, desc and type of the mix being saved.
+			hyperaudio.extend(this.options, details);
+		},
 		load: function(id) {
 			var self = this;
 
@@ -2304,8 +2317,8 @@ var Stage = (function(document, hyperaudio) {
 			if(this.target) {
 
 				// Fudge the user system since getUsername nay works.
-				hyperaudio.api.guest = false;
-				hyperaudio.api.username = 'tester';
+				// hyperaudio.api.guest = false;
+				// hyperaudio.api.username = 'tester';
 
 				hyperaudio.api.getMix(id, function(success) {
 					if(success) {
@@ -2317,6 +2330,8 @@ var Stage = (function(document, hyperaudio) {
 						var articleElem = tmp.querySelector('article'); // Find the article in the content.
 						// Can now insert the contents of the returned mix article into the maintained article.
 						self.article.innerHTML = articleElem.innerHTML;
+
+						// TODO: Should also clear any existing attributes on the article.
 
 						// Now copy over any attributes
 						var attr = articleElem.attributes;
@@ -2341,19 +2356,19 @@ var Stage = (function(document, hyperaudio) {
 			var self = this;
 
 			hyperaudio.extend(this.mix, {
-				label: "Test from hyperaudio.stage.js",
-				desc: "Testing initial save system",
+				label: this.options.title,
+				desc: this.options.desc,
 				meta: {},
 				sort: 999,
-				type: "funky",
+				type: this.options.type,
 				content: this.target.innerHTML
 			});
 
 			if(this.target) {
 
 				// Fudge the user system since getUsername nay works.
-				hyperaudio.api.guest = false;
-				hyperaudio.api.username = 'tester';
+				// hyperaudio.api.guest = false;
+				// hyperaudio.api.username = 'tester';
 
 				hyperaudio.api.putMix(this.mix, function(success) {
 					if(success) {
@@ -2363,23 +2378,14 @@ var Stage = (function(document, hyperaudio) {
 						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
 					}
 				});
-/*
-				xhr({
-					url: url,
-					type: 'POST',
-					data: 'json=' + JSON.stringify({
-						label: label,
-						content: this.target.innerHTML
-					}),
-					complete: function(event) {
-						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
-					},
-					error: function(event) {
-						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
-					}
-				});
-*/
 			}
+		},
+
+		clear: function() {
+			// TODO: Should also clear any existing attributes on the article.
+			this.article.innerHTML = '';
+			this.mix = {};
+			this.options.id = '';
 		},
 
 		parse: function() {
