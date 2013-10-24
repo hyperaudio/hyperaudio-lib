@@ -30,7 +30,10 @@ var Stage = (function(document, hyperaudio) {
 
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
+		this.article = document.createElement('article');
 		this.mix = {};
+
+		this.target.appendChild(this.article);
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -62,7 +65,10 @@ var Stage = (function(document, hyperaudio) {
 				hyperaudio.api.getMix(id, function(success) {
 					if(success) {
 						self.mix = hyperaudio.extend({}, this.mix);
-						self.target.innerHTML = self.mix.content;
+						var tmp = document.createElement('div');
+						tmp.innerHTML = self.mix.content;
+						var articleElem = tmp.querySelector('article');
+						self.article.innerHTML = articleElem.innerHTML;
 						self.initDragDrop();
 						self._trigger(hyperaudio.event.load, {msg: 'Loaded mix'});
 					} else {
