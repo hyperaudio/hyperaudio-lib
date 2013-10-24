@@ -64,6 +64,10 @@ var SideMenu = (function (document, hyperaudio) {
 		}
 
 		function onDrop (el) {
+			if ( !el ) {	// we dropped outside the stage
+				return;
+			}
+
 			var title = el.innerHTML;
 			hyperaudio.addClass(el, 'effect');
 			el.innerHTML = '<form><div>' + title + '</div><label>Delay: <span class="value">1</span>s</label><input type="range" value="1" min="0.5" max="5" step="0.1" onchange="this.parentNode.querySelector(\'span\').innerHTML = this.value"></form>';

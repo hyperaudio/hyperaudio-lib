@@ -191,6 +191,11 @@ var Transcript = (function(document, hyperaudio) {
 							onDrop: function(el) {
 								self.textSelect.clearSelection();
 								this.destroy();
+
+								if ( !el ) {
+									return;
+								}
+
 								el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
 								el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
 								el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
