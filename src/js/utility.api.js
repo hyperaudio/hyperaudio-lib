@@ -51,7 +51,7 @@ var api = (function(hyperaudio) {
 						self.callback(callback, true);
 					},
 					error: function(event) {
-						this.error = true;
+						self.error = true;
 						self.callback(callback, false);
 					}
 				});
@@ -72,7 +72,7 @@ var api = (function(hyperaudio) {
 						self.callback(callback, true);
 					},
 					error: function(event) {
-						this.error = true;
+						self.error = true;
 						self.callback(callback, false);
 					}
 				});
@@ -88,19 +88,19 @@ var api = (function(hyperaudio) {
 				this.getUsername(function(success) {
 					if(success && id) {
 						xhr({
-							url: this.options.api + (this.guest ? '' : this.username + '/') + this.options.transcripts + id,
+							url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.transcripts + id,
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.transcript = json;
 								self.callback(callback, true);
 							},
 							error: function(event) {
-								this.error = true;
+								self.error = true;
 								self.callback(callback, false);
 							}
 						});
 					} else {
-						this.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
+						self.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
 						self.callback(callback, false);
 					}
 				});
@@ -116,19 +116,19 @@ var api = (function(hyperaudio) {
 				this.getUsername(function(success) {
 					if(success) {
 						xhr({
-							url: this.options.api + (this.guest ? '' : this.username + '/') + this.options.mixes,
+							url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.mixes,
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.mixes = json;
 								self.callback(callback, true);
 							},
 							error: function(event) {
-								this.error = true;
+								self.error = true;
 								self.callback(callback, false);
 							}
 						});
 					} else {
-						this.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
+						self.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
 						self.callback(callback, false);
 					}
 				});
@@ -151,12 +151,12 @@ var api = (function(hyperaudio) {
 								self.callback(callback, true);
 							},
 							error: function(event) {
-								this.error = true;
+								self.error = true;
 								self.callback(callback, false);
 							}
 						});
 					} else {
-						this.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
+						self.error = true; // Setting the common error prop is redundant, since it would have been set in getUsername failure.
 						self.callback(callback, false);
 					}
 				});
@@ -181,21 +181,26 @@ var api = (function(hyperaudio) {
 					// Check some stuff?
 				}
 
-				xhr({
-					url: this.options.api + this.username + '/' + this.options.mixes + id,
-					type: type,
-					data: JSON.stringify(mix),
-					complete: function(event) {
-						var json = JSON.parse(this.responseText);
-						self.mix = json;
-						self.callback(callback, true);
-					},
-					error: function(event) {
-						this.error = true;
+				this.getUsername(function(success) {
+					if(success && !this.guest && this.username) {
+						xhr({
+							url: self.options.api + self.username + '/' + self.options.mixes + id,
+							type: type,
+							data: JSON.stringify(mix),
+							complete: function(event) {
+								var json = JSON.parse(this.responseText);
+								self.mix = json;
+								self.callback(callback, true);
+							},
+							error: function(event) {
+								self.error = true;
+								self.callback(callback, false);
+							}
+						});
+					} else {
 						self.callback(callback, false);
 					}
 				});
-
 			} else {
 				setTimeout(function() {
 					self.callback(callback, false);
