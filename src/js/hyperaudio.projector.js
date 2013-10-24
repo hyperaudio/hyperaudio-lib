@@ -91,7 +91,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(media) {
 				this.options.media = media;
 			}
-			this.media[0] = this.options.media
+			this.media[0] = this.options.media;
 
 			if(this.player[0]) {
 				this.player[0].load(this.media[0]);

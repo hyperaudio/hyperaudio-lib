@@ -23,10 +23,11 @@ module.exports = function(grunt) {
 
 						// Utilities used by the Hyperaudio Lib
 						'src/js/utility.dragdrop.js',
-						//'src/js/utility.editblock.js',
-						//'src/js/utility.fadeFX.js',
+						'src/js/utility.editblock.js',
+						'src/js/utility.fadeFX.js',
 						'src/js/utility.sidemenu.js',
 						'src/js/utility.tap.js',
+						'src/js/utility.titleFX.js',
 						'src/js/utility.wordselect.js',
 						'src/js/utility.xhr.js',
 						'src/js/utility.api.js', // After xhr

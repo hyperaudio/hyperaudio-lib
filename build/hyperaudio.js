@@ -1,4 +1,4 @@
-/*! hyperaudio v0.0.18 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 24th October 2013 00:54:48 */
+/*! hyperaudio v0.1.0 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 24th October 2013 22:00:48 */
 var HA = (function(window, document) {
 
 
@@ -550,6 +550,280 @@ var DragDrop = (function (window, document, hyperaudio) {
 	return DragDrop;
 })(window, document, hyperaudio);
 
+var EditBlock = (function (document) {
+
+	function EditBlock (options) {
+		this.options = {};
+
+		for ( var i in options ) {
+			this.options[i] = options[i];
+		}
+
+		this.el = typeof this.options.el == 'string' ? document.querySelector(this.options.el) : this.options.el;
+		this.words = this.el.querySelectorAll('a');
+
+		this.el.className += ' edit';
+		this.el._tap = new Tap({el: this.el});
+		this.el.addEventListener('tap', this, false);
+
+		document.addEventListener('touchend', this, false);
+		document.addEventListener('mouseup', this, false);
+	}
+
+	EditBlock.prototype.handleEvent = function (e) {
+		switch (e.type) {
+			case 'touchend':
+			case 'mouseup':
+				this.cancel(e);
+				break;
+			case 'tap':
+				this.edit(e);
+				break;
+		}
+	};
+
+	EditBlock.prototype.cancel = function (e) {
+		var target = e.target;
+
+		if ( target == this.el || target.parentNode == this.el || target.parentNode.parentNode == this.el ) {
+			return;
+		}
+
+		this.destroy();
+	};
+
+	EditBlock.prototype.edit = function (e) {
+		e.stopPropagation();
+
+		var theCut = e.target;
+		var cutPointReached;
+		var wordCount = this.words.length;
+
+		if ( theCut.tagName != 'A' || theCut == this.words[wordCount-1] ) {
+			return;
+		}
+
+		// Create a new block
+		var newBlock = document.createElement('section');
+		var newParagraph, prevContainer;
+
+		newBlock.className = 'item';
+
+		for ( var i = 0; i < wordCount; i++ ) {
+			if ( this.words[i].parentNode != prevContainer ) {
+				if ( newParagraph && cutPointReached && newParagraph.querySelector('a') ) {
+					newBlock.appendChild(newParagraph);
+				}
+
+				newParagraph = document.createElement('p');
+				prevContainer = this.words[i].parentNode;
+			}
+
+			if ( cutPointReached ) {
+				newParagraph.appendChild(this.words[i]);
+
+				if ( !prevContainer.querySelector('a') ) {
+					prevContainer.parentNode.removeChild(prevContainer);
+				}
+			}
+
+			if ( !cutPointReached && this.words[i] == theCut ) {
+				cutPointReached = true;
+			}
+		}
+
+		newBlock.appendChild(newParagraph);
+
+		var action = document.createElement('div');
+		action.className = 'actions';
+		newBlock.appendChild(action);
+
+		this.el.parentNode.insertBefore(newBlock, this.el.nextSibling);
+		this.el.handleHTML = this.el.innerHTML;
+
+		APP.dropped(newBlock);
+
+		this.destroy();
+	};
+
+	EditBlock.prototype.destroy = function () {
+		// Remove edit status
+		this.el.className = this.el.className.replace(/(^|\s)edit(\s|$)/g, ' ');
+
+		document.removeEventListener('touchend', this, false);
+		document.removeEventListener('mouseup', this, false);
+
+		this.el.removeEventListener('tap', this, false);
+		this.el._editBlock = null;
+
+		this.el._tap.destroy();
+		this.el._tap = null;
+	};
+
+	return EditBlock;
+})(document);
+
+var fadeFX = (function (window, document) {
+	var _elementStyle = document.createElement('div').style;
+
+	var _vendor = (function () {
+		var vendors = ['t', 'webkitT', 'MozT', 'msT', 'OT'],
+			transform,
+			i = 0,
+			l = vendors.length;
+
+		for ( ; i < l; i++ ) {
+			transform = vendors[i] + 'ransition';
+			if ( transform in _elementStyle ) return vendors[i].substr(0, vendors[i].length-1);
+		}
+
+		return false;
+	})();
+
+	function _prefixStyle (style) {
+		if ( _vendor === false ) return false;
+		if ( _vendor === '' ) return style;
+		return _vendor + style.charAt(0).toUpperCase() + style.substr(1);
+	}
+
+	var transition = _prefixStyle('transition');
+	var transform = _prefixStyle('transform');
+
+	_elementStyle = null; // free mem ???
+
+	var fxInstance;
+
+	function fade (options) {
+		if ( !fxInstance ) {
+			var opt = {
+				time: 2000,
+				color: '#000000',
+				autostart: true,
+				crossFade: true,
+				autoplay: true
+			};
+
+			for ( var i in options ) {
+				opt[i] = options[i];
+			}
+
+			video = document.querySelector('#stage-videos .active');
+			fxInstance = new TransitionFade(video, opt);
+		}
+
+		return fxInstance;
+	}
+
+	function TransitionFade (video, options) {
+		this.options = options;
+
+		this.video = video;
+		this.videoIncoming = document.getElementById('stage-video-' + (video.id == 'stage-video-1' ? '2' : '1'));
+
+		this.servo = document.getElementById('fxHelper');
+
+		this.servo.style[transition] = 'opacity 0ms';
+		this.servo.style.left = '0px';
+		this.servo.style.opacity = '0';
+		this.servo.style.backgroundColor = this.options.color;
+//		this.servo.style.left = '-9999px';
+
+		if ( this.options.autostart ) {
+			this.start();
+		}
+	}
+
+	TransitionFade.prototype.handleEvent = function (e) {
+		switch ( e.type ) {
+			case 'transitionend':
+			case 'webkitTransitionEnd':
+			case 'oTransitionEnd':
+			case 'MSTransitionEnd':
+				this.transitionEnd(e);
+				break;
+//			case 'canplay':
+		}
+	};
+
+	TransitionFade.prototype.start = function () {
+		this.phase = 'fadeOut';
+
+		this.servo.addEventListener('transitionend', this, false);
+		this.servo.addEventListener('webkitTransitionEnd', this, false);
+		this.servo.addEventListener('oTransitionEnd', this, false);
+		this.servo.addEventListener('MSTransitionEnd', this, false);
+
+		var trick = this.servo.offsetHeight;	// force refresh. Mandatory on FF
+
+		this.servo.style[transition] = 'opacity ' + this.options.time + 'ms';
+
+		var that = this;
+		setTimeout(function () {
+			that.servo.style.opacity = '1';
+		}, 0);
+	};
+
+	TransitionFade.prototype.transitionEnd = function (e) {
+		e.stopPropagation();
+
+		this.servo.removeEventListener('transitionend', this, false);
+		this.servo.removeEventListener('webkitTransitionEnd', this, false);
+		this.servo.removeEventListener('oTransitionEnd', this, false);
+		this.servo.removeEventListener('MSTransitionEnd', this, false);
+
+		this.video.pause();
+
+		if ( this.phase == 'fadeOut' ) {
+			if ( this.options.onFadeOutEnd ) {
+				this.options.onFadeOutEnd.call(this);
+			}
+
+			if ( this.options.crossFade ) {
+				this.phase = 'waiting';
+				this.video.className = this.video.className.replace(/(^|\s)active($|\s)/, '');
+				this.videoIncoming.className += ' active';
+				this.fadeIn();
+			}
+		} else if ( this.phase == 'fadeIn' ) {
+			if ( this.options.onFadeInEnd ) {
+				this.options.onFadeInEnd.call(this);
+			}
+
+			this.destroy();
+		}
+	};
+
+	TransitionFade.prototype.fadeIn = function () {
+		this.phase = 'fadeIn';
+
+		this.servo.addEventListener('transitionend', this, false);
+		this.servo.addEventListener('webkitTransitionEnd', this, false);
+		this.servo.addEventListener('oTransitionEnd', this, false);
+		this.servo.addEventListener('MSTransitionEnd', this, false);
+
+		if ( this.options.autoplay ) {
+			this.videoIncoming.play();
+		}
+
+		this.servo.style.opacity = '0';
+	};
+
+	TransitionFade.prototype.destroy = function () {
+		this.servo.removeEventListener('transitionend', this, false);
+		this.servo.removeEventListener('webkitTransitionEnd', this, false);
+		this.servo.removeEventListener('oTransitionEnd', this, false);
+		this.servo.removeEventListener('MSTransitionEnd', this, false);
+
+		this.servo.style[transition] = 'opacity 0ms';
+		this.servo.style.opacity = '0';
+		this.servo.style.left = '-9999px';
+
+		fxInstance = null;
+	};
+
+	return fade;
+})(window, document);
+
 var SideMenu = (function (document, hyperaudio) {
 
 	function SideMenu (options) {
@@ -616,6 +890,10 @@ var SideMenu = (function (document, hyperaudio) {
 		}
 
 		function onDrop (el) {
+			if ( !el ) {	// we dropped outside the stage
+				return;
+			}
+
 			var title = el.innerHTML;
 			hyperaudio.addClass(el, 'effect');
 			el.innerHTML = '<form><div>' + title + '</div><label>Delay: <span class="value">1</span>s</label><input type="range" value="1" min="0.5" max="5" step="0.1" onchange="this.parentNode.querySelector(\'span\').innerHTML = this.value"></form>';
@@ -810,6 +1088,138 @@ var Tap = (function (window, document, hyperaudio) {
 	
 	return Tap;
 })(window, document, hyperaudio);
+
+var titleFX = (function (window, document) {
+	var _elementStyle = document.createElement('div').style;
+
+	var _vendor = (function () {
+		var vendors = ['t', 'webkitT', 'MozT', 'msT', 'OT'],
+			transform,
+			i = 0,
+			l = vendors.length;
+
+		for ( ; i < l; i++ ) {
+			transform = vendors[i] + 'ransform';
+			if ( transform in _elementStyle ) return vendors[i].substr(0, vendors[i].length-1);
+		}
+
+		return false;
+	})();
+
+	function _prefixStyle (style) {
+		if ( _vendor === false ) return false;
+		if ( _vendor === '' ) return style;
+		return _vendor + style.charAt(0).toUpperCase() + style.substr(1);
+	}
+
+	var transition = _prefixStyle('transition');
+	var transitionDuration = _prefixStyle('transitionDuration');
+	var transform = _prefixStyle('transform');
+
+	_elementStyle = null; // free mem ???
+
+	var fxInstance;
+
+	function title (options) {
+		if ( !fxInstance ) {
+			var opt = {
+				el: null,
+				text: '',
+				speed: 600,
+				duration: 3000,
+				background: 'rgba(0,0,0,0.8)',
+				color: '#ffffff'
+			};
+
+			for ( var i in options ) {
+				opt[i] = options[i];
+			}
+
+			fxInstance = new TitleEffect(opt);
+		}
+
+		return fxInstance;
+	}
+
+	function TitleEffect (options) {
+		this.options = options;
+
+		this.el = typeof this.options.el == 'string' ? document.querySelector(this.options.el) : this.options.el;
+
+		this.el.innerHTML = this.options.text;
+		this.el.style.backgroundColor = this.options.background;
+		this.el.style.color = this.options.color;
+		this.el.style.left = '0px';
+		this.el.style[transform] = 'translate(0, 100%) translateZ(0)';
+
+		this.el.addEventListener('transitionend', this, false);
+		this.el.addEventListener('webkitTransitionEnd', this, false);
+		this.el.addEventListener('oTransitionEnd', this, false);
+		this.el.addEventListener('MSTransitionEnd', this, false);
+
+		this.start();
+	}
+
+	TitleEffect.prototype.handleEvent = function (e) {
+		switch ( e.type ) {
+			case 'transitionend':
+			case 'webkitTransitionEnd':
+			case 'oTransitionEnd':
+			case 'MSTransitionEnd':
+				this.transitionEnd(e);
+				break;
+		}
+	};
+
+	TitleEffect.prototype.start = function () {
+		this.phase = 'start';
+
+		var trick = this.el.offsetHeight;	// force refresh. Mandatory on FF
+		this.el.style[transitionDuration] = this.options.speed + 'ms';
+
+		var that = this;
+		setTimeout(function () {
+			that.el.style[transform] = 'translate(0, 0) translateZ(0)';
+		}, 0);
+	};
+
+	TitleEffect.prototype.transitionEnd = function (e) {
+		e.stopPropagation();
+
+		if ( this.phase == 'start' ) {
+			this.phase = 'waiting';
+			this.timeout = setTimeout(this.end.bind(this), this.options.duration);
+			return;
+		}
+
+		if ( this.options.onEnd ) {
+			this.options.onEnd.call(this);
+		}
+
+		this.destroy();
+	};
+
+	TitleEffect.prototype.end = function () {
+		this.phase = 'end';
+		this.el.style[transform] = 'translate(0, 100%) translateZ(0)';
+	};
+
+	TitleEffect.prototype.destroy = function () {
+		clearTimeout(this.timeout);
+
+		this.el.removeEventListener('transitionend', this, false);
+		this.el.removeEventListener('webkitTransitionEnd', this, false);
+		this.el.removeEventListener('oTransitionEnd', this, false);
+		this.el.removeEventListener('MSTransitionEnd', this, false);
+
+		this.el.style[transitionDuration] = '0s';
+		this.el.style.left = '-9999px';
+
+		fxInstance = null;
+	};
+
+	return title;
+})(window, document);
 
 var WordSelect = (function (window, document, hyperaudio) {
 
@@ -1099,6 +1509,7 @@ var xhr = (function(hyperaudio) {
 			type: 'GET',
 			responseType: '',
 			async: true,
+			withCredentials: false, // Setting to true requires the CORS header Access-Control-Allow-Credentials on the server
 			timeout: 0,
 			cache: true
 
@@ -1135,6 +1546,7 @@ var xhr = (function(hyperaudio) {
 
 		xhr.open(options.type, options.url, options.async);
 		xhr.responseType = options.responseType;
+		xhr.withCredentials = options.withCredentials;
 		xhr.timeout = options.timeout;
 
 		if(options.data) {
@@ -1158,7 +1570,7 @@ var api = (function(hyperaudio) {
 	return {
 		init: function(options) {
 			this.options = hyperaudio.extend({
-				api: 'https://data.hyperaud.io/',
+				api: 'http://data.hyperaud.io/',
 				transcripts: 'transcripts/',
 				mixes: 'mixes/',
 				whoami: 'whoami/'
@@ -1371,7 +1783,15 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			entity: 'PLAYER', // Not really an option... More like a manifest
 
 			target: '#transcript-video', // The selector of element where the video is generated
-			src: '', // The URL of the video.
+
+			media: {
+				mp4: '', // The URL of the mp4 video.
+				webm:'' // The URL of the webm video.
+			},
+			mediaType: {
+				mp4: 'video/mp4', // The mp4 mime type.
+				webm:'video/webm' // The webm mime type.
+			},
 
 			guiNative: false, // TMP during dev. Either we have a gui or we are chomeless.
 
@@ -1383,6 +1803,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.videoElem = null;
+		this.sourceElem = null;
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 		this.gui = null;
@@ -1405,7 +1826,12 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			if(this.target) {
 				this.videoElem = document.createElement('video');
 				this.videoElem.controls = this.options.guiNative; // TMP during dev. Either we have a gui or we are chomeless.
-
+/*
+				this.sourceElem = {
+					mp4: document.createElement('source'),
+					webm: document.createElement('source')
+				};
+*/
 				// Add listeners to the video element
 				this.videoElem.addEventListener('progress', function(e) {
 					if(this.readyState > 0) {
@@ -1415,13 +1841,15 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				// Clear the target element and add the video
 				this.target.innerHTML = '';
+				// this.videoElem.appendChild(this.sourceElem.mp4);
+				// this.videoElem.appendChild(this.sourceElem.webm);
 				this.target.appendChild(this.videoElem);
 
 				if(this.options.gui) {
 					this.addGUI();
 					this.addGUIListeners();
 				}
-				if(this.options.src) {
+				if(this.options.media.mp4) { // Assumes we have the webm
 					this.load();
 				}
 			} else {
@@ -1485,14 +1913,30 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this._error('GUI not used: gui = ' + this.options.gui);
 			}
 		},
-		load: function(src) {
+		load: function(media) {
 			var self = this;
-			if(src) {
-				this.options.src = src;
+			if(media) {
+				this.options.media = media;
 			}
-			if(this.videoElem) {
+			if(this.videoElem && typeof this.options.media === 'object') {
 				this.killPopcorn();
-				this.videoElem.src = this.options.src;
+
+				// Remove any old source elements
+				this.sourceElem = {};
+				while(this.videoElem.firstChild) {
+					this.videoElem.removeChild(this.videoElem.firstChild);
+				}
+
+				// Setup to work with mp4 and webm property names. See options.
+				hyperaudio.each(this.options.media, function(format, url) {
+					var source = self.sourceElem[format] = document.createElement('source');
+					source.setAttribute('type', self.options.mediaType[format]);
+					source.setAttribute('src', url); // Could use 'this' but less easy to read.
+					self.videoElem.appendChild(source);
+				});
+
+				this.videoElem.load();
+
 				this.initPopcorn();
 			} else {
 				this._error('Video player not created : ' + this.options.target);
@@ -1580,8 +2024,10 @@ var Transcript = (function(document, hyperaudio) {
 
 			id: '', // The ID of the transcript.
 
-			src: '', // [obsolete] The URL of the transcript.
-			video: '', // [obsolete] The URL of the video.
+			// src: '', // [obsolete] The URL of the transcript.
+			// video: '', // [obsolete] The URL of the video.
+
+			media: {},
 
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
@@ -1681,13 +2127,12 @@ var Transcript = (function(document, hyperaudio) {
 			// Setup the player
 			if(this.options.player && hyperaudio.api.transcript) {
 				var hapi = hyperaudio.api,
-					path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename,
-					media = {
-						mp4: path
-						// webm: path.replace();
+					path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename;
+				this.options.media = {
+						mp4: path,
+						webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
 					};
-				this.options.video = media.mp4; // TMP so Stage and projector still do something.
-				this.options.player.load(media.mp4);
+				this.options.player.load(this.options.media);
 				if(this.options.async) {
 					setTimeout(function() {
 						self.parse();
@@ -1756,8 +2201,14 @@ var Transcript = (function(document, hyperaudio) {
 							onDrop: function(el) {
 								self.textSelect.clearSelection();
 								this.destroy();
-								el.setAttribute(opts.stage.options.idAttr, opts.video); // Pass the transcript ID
-								// el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
+
+								if ( !el ) {
+									return;
+								}
+
+								el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
+								el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
+								el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
 								el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
 								opts.stage.dropped(el);
 							}
@@ -1806,12 +2257,11 @@ var Stage = (function(document, hyperaudio) {
 
 			target: '#stage', // The selector of element for the staging area.
 
-			src: '', // [Obsolete] The URL of the saved production.
-
-			// api: 'https://data.hyperaud.io/', // The URL of the API
-			api: 'api/', // TMP - The URL of the API
+			id: '', // The ID of the saved mix.
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
+			mp4Attr: 'data-mp4', // Attribute name that holds the transcript mp4 URL.
+			webmAttr: 'data-webm', // Attribute name that holds the transcript webm URL.
 			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
 			dragdropClass: 'dragdrop',
@@ -1825,6 +2275,10 @@ var Stage = (function(document, hyperaudio) {
 
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
+		this.article = document.createElement('article');
+		this.mix = {};
+
+		this.target.appendChild(this.article);
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -1834,39 +2288,82 @@ var Stage = (function(document, hyperaudio) {
 			this.options.projector.setStage(this);
 		}
 
-		if(this.options.src) {
+		if(this.options.id) {
 			this.load();
 		}
 	}
 
 	Stage.prototype = {
-		load: function(src) {
+		load: function(id) {
 			var self = this;
 
-			if(src) {
-				this.options.src = src;
+			if(id) {
+				this.options.id = id;
 			}
 
-			// Would then load in the saved production from the API
+			if(this.target) {
 
+				// Fudge the user system since getUsername nay works.
+				hyperaudio.api.guest = false;
+				hyperaudio.api.username = 'tester';
+
+				hyperaudio.api.getMix(id, function(success) {
+					if(success) {
+						self.mix = hyperaudio.extend({}, this.mix);
+
+						// Need to maintain the existing article in the stage - Important for dragdrop.
+						var tmp = document.createElement('div'); // Temporary DOM element
+						tmp.innerHTML = self.mix.content; // Add the content to the DOM element
+						var articleElem = tmp.querySelector('article'); // Find the article in the content.
+						// Can now insert the contents of the returned mix article into the maintained article.
+						self.article.innerHTML = articleElem.innerHTML;
+
+						// Now copy over any attributes
+						var attr = articleElem.attributes;
+						for(var i=0, l=attr.length; i < l; i++ ) {
+							self.article.setAttribute(attr[i].name, attr[i].value);
+						}
+
+						// Setup the dragdrop on the loaded mix sections.
+						self.initDragDrop();
+						self._trigger(hyperaudio.event.load, {msg: 'Loaded mix'});
+					} else {
+						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+					}
+				});
+			}
 			// Would then need to init the dragdrop ability on each item
 		},
 
 		save: function() {
 			// Save the staged production
 
-			// PUT to update, POST to create.
-			// PUT/POST to /user/mixes/ with {label: "", content ""}
+			var self = this;
 
-			// var user = hyperaudio.user.getUser(), // WIP
-			var self = this,
-				user = 'mp', // TMP
-				label = 'Not Yet Defined',
-				url = this.options.api + user + '/mixes/';
+			hyperaudio.extend(this.mix, {
+				label: "Test from hyperaudio.stage.js",
+				desc: "Testing initial save system",
+				meta: {},
+				sort: 999,
+				type: "funky",
+				content: this.target.innerHTML
+			});
 
-			// Check we have at least 1 section
-			if(this.target && (this.target.getElementsByTagName('section')).length) {
+			if(this.target) {
 
+				// Fudge the user system since getUsername nay works.
+				hyperaudio.api.guest = false;
+				hyperaudio.api.username = 'tester';
+
+				hyperaudio.api.putMix(this.mix, function(success) {
+					if(success) {
+						self.mix = hyperaudio.extend({}, this.mix);
+						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
+					} else {
+						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+					}
+				});
+/*
 				xhr({
 					url: url,
 					type: 'POST',
@@ -1881,6 +2378,7 @@ var Stage = (function(document, hyperaudio) {
 						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
 					}
 				});
+*/
 			}
 		},
 
@@ -1889,6 +2387,18 @@ var Stage = (function(document, hyperaudio) {
 				opts = this.options;
 
 			// Will need the popcorn.transcript highlighting as per the source transcripts.
+		},
+
+		initDragDrop: function() {
+			var self = this,
+				i, l, sections;
+			if(this.target) {
+				sections = this.target.getElementsByTagName('section');
+				l = sections.length;
+				for(i=0; i < l; i++) {
+					self.dropped(sections[i]);
+				}
+			}
 		},
 
 		dropped: function(el, html) {
@@ -1938,7 +2448,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			entity: 'PROJECTOR', // Not really an option... More like a manifest
 
 			target: '#transcript-video', // The selector of element where the video is generated
-			src: '', // The URL of the video.
+
+			// media: {}, // The URL of the video.
 
 			tPadding: 1, // (Seconds) Time added to end word timings.
 
@@ -1957,6 +2468,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		// this.timeout = {};
 
 		this.player = [];
+		this.media = [];
 		this.current = {};
 		this.gui = null;
 
@@ -2003,7 +2515,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				if(this.options.gui) {
 					this.addGUI();
 				}
-				if(this.options.src) {
+				if(this.options.media) {
 					this.load();
 				}
 			} else {
@@ -2011,14 +2523,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 		addGUI: Player.prototype.addGUI,
-		load: function(src) {
+		load: function(media) {
 			var self = this;
-			if(src) {
-				this.options.src = src;
+			if(media) {
+				this.options.media = media;
 			}
+			this.media[0] = this.options.media;
 
 			if(this.player[0]) {
-				this.player[0].load(this.options.src);
+				this.player[0].load(this.media[0]);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
@@ -2038,7 +2551,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				this.paused = false;
 
-				this.load(this.current.src);
+				this.load(this.current.media);
 				this._play(this.current.start);
 
 			} else {
@@ -2072,8 +2585,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			// Get the first section
 			this.current.section = this.current.sections[this.current.index];
 
-			// Get the ID (the src for now)
-			this.current.src = this.current.section.getAttribute(this.stage.options.idAttr);
+			// Get the ID
+			this.current.id = this.current.section.getAttribute(this.stage.options.idAttr);
+
+			// Get the media
+			this.current.media = {
+				mp4: this.current.section.getAttribute(this.stage.options.mp4Attr),
+				webm: this.current.section.getAttribute(this.stage.options.webmAttr),
+			};
 
 			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);
 			this.current.unit = unit = unit > 0 ? unit : this.options.unit;
@@ -2093,7 +2612,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(++this.current.index < this.current.sections.length) {
 						this.setCurrent(this.current.index);
 
-						this.load(this.current.src);
+						this.load(this.current.media);
 						this._play(this.current.start);
 					} else {
 						this.current.index = 0;
@@ -2116,10 +2635,15 @@ hyperaudio.register('Stage', Stage);
 hyperaudio.register('Projector', Projector);
 
 
-hyperaudio.utility('DragDrop', DragDrop);
-hyperaudio.utility('WordSelect', WordSelect);
-hyperaudio.utility('xhr', xhr);
-hyperaudio.utility('api', api);
+hyperaudio.utility('api', api); // obj
+hyperaudio.utility('DragDrop', DragDrop); // Class
+hyperaudio.utility('EditBlock', EditBlock); // Class
+hyperaudio.utility('fadeFX', fadeFX); // Class
+hyperaudio.utility('SideMenu', SideMenu); // Class
+hyperaudio.utility('Tap', Tap); // Class
+hyperaudio.utility('titleFX ', titleFX ); // Class
+hyperaudio.utility('WordSelect', WordSelect); // Class
+hyperaudio.utility('xhr', xhr); // fn
 
 
 	return hyperaudio;
