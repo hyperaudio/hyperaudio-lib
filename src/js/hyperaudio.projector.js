@@ -11,7 +11,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			entity: 'PROJECTOR', // Not really an option... More like a manifest
 
 			target: '#transcript-video', // The selector of element where the video is generated
-			src: '', // The URL of the video.
+
+			// media: {}, // The URL of the video.
 
 			tPadding: 1, // (Seconds) Time added to end word timings.
 
@@ -30,6 +31,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		// this.timeout = {};
 
 		this.player = [];
+		this.media = [];
 		this.current = {};
 		this.gui = null;
 
@@ -76,7 +78,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				if(this.options.gui) {
 					this.addGUI();
 				}
-				if(this.options.src) {
+				if(this.options.media) {
 					this.load();
 				}
 			} else {
@@ -84,14 +86,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 		addGUI: Player.prototype.addGUI,
-		load: function(src) {
+		load: function(media) {
 			var self = this;
-			if(src) {
-				this.options.src = src;
+			if(media) {
+				this.options.media = media;
 			}
+			this.media[0] = this.options.media
 
 			if(this.player[0]) {
-				this.player[0].load(this.options.src);
+				this.player[0].load(this.media[0]);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
@@ -111,7 +114,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				this.paused = false;
 
-				this.load(this.current.src);
+				this.load(this.current.media);
 				this._play(this.current.start);
 
 			} else {
@@ -145,8 +148,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			// Get the first section
 			this.current.section = this.current.sections[this.current.index];
 
-			// Get the ID (the src for now)
-			this.current.src = this.current.section.getAttribute(this.stage.options.idAttr);
+			// Get the ID
+			this.current.id = this.current.section.getAttribute(this.stage.options.idAttr);
+
+			// Get the media
+			this.current.media = {
+				mp4: this.current.section.getAttribute(this.stage.options.mp4Attr),
+				webm: this.current.section.getAttribute(this.stage.options.webmAttr),
+			};
 
 			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);
 			this.current.unit = unit = unit > 0 ? unit : this.options.unit;
@@ -166,7 +175,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(++this.current.index < this.current.sections.length) {
 						this.setCurrent(this.current.index);
 
-						this.load(this.current.src);
+						this.load(this.current.media);
 						this._play(this.current.start);
 					} else {
 						this.current.index = 0;

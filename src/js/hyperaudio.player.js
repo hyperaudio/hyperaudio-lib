@@ -11,7 +11,15 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			entity: 'PLAYER', // Not really an option... More like a manifest
 
 			target: '#transcript-video', // The selector of element where the video is generated
-			src: '', // The URL of the video.
+
+			media: {
+				mp4: '', // The URL of the mp4 video.
+				webm:'' // The URL of the webm video.
+			},
+			mediaType: {
+				mp4: 'video/mp4', // The mp4 mime type.
+				webm:'video/webm' // The webm mime type.
+			},
 
 			guiNative: false, // TMP during dev. Either we have a gui or we are chomeless.
 
@@ -23,6 +31,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.videoElem = null;
+		this.sourceElem = null;
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 		this.gui = null;
@@ -45,7 +54,12 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			if(this.target) {
 				this.videoElem = document.createElement('video');
 				this.videoElem.controls = this.options.guiNative; // TMP during dev. Either we have a gui or we are chomeless.
-
+/*
+				this.sourceElem = {
+					mp4: document.createElement('source'),
+					webm: document.createElement('source')
+				};
+*/
 				// Add listeners to the video element
 				this.videoElem.addEventListener('progress', function(e) {
 					if(this.readyState > 0) {
@@ -55,13 +69,15 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				// Clear the target element and add the video
 				this.target.innerHTML = '';
+				// this.videoElem.appendChild(this.sourceElem.mp4);
+				// this.videoElem.appendChild(this.sourceElem.webm);
 				this.target.appendChild(this.videoElem);
 
 				if(this.options.gui) {
 					this.addGUI();
 					this.addGUIListeners();
 				}
-				if(this.options.src) {
+				if(this.options.media.mp4) { // Assumes we have the webm
 					this.load();
 				}
 			} else {
@@ -125,14 +141,30 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this._error('GUI not used: gui = ' + this.options.gui);
 			}
 		},
-		load: function(src) {
+		load: function(media) {
 			var self = this;
-			if(src) {
-				this.options.src = src;
+			if(media) {
+				this.options.media = media;
 			}
-			if(this.videoElem) {
+			if(this.videoElem && typeof this.options.media === 'object') {
 				this.killPopcorn();
-				this.videoElem.src = this.options.src;
+
+				// Remove any old source elements
+				this.sourceElem = {};
+				while(this.videoElem.firstChild) {
+					this.videoElem.removeChild(this.videoElem.firstChild);
+				}
+
+				// Setup to work with mp4 and webm property names. See options.
+				hyperaudio.each(this.options.media, function(format, url) {
+					var source = self.sourceElem[format] = document.createElement('source');
+					source.setAttribute('type', self.options.mediaType[format]);
+					source.setAttribute('src', url); // Could use 'this' but less easy to read.
+					self.videoElem.appendChild(source);
+				});
+
+				this.videoElem.load();
+
 				this.initPopcorn();
 			} else {
 				this._error('Video player not created : ' + this.options.target);

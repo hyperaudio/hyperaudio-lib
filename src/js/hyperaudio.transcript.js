@@ -14,8 +14,10 @@ var Transcript = (function(document, hyperaudio) {
 
 			id: '', // The ID of the transcript.
 
-			src: '', // [obsolete] The URL of the transcript.
-			video: '', // [obsolete] The URL of the video.
+			// src: '', // [obsolete] The URL of the transcript.
+			// video: '', // [obsolete] The URL of the video.
+
+			media: {},
 
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
@@ -115,13 +117,12 @@ var Transcript = (function(document, hyperaudio) {
 			// Setup the player
 			if(this.options.player && hyperaudio.api.transcript) {
 				var hapi = hyperaudio.api,
-					path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename,
-					media = {
-						mp4: path
-						// webm: path.replace();
+					path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename;
+				this.options.media = {
+						mp4: path,
+						webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
 					};
-				this.options.video = media.mp4; // TMP so Stage and projector still do something.
-				this.options.player.load(media.mp4);
+				this.options.player.load(this.options.media);
 				if(this.options.async) {
 					setTimeout(function() {
 						self.parse();
@@ -190,8 +191,9 @@ var Transcript = (function(document, hyperaudio) {
 							onDrop: function(el) {
 								self.textSelect.clearSelection();
 								this.destroy();
-								el.setAttribute(opts.stage.options.idAttr, opts.video); // Pass the transcript ID
-								// el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
+								el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
+								el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
+								el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
 								el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
 								opts.stage.dropped(el);
 							}
