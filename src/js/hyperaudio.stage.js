@@ -65,10 +65,21 @@ var Stage = (function(document, hyperaudio) {
 				hyperaudio.api.getMix(id, function(success) {
 					if(success) {
 						self.mix = hyperaudio.extend({}, this.mix);
-						var tmp = document.createElement('div');
-						tmp.innerHTML = self.mix.content;
-						var articleElem = tmp.querySelector('article');
+
+						// Need to maintain the existing article in the stage - Important for dragdrop.
+						var tmp = document.createElement('div'); // Temporary DOM element
+						tmp.innerHTML = self.mix.content; // Add the content to the DOM element
+						var articleElem = tmp.querySelector('article'); // Find the article in the content.
+						// Can now insert the contents of the returned mix article into the maintained article.
 						self.article.innerHTML = articleElem.innerHTML;
+
+						// Now copy over any attributes
+						var attr = articleElem.attributes;
+						for(var i=0, l=attr.length; i < l; i++ ) {
+							self.article.setAttribute(attr[i].name, attr[i].value);
+						}
+
+						// Setup the dragdrop on the loaded mix sections.
 						self.initDragDrop();
 						self._trigger(hyperaudio.event.load, {msg: 'Loaded mix'});
 					} else {
