@@ -100,7 +100,7 @@ var Stage = (function(document, hyperaudio) {
 			// Would then need to init the dragdrop ability on each item
 		},
 
-		save: function() {
+		save: function(callback) {
 			// Save the staged production
 
 			var self = this;
@@ -124,10 +124,18 @@ var Stage = (function(document, hyperaudio) {
 					if(success) {
 						self.mix = hyperaudio.extend({}, this.mix);
 						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
+						self.callback(callback, true);
 					} else {
 						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+						self.callback(callback, false);
 					}
 				});
+			}
+		},
+
+		callback: function(callback, success) {
+			if(typeof callback === 'function') {
+				callback.call(this, success);
 			}
 		},
 

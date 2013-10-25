@@ -33,6 +33,9 @@ var api = (function(hyperaudio) {
 		},
 		getUsername: function(callback, force) {
 			var self = this;
+
+			// force = typeof force === 'undefined' ? true : force; // default force = true.
+
 			if(!force && (this.guest || this.username)) {
 				setTimeout(function() {
 					self.callback(callback, true);
@@ -200,7 +203,7 @@ var api = (function(hyperaudio) {
 					} else {
 						self.callback(callback, false);
 					}
-				});
+				}, true); // Force the call to get username before attempting to save.
 			} else {
 				setTimeout(function() {
 					self.callback(callback, false);
