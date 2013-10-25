@@ -164,7 +164,10 @@ var Stage = (function(document, hyperaudio) {
 
 			var editBlock = function (e) {
 				e.stopPropagation();
-				this.parentNode._editBlock = new EditBlock({el: this.parentNode});
+				this.parentNode._editBlock = new EditBlock({
+					el: this.parentNode,
+					stage: self
+				});
 			};
 
 			if(this.target) {

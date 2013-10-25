@@ -8,6 +8,7 @@ var EditBlock = (function (document) {
 		}
 
 		this.el = typeof this.options.el == 'string' ? document.querySelector(this.options.el) : this.options.el;
+		this.stage = this.options.stage || {dropped:function(){}};
 		this.words = this.el.querySelectorAll('a');
 
 		this.el.className += ' edit';
@@ -89,7 +90,7 @@ var EditBlock = (function (document) {
 		this.el.parentNode.insertBefore(newBlock, this.el.nextSibling);
 		this.el.handleHTML = this.el.innerHTML;
 
-		APP.dropped(newBlock);
+		this.stage.dropped(newBlock);
 
 		this.destroy();
 	};
