@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.5 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 04:34:09 */
+/*! hyperaudio v0.1.6 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 19:55:21 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4383,6 +4383,9 @@ var api = (function(hyperaudio) {
 		},
 		getUsername: function(callback, force) {
 			var self = this;
+
+			// force = typeof force === 'undefined' ? true : force; // default force = true.
+
 			if(!force && (this.guest || this.username)) {
 				setTimeout(function() {
 					self.callback(callback, true);
@@ -4550,7 +4553,7 @@ var api = (function(hyperaudio) {
 					} else {
 						self.callback(callback, false);
 					}
-				});
+				}, true); // Force the call to get username before attempting to save.
 			} else {
 				setTimeout(function() {
 					self.callback(callback, false);
@@ -5136,7 +5139,7 @@ var Stage = (function(document, hyperaudio) {
 			// Would then need to init the dragdrop ability on each item
 		},
 
-		save: function() {
+		save: function(callback) {
 			// Save the staged production
 
 			var self = this;
@@ -5160,10 +5163,18 @@ var Stage = (function(document, hyperaudio) {
 					if(success) {
 						self.mix = hyperaudio.extend({}, this.mix);
 						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
+						self.callback(callback, true);
 					} else {
 						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+						self.callback(callback, false);
 					}
 				});
+			}
+		},
+
+		callback: function(callback, success) {
+			if(typeof callback === 'function') {
+				callback.call(this, success);
 			}
 		},
 
