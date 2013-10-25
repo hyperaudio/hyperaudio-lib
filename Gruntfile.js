@@ -18,7 +18,7 @@ module.exports = function(grunt) {
 					'build/<%= pkg.name %>.js': [
 
 						// The Popcorn lib and plugins
-						'/lib/popcorn-1.4.0.js',
+						'lib/popcorn-1.4.0.js',
 						'src/js/popcorn.transcript.js',
 
 						// Top closure wrapper
@@ -76,7 +76,7 @@ module.exports = function(grunt) {
 				files: {
 					src: [
 						'Gruntfile.js',
-						'/lib/*.js',
+						// 'lib/*.js',
 						'src/js/*.js'
 					]
 				}
