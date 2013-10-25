@@ -54,7 +54,7 @@ var Stage = (function(document, hyperaudio) {
 
 	Stage.prototype = {
 		mixDetails: function(details) {
-			// [SHOULD] only really used to set the lebel, desc and type of the mix being saved.
+			// [SHOULD] only really used to set the label, desc and type of the mix being saved.
 			hyperaudio.extend(this.options, details);
 		},
 		load: function(id) {
@@ -73,6 +73,11 @@ var Stage = (function(document, hyperaudio) {
 				hyperaudio.api.getMix(id, function(success) {
 					if(success) {
 						self.mix = hyperaudio.extend({}, this.mix);
+						self.mixDetails({
+							title: self.mix.label,
+							desc: self.mix.desc,
+							type: self.mix.type
+						});
 
 						// Need to maintain the existing article in the stage - Important for dragdrop.
 						var tmp = document.createElement('div'); // Temporary DOM element
