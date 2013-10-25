@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.4 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 03:35:07 */
+/*! hyperaudio v0.1.5 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 04:31:57 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -5339,6 +5339,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.media[0] = this.options.media;
 
 			if(this.player[0]) {
+				hyperaudio.addClass(this.player[0].videoElem, 'active');
 				this.player[0].load(this.media[0]);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
