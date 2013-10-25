@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.5 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 04:31:57 */
+/*! hyperaudio v0.1.5 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 04:34:09 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -3388,10 +3388,13 @@ var EditBlock = (function (document) {
 		}
 
 		// Create a new block
-		var newBlock = document.createElement('section');
+		//var newBlock = document.createElement('section');
+		var newBlock = this.el.cloneNode(false);
 		var newParagraph, prevContainer;
+		
+		newBlock.className = newBlock.className.replace(/(^|\s)edit(\s|$)/g, ' ');
 
-		newBlock.className = 'item';
+		//newBlock.className = 'item';
 
 		for ( var i = 0; i < wordCount; i++ ) {
 			if ( this.words[i].parentNode != prevContainer ) {
