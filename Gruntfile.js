@@ -16,6 +16,11 @@ module.exports = function(grunt) {
 			hyperaudio: {
 				files: {
 					'build/<%= pkg.name %>.js': [
+
+						// The Popcorn lib and plugins
+						'/lib/popcorn-1.4.0.js',
+						'src/js/popcorn.transcript.js',
+
 						// Top closure wrapper
 						'src/js/wrapper/top.js',
 						// The Hyperaudio Lib Core
@@ -71,6 +76,7 @@ module.exports = function(grunt) {
 				files: {
 					src: [
 						'Gruntfile.js',
+						'/lib/*.js',
 						'src/js/*.js'
 					]
 				}
