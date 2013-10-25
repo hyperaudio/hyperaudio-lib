@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.6 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 19:55:21 */
+/*! hyperaudio v0.1.7 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 21:15:20 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -3024,22 +3024,9 @@ var hyperaudio = (function() {
 			}
 		},
 
-		// TMP - This fn is WIP and left in as started making code for JSONP and then put it on hold.
-		jsonp: function(url, scope, callback) {
-			//
-			var head = document.getElementsByTagName('head')[0];
-			var script = document.createElement('script');
-			script.type = 'text/javascript';
-
-			var jsonp_i = 0; // TMP - would be in scope of core code as a static.
-
-			// Need to make the callback run in the correct scope.
-			callback[jsonp_i++] = function(json) {
-				callback.call(scope, data);
-			};
-
-			script.src = url;
-
+		// http://stackoverflow.com/questions/1403888/get-url-parameter-with-javascript-or-jquery
+		getURLParameter: function(name) {
+			return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
 		},
 
 		hasClass: function(e, c) {
