@@ -94,6 +94,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.media[0] = this.options.media;
 
 			if(this.player[0]) {
+				hyperaudio.addClass(this.player[0].videoElem, 'active');
 				this.player[0].load(this.media[0]);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
