@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.3 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 03:19:31 */
+/*! hyperaudio v0.1.4 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 03:35:07 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -3343,6 +3343,7 @@ var EditBlock = (function (document) {
 		}
 
 		this.el = typeof this.options.el == 'string' ? document.querySelector(this.options.el) : this.options.el;
+		this.stage = this.options.stage || {dropped:function(){}};
 		this.words = this.el.querySelectorAll('a');
 
 		this.el.className += ' edit';
@@ -3424,7 +3425,7 @@ var EditBlock = (function (document) {
 		this.el.parentNode.insertBefore(newBlock, this.el.nextSibling);
 		this.el.handleHTML = this.el.innerHTML;
 
-		APP.dropped(newBlock);
+		this.stage.dropped(newBlock);
 
 		this.destroy();
 	};
@@ -5196,7 +5197,10 @@ var Stage = (function(document, hyperaudio) {
 
 			var editBlock = function (e) {
 				e.stopPropagation();
-				this.parentNode._editBlock = new EditBlock({el: this.parentNode});
+				this.parentNode._editBlock = new EditBlock({
+					el: this.parentNode,
+					stage: self
+				});
 			};
 
 			if(this.target) {
