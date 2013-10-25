@@ -159,16 +159,32 @@ var Stage = (function(document, hyperaudio) {
 
 		dropped: function(el, html) {
 			var self = this;
+			var actions;
+			var draggableClass = '';
+
+			var editBlock = function (e) {
+				e.stopPropagation();
+				this.parentNode._editBlock = new EditBlock({el: this.parentNode});
+			};
 
 			if(this.target) {
 				hyperaudio.removeClass(this.target, this.options.dragdropClass);
+
+				// add edit action if needed
+				if ( !(/(^|\s)effect($|\s)/.test(el.className)) ) {
+					actions = el.querySelector('.actions');
+					actions._tap = new Tap({el: actions});
+					actions.addEventListener('tap', editBlock, false);
+				} else {
+					draggableClass = 'draggableEffect';
+				}
 
 				// Setup item for future dragdrop 
 				el._dragInstance = new DragDrop({
 					handle: el,
 					dropArea: this.target,
 					html: html ? html : el.innerHTML,
-					// draggableClass: draggableClass,
+					draggableClass: draggableClass,
 					onDragStart: function () {
 						hyperaudio.addClass(self.target, self.options.dragdropClass);
 					},
