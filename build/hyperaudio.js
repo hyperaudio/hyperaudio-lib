@@ -1,4 +1,149 @@
-/*! hyperaudio v0.1.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 00:34:04 */
+/*! hyperaudio v0.1.2 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 25th October 2013 03:11:00 */
+// PLUGIN: Transcript
+
+(function ( Popcorn ) {
+
+	/**
+	 * Transcript popcorn plug-in 
+	 * Displays a transcript in the target div or DOM node.
+	 * Options parameter will need a time and a target.
+	 * Optional parameters are futureClass.
+	 * 
+	 * Time is the time that you want this plug-in to execute,
+	 * Target is the id of the document element that the content refers
+	 * to, or the DoM node itself. This target element must exist on the DOM
+	 * futureClass is the CSS class name to be used when the target has not been read yet.
+	 *
+	 * 
+	 * @param {Object} options
+	 * 
+	 * Example:
+		var p = Popcorn('#video')
+			.transcript({
+				time:        5,                  // seconds, mandatory
+				target:      'word-42',          // mandatory
+				futureClass: 'transcript-hide'   // optional
+			})
+			.transcript({
+				time:        32,                                    // seconds, mandatory
+				target:      document.getElementById( 'word-84' ),  // mandatory
+				futureClass: 'transcript-grey'                      // optional
+			});
+	 *
+	 */
+
+	// This plugin assumes that you are generating the plugins in the order of the text.
+	// So that the parent may be compared to the previous ones parent.
+
+	Popcorn.plugin( "transcript" , (function() {
+
+		var pParent;
+
+		return {		
+			manifest: {
+				about:{
+					name: "Popcorn Transcript Plugin",
+					version: "0.2",
+					author:  "Mark Panaghiston",
+					website: "http://www.jplayer.org/"
+				},
+				options:{
+					time: {elem:'input', type:'text', label:'In'},
+					target:  'Transcript-container',
+					futureClass: {elem:'input', type:'text', label:'Class'},
+					onNewPara: function() {}
+				}
+			},
+
+			// The popcorn docs appears to have renamed 'options' with 'track', but its operation seems the same.
+			// Believe that this is to identify the parameter as the track object, rather than 'options', which is probably used all over the place.
+
+			_setup: function( options ) {
+
+				var parent, iAmNewPara;
+
+				// if a target is specified and is a string, use that - Requires every word <span> to have a unique ID.
+				// else if target is specified and is an object, use object as DOM reference
+				// else Throw an error.
+				if ( options.target && typeof options.target === "string" && options.target !== 'Transcript-container' ) {
+					options.container = document.getElementById( options.target );
+				} else if ( options.target && typeof options.target === "object" ) {
+					options.container = options.target;
+				} else {
+					throw "Popcorn.transcript: target property must be an ID string or a pointer to the DOM of the transcript word.";
+				}
+
+				options.start = 0;
+				options.end = options.time;
+
+				if(!options.futureClass) {
+					options.futureClass = "transcript-future";
+				}
+
+				parent = options.target.parentNode;
+				if(parent !== pParent) {
+					iAmNewPara = true;
+					pParent = parent;
+				}
+
+				options.transcriptRead = function() {
+					if( options.container.classList ) {
+						options.container.classList.remove(options.futureClass);
+					} else {
+						options.container.className = "";
+					}
+					if(iAmNewPara && typeof options.onNewPara === 'function') {
+						options.onNewPara(options.target.parentNode);
+					}
+				};
+
+				options.transcriptFuture = function() {
+					if( options.container.classList ) {
+						options.container.classList.add(options.futureClass);
+					} else {
+						options.container.className = options.futureClass;
+					}
+				};
+
+				// Note: end times close to zero can have issues. (Firefox 4.0 worked with 100ms. Chrome needed 200ms. iOS needed 500ms)
+				if(options.end > options.start) {
+					options.transcriptFuture();
+				}
+
+			},
+
+			_update: function( options ) {
+				// update code, fire on update/modification of a plugin created track event.
+			},
+
+			_teardown: function( options ) {
+				// teardown code, fire on removal of plugin or destruction of instance
+			},
+
+			/**
+			 * @member transcript 
+			 * The start function will be executed when the currentTime 
+			 * of the video reaches the start time provided by the 
+			 * options variable
+			 */
+			start: function( event, options ) {
+				options.transcriptFuture();
+			},
+
+			/**
+			 * @member transcript 
+			 * The end function will be executed when the currentTime 
+			 * of the video reaches the end time provided by the 
+			 * options variable
+			 */
+			end: function( event, options ) {
+				options.transcriptRead();
+			}
+		};
+	})());
+})( Popcorn );
+
+
 var HA = (function(window, document) {
 
 
@@ -2219,8 +2364,7 @@ var Transcript = (function(document, hyperaudio) {
 							}
 						});
 
-						// var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
-						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, ''); // + '<div class="actions"></div>';
+						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
 						dragdrop.init(html, e);
 					}
 				});
@@ -2409,16 +2553,32 @@ var Stage = (function(document, hyperaudio) {
 
 		dropped: function(el, html) {
 			var self = this;
+			var actions;
+			var draggableClass = '';
+
+			var editBlock = function (e) {
+				e.stopPropagation();
+				this.parentNode._editBlock = new EditBlock({el: this.parentNode});
+			};
 
 			if(this.target) {
 				hyperaudio.removeClass(this.target, this.options.dragdropClass);
+
+				// add edit action if needed
+				if ( !(/(^|\s)effect($|\s)/.test(el.className)) ) {
+					actions = el.querySelector('.actions');
+					actions._tap = new Tap({el: actions});
+					actions.addEventListener('tap', editBlock, false);
+				} else {
+					draggableClass = 'draggableEffect';
+				}
 
 				// Setup item for future dragdrop 
 				el._dragInstance = new DragDrop({
 					handle: el,
 					dropArea: this.target,
 					html: html ? html : el.innerHTML,
-					// draggableClass: draggableClass,
+					draggableClass: draggableClass,
 					onDragStart: function () {
 						hyperaudio.addClass(self.target, self.options.dragdropClass);
 					},
@@ -2647,7 +2807,7 @@ hyperaudio.utility('EditBlock', EditBlock); // Class
 hyperaudio.utility('fadeFX', fadeFX); // Class
 hyperaudio.utility('SideMenu', SideMenu); // Class
 hyperaudio.utility('Tap', Tap); // Class
-hyperaudio.utility('titleFX ', titleFX ); // Class
+hyperaudio.utility('titleFX', titleFX ); // Class
 hyperaudio.utility('WordSelect', WordSelect); // Class
 hyperaudio.utility('xhr', xhr); // fn
 
