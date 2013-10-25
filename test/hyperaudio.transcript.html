@@ -104,6 +104,7 @@ span.code {
 <script type="text/javascript" src="../src/js/utility.api.js"></script>
 <script type="text/javascript" src="../src/js/utility.sidemenu.js"></script>
 <script type="text/javascript" src="../src/js/utility.tap.js"></script>
+<script type="text/javascript" src="../src/js/utility.editblock.js"></script>
 <script type="text/javascript">
 
 	hyperaudio.register('Player', Player);
@@ -153,7 +154,8 @@ span.code {
 
 	var id = document.querySelector('#stage-id');
 	
-	var title = document.querySelector('#stage-title').addEventListener('change', function(e) {
+	var title = document.querySelector('#stage-title');
+	title.addEventListener('change', function(e) {
 		e.preventDefault();
 		stage.mixDetails({
 			title:this.value
