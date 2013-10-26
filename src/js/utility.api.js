@@ -176,16 +176,20 @@ var api = (function(hyperaudio) {
 				var type = 'POST',
 					id = '';
 
-				if(this.mix && this.mix._id && this.mix._id === mix._id) {
-					type = 'PUT';
-					id = this.mix._id;
-					// Check some stuff?
-				} else {
-					// Check some stuff?
-				}
-
 				this.getUsername(function(success) {
+
 					if(success && !this.guest && this.username) {
+
+						// Check: Mix IDs match and user is owner.
+
+						if(this.mix && this.mix._id && this.mix._id === mix._id && this.username === mix.owner) {
+							type = 'PUT';
+							id = this.mix._id;
+							// Check some stuff?
+						} else {
+							// Check some stuff?
+						}
+
 						xhr({
 							url: self.options.api + self.username + '/' + self.options.mixes + id,
 							type: type,
