@@ -85,7 +85,21 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this._error('Target not found : ' + this.options.target);
 			}
 		},
-		addGUI: Player.prototype.addGUI,
+		addGUI: function() {
+			var fxHelper = document.createElement('div');
+			fxHelper.id = 'fxHelper';
+			fxHelper.className = 'video-transition-servo';
+
+			var titleFXHelper = document.createElement('div');
+			titleFXHelper.id = 'titleFXHelper';
+			titleFXHelper.className = 'title-effect-servo';
+
+			this.target.appendChild(fxHelper);
+			this.target.appendChild(titleFXHelper);
+
+			// Add the default Player GUI
+			Player.prototype.addGUI.call(this);
+		},
 		load: function(media) {
 			var self = this;
 			if(media) {
@@ -144,10 +158,40 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.player[0].currentTime(time, play);
 		},
 		setCurrent: function(index) {
+			var weHaveMoreVideo = false,
+				effectType;
+
 			this.current.index = index;
 
 			// Get the first section
 			this.current.section = this.current.sections[this.current.index];
+
+			if(effectType = this.current.section.getAttribute('data-effect')) {
+
+				var ipText = this.current.section.querySelector('input[type="text"]');
+				var ipDuration = this.current.section.querySelector('input[type="range"]');
+
+				switch(effectType) {
+					case 'title':
+						if(ipText && ipDuration) {
+							titleFX({
+								el: '#titleFXHelper',
+								text: ipText.value,
+								duration: ipDuration.value * 1000
+							});
+						}
+						break;
+					case 'fade':
+						break;
+					case 'pause':
+						break;
+				}
+
+				if(++this.current.index < this.current.sections.length) {
+					weHaveMoreVideo = this.setCurrent(this.current.index);
+				}
+				return weHaveMoreVideo;
+			}
 
 			// Get the ID
 			this.current.id = this.current.section.getAttribute(this.stage.options.idAttr);
@@ -163,8 +207,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			// Still have attributes hard coded in here. Would need to pass from the transcript to stage and then to here.
 			var words = this.current.section.getElementsByTagName('a');
-			this.current.start = words[0].getAttribute('data-m') * unit;
-			this.current.end = words[words.length-1].getAttribute('data-m') * unit;
+			if(words.length) {
+				this.current.start = words[0].getAttribute('data-m') * unit;
+				this.current.end = words[words.length-1].getAttribute('data-m') * unit;
+				weHaveMoreVideo = true;
+			} else {
+				weHaveMoreVideo = false;
+			}
+			return weHaveMoreVideo;
 		},
 		manager: function(event) {
 			var self = this;
@@ -174,15 +224,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					// Goto the next section
 
 					if(++this.current.index < this.current.sections.length) {
-						this.setCurrent(this.current.index);
+						if(this.setCurrent(this.current.index)) {
+							this.load(this.current.media);
+							this._play(this.current.start);
+						} else {
+							this.current.index = 0;
 
-						this.load(this.current.media);
-						this._play(this.current.start);
-					} else {
-						this.current.index = 0;
-
-						this.paused = true;
-						this._pause();
+							this.paused = true;
+							this._pause();
+						}
 					}
 				}
 			}
