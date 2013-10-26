@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.9 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 26th October 2013 01:43:34 */
+/*! hyperaudio v0.1.10 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 26th October 2013 03:13:34 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4513,16 +4513,20 @@ var api = (function(hyperaudio) {
 				var type = 'POST',
 					id = '';
 
-				if(this.mix && this.mix._id && this.mix._id === mix._id) {
-					type = 'PUT';
-					id = this.mix._id;
-					// Check some stuff?
-				} else {
-					// Check some stuff?
-				}
-
 				this.getUsername(function(success) {
+
 					if(success && !this.guest && this.username) {
+
+						// Check: Mix IDs match and user is owner.
+
+						if(this.mix && this.mix._id && this.mix._id === mix._id && this.username === mix.owner) {
+							type = 'PUT';
+							id = this.mix._id;
+							// Check some stuff?
+						} else {
+							// Check some stuff?
+						}
+
 						xhr({
 							url: self.options.api + self.username + '/' + self.options.mixes + id,
 							type: type,
