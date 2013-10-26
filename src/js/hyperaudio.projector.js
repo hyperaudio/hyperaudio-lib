@@ -166,7 +166,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			// Get the first section
 			this.current.section = this.current.sections[this.current.index];
 
-			if(effectType = this.current.section.getAttribute('data-effect')) {
+			effectType = this.current.section.getAttribute('data-effect');
+			if(effectType) {
 
 				var ipText = this.current.section.querySelector('input[type="text"]');
 				var ipDuration = this.current.section.querySelector('input[type="range"]');
