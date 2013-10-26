@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.8 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 26th October 2013 01:20:30 */
+/*! hyperaudio v0.1.9 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 26th October 2013 01:43:34 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -5475,16 +5475,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
 					// Goto the next section
 
-					if(++this.current.index < this.current.sections.length) {
-						if(this.setCurrent(this.current.index)) {
-							this.load(this.current.media);
-							this._play(this.current.start);
-						} else {
-							this.current.index = 0;
+					// Want to refactor the setCurrent() code... Maybe make it more like nextCurrent or something like that.
+					if(++this.current.index < this.current.sections.length && this.setCurrent(this.current.index)) {
+						this.load(this.current.media);
+						this._play(this.current.start);
+					} else {
+						this.current.index = 0;
 
-							this.paused = true;
-							this._pause();
-						}
+						this.paused = true;
+						this._pause();
 					}
 				}
 			}
