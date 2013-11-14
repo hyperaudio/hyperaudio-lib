@@ -55,9 +55,11 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 
 			if(this.target) {
-				this.popcorn = Popcorn.youtube( this.target, this.options.media.youtube);
-				this.videoElem = this.popcorn;
-				this.videoElem.addEventListener = this.popcorn.on;
+				this.videoElem = Popcorn.HTMLYouTubeVideoElement(this.target);
+				this.popcorn = Popcorn(this.videoElem, this.options.media.youtube);
+				if(this.options.media.youtube) {
+					this.load();
+				}
 			} else {
 				this._error('Target not found : ' + this.options.target);
 			}
@@ -68,10 +70,10 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 		load: function(media) {
 			var self = this;
 			if(media) {
-				this.options.media = media;
+				// this.options.media = media; // TMP hack
 			}
 			if(this.popcorn) {
-				this.popcorn.media.src = media.youtube;
+				this.popcorn.media.src = this.options.media.youtube;
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
