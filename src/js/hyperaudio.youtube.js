@@ -15,7 +15,8 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 			target: '#transcript-video', // The selector of element where the video is generated
 
 			media: {
-				youtube: 'http://www.youtube.com/watch?v=etaCHoeJXCI', // TMP - Youtube URL
+				// youtube: 'http://www.youtube.com/watch?v=etaCHoeJXCI', // TMP - Youtube URL
+				youtube: '', // The URL of the Youtube video.
 				mp4: '', // The URL of the mp4 video.
 				webm:'' // The URL of the webm video.
 			},
@@ -56,7 +57,8 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 
 			if(this.target) {
 				this.videoElem = Popcorn.HTMLYouTubeVideoElement(this.target);
-				this.popcorn = Popcorn(this.videoElem, this.options.media.youtube);
+				// this.popcorn = Popcorn(this.videoElem);
+				this.initPopcorn();
 				if(this.options.media.youtube) {
 					this.load();
 				}
@@ -69,11 +71,11 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 		},
 		load: function(media) {
 			var self = this;
-			if(media) {
-				// this.options.media = media; // TMP hack
+			if(media && media.youtube) { // TMP hack (2nd clause)
+				this.options.media = media;
 			}
 			if(this.popcorn) {
-				this.popcorn.media.src = this.options.media.youtube;
+				this.popcorn.media.src = this.options.media.youtube; //  + '&html5=1';
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
