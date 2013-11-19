@@ -75,7 +75,8 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 				this.options.media = media;
 			}
 			if(this.popcorn) {
-				this.popcorn.media.src = this.options.media.youtube; //  + '&html5=1';
+				// this.popcorn.media.src = this.options.media.youtube; //  + '&html5=1';
+				this.videoElem.src = this.options.media.youtube; //  + '&html5=1';
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
