@@ -58,7 +58,7 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 			if(this.target) {
 				this.videoElem = Popcorn.HTMLYouTubeVideoElement(this.target);
 				// this.popcorn = Popcorn(this.videoElem);
-				this.initPopcorn();
+				// this.initPopcorn();
 				if(this.options.media.youtube) {
 					this.load();
 				}
@@ -74,7 +74,7 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 			if(media && media.youtube) { // TMP hack (2nd clause)
 				this.options.media = media;
 			}
-			if(this.popcorn) {
+			if(true || this.popcorn) {
 				// this.popcorn.media.src = this.options.media.youtube; //  + '&html5=1';
 				this.videoElem.src = this.options.media.youtube; //  + '&html5=1';
 			} else {
@@ -92,18 +92,21 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 		play: function(time) {
+			this.videoElem.play(time);
 			if(this.popcorn) {
-				this.popcorn.play(time);
+				// this.popcorn.play(time);
 			}
 		},
 		pause: function(time) {
+			this.videoElem.pause(time);
 			if(this.popcorn) {
-				this.popcorn.pause(time);
+				// this.popcorn.pause(time);
 			}
 		},
 		currentTime: function(time, play) {
+			this.videoElem.currentTime(time);
 			if(this.popcorn) {
-				this.popcorn.currentTime(time);
+				// this.popcorn.currentTime(time);
 			}
 		}
 	};
