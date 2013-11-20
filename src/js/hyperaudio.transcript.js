@@ -119,9 +119,9 @@ var Transcript = (function(document, hyperaudio) {
 				var hapi = hyperaudio.api,
 					path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename;
 				this.options.media = {
-						mp4: path,
-						webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
-					};
+					mp4: path,
+					webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
+				};
 				this.options.player.load(this.options.media);
 				if(this.options.async) {
 					setTimeout(function() {
