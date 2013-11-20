@@ -56,9 +56,15 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 
 			if(this.target) {
-				this.videoElem = Popcorn.HTMLYouTubeVideoElement(this.target);
+				// this.videoElem = Popcorn.HTMLYouTubeVideoElement(this.target);
 				// this.popcorn = Popcorn(this.videoElem);
 				// this.initPopcorn();
+
+				// Need to have a videoElem for Projector to be happy.
+				this.target.innerHTML = '';
+				this.videoElem = document.createElement('video');
+				this.target.appendChild(this.videoElem);
+
 				if(this.options.media.youtube) {
 					this.load();
 				}
@@ -71,12 +77,58 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 		},
 		load: function(media) {
 			var self = this;
-			if(media && media.youtube) { // TMP hack (2nd clause)
+			if(media) {
 				this.options.media = media;
 			}
-			if(true || this.popcorn) {
-				// this.popcorn.media.src = this.options.media.youtube; //  + '&html5=1';
-				this.videoElem.src = this.options.media.youtube; //  + '&html5=1';
+			if(this.target) {
+
+				this.killPopcorn();
+
+				if(this.options.media.youtube) {
+					if(!this.videoElem._util || this.videoElem._util.type !== "YouTube") {
+						// Remove any old target elements
+						while(this.target.firstChild) {
+							this.target.removeChild(this.target.firstChild);
+						}
+						this.videoElem = Popcorn.HTMLYouTubeVideoElement(this.target);
+					}
+
+					// Before setting the YT src
+					this.videoElem.controls = true;
+
+					// this.popcorn.media.src = this.options.media.youtube; // + '&html5=1';
+					this.videoElem.src = this.options.media.youtube + '&html5=1';
+				} else {
+					if(this.videoElem._util) {
+						// this.target.innerHTML = '';
+						// Remove any old target elements
+						while(this.target.firstChild) {
+							this.target.removeChild(this.target.firstChild);
+						}
+
+						this.videoElem = document.createElement('video');
+						this.target.appendChild(this.videoElem);
+					}
+
+					// Remove any old source elements
+					while(this.videoElem.firstChild) {
+						this.videoElem.removeChild(this.videoElem.firstChild);
+					}
+
+					// Setup to work with mp4 and webm property names. See options.
+					hyperaudio.each(this.options.media, function(format, url) {
+						var source = document.createElement('source');
+						source.setAttribute('type', self.options.mediaType[format]);
+						source.setAttribute('src', url); // Could use 'this' but less easy to read.
+						self.videoElem.appendChild(source);
+					});
+
+					this.videoElem.controls = true;
+
+					this.videoElem.load();
+				}
+
+				this.initPopcorn();
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
@@ -92,21 +144,18 @@ var Youtube = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 		play: function(time) {
-			this.videoElem.play(time);
 			if(this.popcorn) {
-				// this.popcorn.play(time);
+				this.popcorn.play(time);
 			}
 		},
 		pause: function(time) {
-			this.videoElem.pause(time);
 			if(this.popcorn) {
-				// this.popcorn.pause(time);
+				this.popcorn.pause(time);
 			}
 		},
 		currentTime: function(time, play) {
-			this.videoElem.currentTime(time);
 			if(this.popcorn) {
-				// this.popcorn.currentTime(time);
+				this.popcorn.currentTime(time);
 			}
 		}
 	};
