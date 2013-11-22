@@ -28,11 +28,6 @@
 			guiNative: true // custom gui in dev
 		});
 
-		// TMP
-		var stage = HA.Stage({
-			target: "#target-stage"
-		});
-
 		var transcript = HA.Transcript({
 			target: "#source-transcript",
 			media: {
@@ -41,7 +36,6 @@
 				mp4: "http://hyperaud.io/video/internetindians.mp4",
 				webm:"http://hyperaud.io/video/internetindians.webm"
 			},
-			stage: stage,
 			player: player
 		});
 	}
