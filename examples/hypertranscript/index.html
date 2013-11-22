@@ -14,30 +14,31 @@
 	<div id="source-transcript" class="transcript"></div>
 </div>
 
-<script type="text/javascript" src="build/hyperaudio.js"></script>
-<!--
 <script type="text/javascript" src="../../build/hyperaudio.js"></script>
--->
 
 <script type="text/javascript">
 
+	var ht = {
+		init: function() {
+			this.player = HA.Player({
+				target: "#source-video",
+				guiNative: true // custom gui in dev
+			});
+			this.transcript = HA.Transcript({
+				target: "#source-transcript",
+				media: {
+					// transcript: "http://hyperaud.io/transcripts/ts-internetindians.htm",
+					transcript: "/hyperaudio-dev/transcripts/ts-internetindians.htm",
+					mp4: "http://hyperaud.io/video/internetindians.mp4",
+					webm:"http://hyperaud.io/video/internetindians.webm"
+				},
+				player: this.player
+			});
+		}
+	}
+
 	window.onload = function(){
-
-		var player = HA.Player({
-			target: "#source-video",
-			guiNative: true // custom gui in dev
-		});
-
-		var transcript = HA.Transcript({
-			target: "#source-transcript",
-			media: {
-				transcript: "http://hyperaud.io/transcripts/ts-internetindians.htm",
-				// transcript: "/hyperaudio-dev/transcripts/ts-internetindians.htm",
-				mp4: "http://hyperaud.io/video/internetindians.mp4",
-				webm:"http://hyperaud.io/video/internetindians.webm"
-			},
-			player: player
-		});
+		ht.init();
 	}
 </script>
 </body>
