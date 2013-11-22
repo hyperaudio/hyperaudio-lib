@@ -75,8 +75,22 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.target.appendChild(player);
 				}
 
+				this.addHelpers();
+
 				if(this.options.gui) {
-					this.addGUI();
+					// Add the default Player GUI
+					// Player.prototype.addGUI.call(this);
+
+					this.videoElem = this.player[0].videoElem; // TMP hack during dev
+
+					if(this.options.gui) {
+						this.GUI = new hyperaudio.PlayerGUI({
+							player: this,
+
+							navigation: true,		// next/prev buttons
+							fullscreen: true		// fullscreen button
+						});
+					}
 				}
 				if(this.options.media) {
 					this.load();
@@ -85,7 +99,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this._error('Target not found : ' + this.options.target);
 			}
 		},
-		addGUI: function() {
+		addHelpers: function() {
 			var fxHelper = document.createElement('div');
 			fxHelper.id = 'fxHelper';
 			fxHelper.className = 'video-transition-servo';
@@ -97,8 +111,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.target.appendChild(fxHelper);
 			this.target.appendChild(titleFXHelper);
 
-			// Add the default Player GUI
-			Player.prototype.addGUI.call(this);
 		},
 		load: function(media) {
 			var self = this;

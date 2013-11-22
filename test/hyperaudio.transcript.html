@@ -95,6 +95,7 @@ span.code {
 <script type="text/javascript" src="../src/js/popcorn.transcript.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.core.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.player.js"></script>
+<script type="text/javascript" src="../src/js/hyperaudio.player.gui.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.transcript.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.stage.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.projector.js"></script>
@@ -109,6 +110,7 @@ span.code {
 <script type="text/javascript">
 
 	hyperaudio.register('Player', Player);
+	hyperaudio.register('PlayerGUI', PlayerGUI);
 	hyperaudio.register('Transcript', Transcript);
 	hyperaudio.register('Stage', Stage);
 	hyperaudio.register('Projector', Projector);
@@ -118,7 +120,8 @@ span.code {
 
 	var player = hyperaudio.Player({
 		target: "#source-video",
-		guiNative: true // TMP while gui in dev
+		// guiNative: true // TMP while gui in dev
+		gui: true
 	});
 
 	var projector = hyperaudio.Projector({
