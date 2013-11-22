@@ -17,9 +17,13 @@ var Transcript = (function(document, hyperaudio) {
 			// src: '', // [obsolete] The URL of the transcript.
 			// video: '', // [obsolete] The URL of the video.
 
-			media: {},
+			media: {
+				// transcript, mp4, webm urls
+			},
 
 			select: true, // Enables selection of the transcript
+
+			wordsPlay: true, // Enables word clicks forcing play
 
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
@@ -47,20 +51,29 @@ var Transcript = (function(document, hyperaudio) {
 		}
 
 		// If we have the info, kick things off
-		if(this.options.id) {
+		if(this.options.id || this.options.media.mp4) {
 			this.load();
 		}
 	}
 
 	Transcript.prototype = {
-		// load: function(transcript) {
+
 		load: function(id) {
 			var self = this;
 
 			this.ready = false;
 
-			if(id) {
-				this.options.id = id;
+			if(typeof id !== 'undefined') {
+				if(typeof id === 'string') {
+					this.options.id = id;
+					this.options.media = {};
+				} else if(typeof id === 'object') {
+					this.options.id = '';
+					this.options.media = id;
+				} else {
+					this.options.id = '';
+					this.options.media = {};
+				}
 			}
 /*
 			if(transcript) {
@@ -85,31 +98,33 @@ var Transcript = (function(document, hyperaudio) {
 			if(this.target) {
 				this.target.innerHTML = '';
 
-				hyperaudio.api.getTranscript(this.options.id, function(success) {
-					if(success) {
-						self.target.innerHTML = this.transcript.content;
-						self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.id + '"'});
-					} else {
-						self.target.innerHTML = 'Problem with transcript URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
-						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.id + '"');
-					}
-					setVideo();
-				});
-/*
-				xhr({
-					url: this.options.src,
-					complete: function(event) {
-						self.target.innerHTML = this.responseText;
-						self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.src + '"'});
+				if(this.options.id) {
+					hyperaudio.api.getTranscript(this.options.id, function(success) {
+						if(success) {
+							self.target.innerHTML = this.transcript.content;
+							self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.id + '"'});
+						} else {
+							self.target.innerHTML = 'Problem with transcript URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
+							self._error(this.status + ' ' + this.statusText + ' : "' + self.options.id + '"');
+						}
 						setVideo();
-					},
-					error: function(event) {
-						self.target.innerHTML = 'Problem with transcript URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
-						self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
-						setVideo();
-					}
-				});
-*/
+					});
+
+				} else if(this.options.media.transcript) {
+					hyperaudio.xhr({
+						url: this.options.media.transcript,
+						complete: function(event) {
+							self.target.innerHTML = this.responseText;
+							self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.src + '"'});
+							setVideo();
+						},
+						error: function(event) {
+							self.target.innerHTML = 'Problem with transcript URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
+							self._error(this.status + ' ' + this.statusText + ' : "' + self.options.src + '"');
+							setVideo();
+						}
+					});
+				}
 			}
 		},
 
@@ -117,13 +132,18 @@ var Transcript = (function(document, hyperaudio) {
 			var self = this;
 
 			// Setup the player
-			if(this.options.player && hyperaudio.api.transcript) {
-				var hapi = hyperaudio.api,
-					path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename;
-				this.options.media = {
-					mp4: path,
-					webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
-				};
+			if(this.options.player) {
+
+				if(this.options.id && hyperaudio.api.transcript) {
+
+					var hapi = hyperaudio.api,
+						path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename;
+					this.options.media = {
+						mp4: path,
+						webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
+					};
+				}
+
 				this.options.player.load(this.options.media);
 				if(this.options.async) {
 					setTimeout(function() {
@@ -165,7 +185,11 @@ var Transcript = (function(document, hyperaudio) {
 					if(event.target.nodeName.toLowerCase() === opts.word) {
 						var tAttr = event.target.getAttribute(opts.timeAttr),
 							time = tAttr * opts.unit;
-						opts.player.currentTime(time);
+						if(opts.wordsPlay) {
+							opts.player.play(time);
+						} else {
+							opts.player.currentTime(time);
+						}
 					}
 				}, false);
 			}
@@ -184,12 +208,12 @@ var Transcript = (function(document, hyperaudio) {
 				// Destroy any existing WordSelect.
 				this.deselectorize();
 
-				this.textSelect = new WordSelect({
+				this.textSelect = new hyperaudio.WordSelect({
 					el: opts.target,
 					onDragStart: function(e) {
 						if(opts.stage) {
 							hyperaudio.addClass(opts.stage.target, opts.stage.options.dragdropClass);
-							var dragdrop = new DragDrop({
+							var dragdrop = new hyperaudio.DragDrop({
 								dropArea: opts.stage.target,
 								init: false,
 								onDrop: function(el) {

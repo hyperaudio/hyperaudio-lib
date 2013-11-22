@@ -106,3 +106,55 @@ p {
 	background: #ffc;
 	color: #a00;
 }
+
+.transcript .selected {
+	background: #C0E7A1 !important;
+	color: #111 !important;
+}
+
+.transcript a.last {
+	z-index: 2;
+}
+
+.transcript a.first,
+.transcript a.last {
+	cursor: move;
+}
+
+.transcript a.first:before {
+	font-family: 'fontello';
+	content: 'R';
+	color: #111;
+	font-size: 1.1em;
+	text-align: center;
+	line-height: 24px;
+	position: absolute;
+	width: 28px;
+	height: 24px;
+	background: #C0E7A1;
+	left: -2px;
+	top: -26px;
+	border-width: 2px 2px 0 2px;
+	border-color: #cee #fff #fff #fff;
+	border-style: solid;
+	text-shadow: 0 1px 0 #fff;
+}
+
+.transcript a.last:after {
+	font-family: 'fontello';
+	content: 'R';
+	color: #111;
+	font-size: 1.1em;
+	text-align: center;
+	line-height: 24px;
+	position: absolute;
+	width: 28px;
+	height: 24px;
+	background: #C0E7A1;
+	right: -2px;
+	bottom: -26px;
+	border-width: 0 2px 2px 2px;
+	border-color: #cee #fff #fff #fff;
+	border-style: solid;
+	text-shadow: 0 1px 0 #fff;
+}

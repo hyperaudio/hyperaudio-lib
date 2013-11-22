@@ -10,10 +10,14 @@
 
 <div id="wrapper">
 	<div id="source-video" class="transcript-video"></div>
+	<div id="target-stage" class="stage"></div> <!-- TMP -->
 	<div id="source-transcript" class="transcript"></div>
 </div>
 
+<script type="text/javascript" src="build/hyperaudio.js"></script>
+<!--
 <script type="text/javascript" src="../../build/hyperaudio.js"></script>
+-->
 
 <script type="text/javascript">
 
@@ -24,22 +28,20 @@
 			guiNative: true // custom gui in dev
 		});
 
-		var sourceVideo = document.querySelector('#source-video video');
-		var sourceUrl = "";
-
-		//Check for older browsers that don't support mp4
-
-		if (sourceVideo.canPlayType('video/mpeg')) {
-			sourceUrl = "http://hyperaud.io/video/internetindians.mp4";
-		}
-		else if (sourceVideo.canPlayType('video/webm')) {
-			sourceUrl = "http://hyperaud.io/video/internetindians.webm";
-		}
+		// TMP
+		var stage = HA.Stage({
+			target: "#target-stage"
+		});
 
 		var transcript = HA.Transcript({
 			target: "#source-transcript",
-			src: "/transcripts/ts-internetindians.htm",
-			video: sourceUrl,
+			media: {
+				transcript: "http://hyperaud.io/transcripts/ts-internetindians.htm",
+				// transcript: "/hyperaudio-dev/transcripts/ts-internetindians.htm",
+				mp4: "http://hyperaud.io/video/internetindians.mp4",
+				webm:"http://hyperaud.io/video/internetindians.webm"
+			},
+			stage: stage,
 			player: player
 		});
 	}
