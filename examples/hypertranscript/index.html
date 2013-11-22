@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Transcript demo</title>
+	<link rel="stylesheet" type="text/css" href="css/hyperaudio.transcript.css" />
+	<link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
+</head>
+<body>
+
+<div id="wrapper">
+	<div id="source-video" class="transcript-video"></div>
+	<div id="source-transcript" class="transcript"></div>
+</div>
+
+<script type="text/javascript" src="../../build/hyperaudio.js"></script>
+
+<script type="text/javascript">
+
+	window.onload = function(){
+
+		var player = HA.Player({
+			target: "#source-video",
+			guiNative: true // custom gui in dev
+		});
+
+		var sourceVideo = document.querySelector('#source-video video');
+		var sourceUrl = "";
+
+		//Check for older browsers that don't support mp4
+
+		if (sourceVideo.canPlayType('video/mpeg')) {
+			sourceUrl = "http://hyperaud.io/video/internetindians.mp4";
+		}
+		else if (sourceVideo.canPlayType('video/webm')) {
+			sourceUrl = "http://hyperaud.io/video/internetindians.webm";
+		}
+
+		var transcript = HA.Transcript({
+			target: "#source-transcript",
+			src: "/transcripts/ts-internetindians.htm",
+			video: sourceUrl,
+			player: player
+		});
+	}
+</script>
+</body>
+</html>
