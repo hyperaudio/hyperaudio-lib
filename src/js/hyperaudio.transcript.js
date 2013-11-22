@@ -19,6 +19,8 @@ var Transcript = (function(document, hyperaudio) {
 
 			media: {},
 
+			select: true, // Enables selection of the transcript
+
 			group: 'p', // Element type used to group paragraphs.
 			word: 'a', // Element type used per word.
 
@@ -176,7 +178,8 @@ var Transcript = (function(document, hyperaudio) {
 			var self = this,
 				opts = this.options;
 
-			if(opts.stage) {
+			// if(opts.stage) {
+			if(opts.select) {
 
 				// Destroy any existing WordSelect.
 				this.deselectorize();
@@ -184,28 +187,30 @@ var Transcript = (function(document, hyperaudio) {
 				this.textSelect = new WordSelect({
 					el: opts.target,
 					onDragStart: function(e) {
-						hyperaudio.addClass(opts.stage.target, opts.stage.options.dragdropClass);
-						var dragdrop = new DragDrop({
-							dropArea: opts.stage.target,
-							init: false,
-							onDrop: function(el) {
-								self.textSelect.clearSelection();
-								this.destroy();
+						if(opts.stage) {
+							hyperaudio.addClass(opts.stage.target, opts.stage.options.dragdropClass);
+							var dragdrop = new DragDrop({
+								dropArea: opts.stage.target,
+								init: false,
+								onDrop: function(el) {
+									self.textSelect.clearSelection();
+									this.destroy();
 
-								if ( !el ) {
-									return;
+									if ( !el ) {
+										return;
+									}
+
+									el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
+									el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
+									el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
+									el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
+									opts.stage.dropped(el);
 								}
+							});
 
-								el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
-								el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
-								el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
-								el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
-								opts.stage.dropped(el);
-							}
-						});
-
-						var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
-						dragdrop.init(html, e);
+							var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
+							dragdrop.init(html, e);
+						}
 					}
 				});
 				this.ready = true;
