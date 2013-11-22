@@ -1,78 +1,155 @@
 @font-face {
-	font-family: 'entypo';
-	src: url('../font/entypo.eot?26969370');
-	src: url('../font/entypo.eot?26969370#iefix') format('embedded-opentype'),
-		url('../font/entypo.woff?26969370') format('woff'),
-		url('../font/entypo.ttf?26969370') format('truetype'),
-		url('../font/entypo.svg?26969370#entypo') format('svg');
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'fontello';
+  src: url('../font/fontello.eot?1628630');
+  src: url('../font/fontello.eot?1628630#iefix') format('embedded-opentype'),
+       url('../font/fontello.woff?1628630') format('woff'),
+       url('../font/fontello.ttf?1628630') format('truetype'),
+       url('../font/fontello.svg?1628630#fontello') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 
-.hyperaudio-player-play:before,
-.hyperaudio-player-pause:before {
-	font-family: "entypo";
-	font-style: normal;
-	font-weight: normal;
-	speak: none;
+.hyperaudio-player-controls li:before {
+  font-family: "fontello";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
  
-	display: inline-block;
-	text-decoration: inherit;
-	width: 32px;
-	text-align: center;
-	/* opacity: .8; */
+  display: inline-block;
+  text-decoration: inherit;
+  text-align: center;
+  font-variant: normal;
+  text-transform: none;
 
-	/* For safety - reset parent styles, that can break glyph codes*/
-	font-variant: normal;
-	text-transform: none;
-
-	/* fix buttons height, for twitter bootstrap */
-	line-height: 1em;
-
-	/* Uncomment for 3D effect */
-	text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3);
+  display: block;
+  text-align: center;
 }
 
-.hyperaudio-player-play:before { content: '\25b6'; }
-.hyperaudio-player-pause:before { content: '\2016'; }
+.hyperaudio-player-play:before { content: 'q'; }
+.playing .hyperaudio-player-play:before { content: 'e'; }
+.hyperaudio-player-play.playing:before { content: 'e'; }
+.hyperaudio-player-prev:before { content: 't'; }
+.hyperaudio-player-next:before { content: 'r'; }
+.hyperaudio-player-fullscreen:before { content: 'p'; }
 
-.hyperaudio-player-play,
-.hyperaudio-player-pause {
-	color:#aaa;
-	cursor:pointer;
+.hyperaudio-player {
+	position: relative;
 }
 
-/* Taken care of in the player class
-.hyperaudio-player-pause {
-	display:none;
-}
-*/
-
-.hyperaudio-player-play:hover,
-.hyperaudio-player-pause:hover {
-	color:#ccc;
+.hyperaudio-player {
+	width: 480px;
 }
 
-.hyperaudio-player-container video {
+.hyperaudio-player:-webkit-full-screen { width: 100% }
+.hyperaudio-player:-moz-full-screen { width: 100% }
+.hyperaudio-player:-ms-full-screen { width: 100% }
+.hyperaudio-player:-o-full-screen { width: 100% }
+.hyperaudio-player:full-screen { width: 100% }
+
+.hyperaudio-player:-webkit-full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
+.hyperaudio-player:-moz-full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
+.hyperaudio-player:-ms-full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
+.hyperaudio-player:-o-full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
+.hyperaudio-player:full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
+
+.hyperaudio-player video {
 	width:100%;
 	height:100%;
 }
 
-.hyperaudio-player-gui {
-	position:absolute;
-	bottom:0;
-	left:0;
-	/* width:480px; */
-	width:32px;
-	height:32px;
-	font-size:16px;
-	line-height:32px;
-	/* background-color:#aaa; */
-	/* display:none; */
+.hyperaudio-player-gui * {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 }
 
-.hyperaudio-player-controls {
-	width:32px;
-	height:100%;
-	background-color:#666;
+.hyperaudio-player:hover .hyperaudio-player-gui {
+	opacity: 1;
 }
+
+.hyperaudio-player:-webkit-full-screen:hover .hyperaudio-player-gui { opacity: 0; }
+.hyperaudio-player:-moz-full-screen:hover .hyperaudio-player-gui { opacity: 0; }
+.hyperaudio-player:-ms-full-screen:hover .hyperaudio-player-gui { opacity: 0; }
+.hyperaudio-player:-o-full-screen:hover .hyperaudio-player-gui { opacity: 0; }
+.hyperaudio-player:full-screen:hover .hyperaudio-player-gui { opacity: 0; }
+
+.hyperaudio-player:-webkit-full-screen .hyperaudio-player-gui:hover { opacity: 1; }
+.hyperaudio-player:-moz-full-screen .hyperaudio-player-gui:hover { opacity: 1; }
+.hyperaudio-player:-ms-full-screen .hyperaudio-player-gui:hover { opacity: 1; }
+.hyperaudio-player:-o-full-screen .hyperaudio-player-gui:hover { opacity: 1; }
+.hyperaudio-player:full-screen .hyperaudio-player-gui:hover { opacity: 1; }
+
+.hyperaudio-player-gui {
+	position:absolute;
+	bottom:0px;
+	left:0px;
+	right: 0px;
+	height:48px;
+	font-size:16px;
+	line-height:48px;
+	opacity: 0;
+	-webkit-transition: 500ms opacity;
+	-moz-transition: 500ms opacity;
+	-ms-transition: 500ms opacity;
+	-o-transition: 500ms opacity;
+	transition: 500ms opacity;
+}
+
+/*.hyperaudio-player:-webkit-full-screen .hyperaudio-player-gui {
+	bottom: 10px;
+}*/
+
+.hyperaudio-player-controls {
+	display: block;
+	margin: 0 auto;
+	width:100%;
+	height:100%;
+	max-width: 768px;
+}
+
+.hyperaudio-player:-webkit-full-screen .hyperaudio-player-controls { border: 2px solid #000; border-bottom-width:0; }
+.hyperaudio-player:-moz-full-screen .hyperaudio-player-controls { border: 2px solid #000; border-bottom-width:0; }
+.hyperaudio-player:-ms-full-screen .hyperaudio-player-controls { border: 2px solid #000; border-bottom-width:0; }
+.hyperaudio-player:-o-full-screen .hyperaudio-player-controls { border: 2px solid #000; border-bottom-width:0; }
+.hyperaudio-player:full-screen .hyperaudio-player-controls { border: 2px solid #000; border-bottom-width:0; }
+
+.hyperaudio-player-controls li {
+	height: 100%;
+	display: block;
+	float: left;
+}
+
+.hyperaudio-player-play,
+.hyperaudio-player-prev,
+.hyperaudio-player-next,
+.hyperaudio-player-fullscreen {
+	color: #eee;
+	width: 10%;
+	background: #469659;
+	text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+	cursor: pointer;
+}
+
+.hyperaudio-player-play:hover,
+.hyperaudio-player-prev:hover,
+.hyperaudio-player-next:hover,
+.hyperaudio-player-fullscreen:hover {
+	color: #fff;
+}
+
+.hyperaudio-player-bar {
+	width: 60%;
+	background-color: rgba(0,0,0,0.5);
+}
+
+.hyperaudio-player-progress {
+	height: 100%;
+	width: 1%;
+	background: #387847;
+	border-right: 1px solid #000;
+}
+

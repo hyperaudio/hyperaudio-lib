@@ -74,9 +74,14 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this.target.appendChild(this.videoElem);
 
 				if(this.options.gui) {
-					this.addGUI();
-					this.addGUIListeners();
+					this.GUI = new hyperaudio.PlayerGUI({
+						player: this,
+
+						navigation: true,		// next/prev buttons
+						fullscreen: true		// fullscreen button
+					});
 				}
+
 				if(this.options.media.mp4) { // Assumes we have the webm
 					this.load();
 				}
@@ -84,63 +89,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this._error('Target not found : ' + this.options.target);
 			}
 		},
-		addGUI: function() {
-			var self = this;
-			if(this.target) {
-				this.gui = {
-					container: this.target, // To add a class to the player target
-					gui: document.createElement('div'),
-					controls: document.createElement('div'),
-					play: document.createElement('a'),
-					pause: document.createElement('a')
-				};
 
-				// Add a class to each element
-				hyperaudio.each(this.gui, function(name) {
-					hyperaudio.addClass(this, self.options.cssClassPrefix + name);
-				});
-
-				// Add listeners to controls
-				this.gui.play.addEventListener('click', function(e) {
-					e.preventDefault();
-					self.play();
-				}, false);
-				this.gui.pause.addEventListener('click', function(e) {
-					e.preventDefault();
-					self.pause();
-				}, false);
-/*
-				// Add listeners to the video element
-				this.videoElem.addEventListener('ended', function(e) {
-					self.gui.play.style.display = '';
-					self.gui.pause.style.display = 'none';
-				}, false);
-*/
-				// Hide the pause button
-				this.gui.pause.style.display = 'none';
-
-				// Build the GUI structure
-				this.gui.gui.appendChild(this.gui.controls);
-				this.gui.controls.appendChild(this.gui.play);
-				this.gui.controls.appendChild(this.gui.pause);
-				this.target.appendChild(this.gui.gui);
-			} else {
-				this._error('Target not found : ' + this.options.target);
-			}
-		},
-		addGUIListeners: function() {
-			var self = this;
-			if(this.gui) {
-				// Add listeners to the video element
-				this.videoElem.addEventListener('ended', function(e) {
-					self.gui.play.style.display = '';
-					self.gui.pause.style.display = 'none';
-				}, false);
-
-			} else {
-				this._error('GUI not used: gui = ' + this.options.gui);
-			}
-		},
 		load: function(media) {
 			var self = this;
 			if(media) {
@@ -181,17 +130,9 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 		play: function(time) {
-			if(this.gui) {
-				this.gui.play.style.display = 'none';
-				this.gui.pause.style.display = '';
-			}
 			this.currentTime(time, true);
 		},
 		pause: function(time) {
-			if(this.gui) {
-				this.gui.play.style.display = '';
-				this.gui.pause.style.display = 'none';
-			}
 			this.videoElem.pause();
 			this.currentTime(time);
 		},

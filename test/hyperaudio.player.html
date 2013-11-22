@@ -4,13 +4,6 @@
 	<meta charset="utf-8" />
 	<title>Player demo</title>
 	<link rel="stylesheet" type="text/css" href="../src/css/hyperaudio.player.css" />
-<style>
-.hyperaudio-player {
-	position:relative; /* The Player target must be relative or absolute - for the GUI CSS to work */
-	width:480px;
-	height:270px;
-}
-</style>
 </head>
 <body>
 
@@ -18,10 +11,12 @@
 
 <script type="text/javascript" src="../lib/popcorn.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.core.js"></script>
+<script type="text/javascript" src="../src/js/hyperaudio.player.gui.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.player.js"></script>
 <script type="text/javascript">
 
 	hyperaudio.register('Player', Player);
+	hyperaudio.register('PlayerGUI', PlayerGUI);
 
 	var player = hyperaudio.Player({
 		target: "#source-video",
@@ -33,5 +28,6 @@
 	});
 
 </script>
+
 </body>
 </html>
