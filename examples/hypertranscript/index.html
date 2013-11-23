@@ -14,7 +14,7 @@
 	<div id="source-transcript" class="transcript"></div>
 </div>
 
-<script type="text/javascript" src="../../build/hyperaudio.js"></script>
+<script type="text/javascript" src="build/hyperaudio.js"></script>
 
 <script type="text/javascript">
 
@@ -27,13 +27,20 @@
 			this.transcript = HA.Transcript({
 				target: "#source-transcript",
 				media: {
-					// transcript: "http://hyperaud.io/transcripts/ts-internetindians.htm",
-					transcript: "/hyperaudio-dev/transcripts/ts-internetindians.htm",
+					transcript: "http://hyperaud.io/transcripts/ts-internetindians.htm",
 					mp4: "http://hyperaud.io/video/internetindians.mp4",
 					webm:"http://hyperaud.io/video/internetindians.webm"
 				},
 				player: this.player
 			});
+			this.hint();
+		},
+		logTweet: function() {
+			var selection = this.transcript.getSelection();
+			console.log('logTweet: selection = %o', selection);
+		},
+		hint: function() {
+			console.log('Execute "ht.logTweet()" in the console to get selection information');
 		}
 	}
 

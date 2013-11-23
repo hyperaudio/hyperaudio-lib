@@ -249,6 +249,31 @@ var Transcript = (function(document, hyperaudio) {
 			delete this.textSelect;
 		},
 
+		getSelection: function() {
+			if(this.textSelect) {
+				var opts = this.options,
+					html = this.textSelect.getSelection(),
+					el = document.createElement('div'),
+					words, start, end;
+
+				el.innerHTML = html;
+				words = el.querySelectorAll(opts.word);
+
+				if(words.length) {
+					start = words[0].getAttribute(opts.timeAttr);
+					end = words[words.length - 1].getAttribute(opts.timeAttr);
+				}
+
+				// The end time is the start of the last word, so needs padding.
+				return {
+					text: el.textContent,
+					start: start,
+					end: end
+				};
+			}
+			return {};
+		},
+
 		enable: function() {
 			this.enabled = true;
 		},
