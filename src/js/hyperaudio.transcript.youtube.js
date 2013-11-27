@@ -25,7 +25,7 @@ var Transcript = (function(document, hyperaudio) {
 			timeAttr: 'data-m', // Attribute name that holds the timing information.
 			unit: 0.001, // Milliseconds.
 
-			async: true, // When true, some operations are delayed by a timeout.
+			async: false, // true, // When true, some operations are delayed by a timeout.
 
 			stage: null,
 			player: null
@@ -177,6 +177,8 @@ var Transcript = (function(document, hyperaudio) {
 					}
 				}, false);
 			}
+
+			opts.player.play(12);
 
 			this.selectorize();
 		},

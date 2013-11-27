@@ -99,6 +99,7 @@ span.code {
 <script type="text/javascript" src="../src/js/hyperaudio.core.js"></script>
 
 <script type="text/javascript" src="../src/js/hyperaudio.player.js"></script> <!-- Need for projector ATM -->
+<script type="text/javascript" src="../src/js/hyperaudio.player.gui.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.youtube.js"></script>
 
 <script type="text/javascript" src="../src/js/hyperaudio.transcript.youtube.js"></script> <!-- A hacked version to test -->
@@ -115,6 +116,7 @@ span.code {
 <script type="text/javascript">
 
 	hyperaudio.register('Player', Youtube); // Switched in youtube player
+	hyperaudio.register('PlayerGUI', PlayerGUI);
 	hyperaudio.register('Transcript', Transcript);
 	hyperaudio.register('Stage', Stage);
 	hyperaudio.register('Projector', Projector);
