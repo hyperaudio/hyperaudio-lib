@@ -13,9 +13,12 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			target: '#transcript-video', // The selector of element where the video is generated
 
 			media: {
+				youtube: '', // The URL of the Youtube video.
 				mp4: '', // The URL of the mp4 video.
 				webm:'' // The URL of the webm video.
 			},
+
+			// Types valid in a video element
 			mediaType: {
 				mp4: 'video/mp4', // The mp4 mime type.
 				webm:'video/webm' // The webm mime type.
@@ -24,14 +27,13 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			guiNative: false, // TMP during dev. Either we have a gui or we are chomeless.
 
 			gui: false, // True to add a gui
-			cssClassPrefix: 'hyperaudio-player-', // Prefix of the class added to the GUI created.
+			cssClass: 'hyperaudio-player', // Class added to the target for the GUI CSS. (should move to GUI)
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.videoElem = null;
-		this.sourceElem = null;
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 		this.gui = null;
@@ -39,8 +41,6 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		if(this.options.DEBUG) {
 			this._debug();
 		}
-
-		// Probably want a media object, instead of a single SRC
 
 		if(this.target) {
 			this.create();
@@ -52,14 +52,13 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 
 			if(this.target) {
+
+				// The (effect of the) next line should probably be moved into the GUI.
+				hyperaudio.addClass(this.target, this.options.cssClass);
+
 				this.videoElem = document.createElement('video');
 				this.videoElem.controls = this.options.guiNative; // TMP during dev. Either we have a gui or we are chomeless.
-/*
-				this.sourceElem = {
-					mp4: document.createElement('source'),
-					webm: document.createElement('source')
-				};
-*/
+
 				// Add listeners to the video element
 				this.videoElem.addEventListener('progress', function(e) {
 					if(this.readyState > 0) {
@@ -68,9 +67,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				}, false);
 
 				// Clear the target element and add the video
-				this.target.innerHTML = '';
-				// this.videoElem.appendChild(this.sourceElem.mp4);
-				// this.videoElem.appendChild(this.sourceElem.webm);
+				// this.target.innerHTML = '';
+				this.empty(this.target);
 				this.target.appendChild(this.videoElem);
 
 				if(this.options.gui) {
@@ -99,7 +97,6 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this.killPopcorn();
 
 				// Remove any old source elements
-				this.sourceElem = {};
 				while(this.videoElem.firstChild) {
 					this.videoElem.removeChild(this.videoElem.firstChild);
 				}
@@ -108,7 +105,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				hyperaudio.each(this.options.media, function(format, url) {
 					// Only create known formats, so we can add other info to the media object.
 					if(self.options.mediaType[format]) {
-						var source = self.sourceElem[format] = document.createElement('source');
+						var source = document.createElement('source');
 						source.setAttribute('type', self.options.mediaType[format]);
 						source.setAttribute('src', url); // Could use 'this' but less easy to read.
 						self.videoElem.appendChild(source);
@@ -130,6 +127,12 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			if(this.popcorn) {
 				this.popcorn.destroy();
 				delete this.popcorn;
+			}
+		},
+		empty: function(el) {
+			// Empties the element... Possibly better than el.innerHTML = '';
+			while(el && el.firstChild) {
+				el.removeChild(el.firstChild);
 			}
 		},
 		play: function(time) {
