@@ -36,7 +36,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		this.videoElem = null;
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
-		this.gui = null;
+
+		this.youtube = false; // A flag to indicate if the YT player being used.
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -56,20 +57,38 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				// The (effect of the) next line should probably be moved into the GUI.
 				hyperaudio.addClass(this.target, this.options.cssClass);
 
-				this.videoElem = document.createElement('video');
-				this.videoElem.controls = this.options.guiNative; // TMP during dev. Either we have a gui or we are chomeless.
+				this.wrapper = {
+					html: document.createElement('div'),
+					youtube: document.createElement('div')
+				};
+				hyperaudio.addClass(this.wrapper.html, this.options.cssClass + '-video-wrapper');
+				hyperaudio.addClass(this.wrapper.youtube, this.options.cssClass + '-youtube-wrapper');
+
+				this.solution = {
+					html: document.createElement('video'),
+					youtube: Popcorn.HTMLYouTubeVideoElement(this.wrapper.youtube)
+				}
+
+				// Default to a video element to start with
+				this.videoElem = this.solution.html;
+				this.youtube = false;
+				this.updateSolution();
+
+				this.solution.html.controls = this.options.guiNative; // TMP during dev. Either we have a gui or we are chomeless.
 
 				// Add listeners to the video element
-				this.videoElem.addEventListener('progress', function(e) {
+				this.solution.html.addEventListener('progress', function(e) {
 					if(this.readyState > 0) {
 						this.commandsIgnored = false;
 					}
 				}, false);
 
 				// Clear the target element and add the video
-				// this.target.innerHTML = '';
 				this.empty(this.target);
-				this.target.appendChild(this.videoElem);
+				this.wrapper.html.appendChild(this.solution.html);
+				// this.wrapper.youtube.appendChild(this.solution.youtube);
+				this.target.appendChild(this.wrapper.html);
+				this.target.appendChild(this.wrapper.youtube);
 
 				if(this.options.gui) {
 					this.GUI = new hyperaudio.PlayerGUI({
@@ -80,7 +99,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					});
 				}
 
-				if(this.options.media.mp4) { // Assumes we have the webm
+				if(this.options.media.youtube || this.options.media.mp4) { // Assumes we have the webm
 					this.load();
 				}
 			} else {
@@ -88,33 +107,75 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 
+		mediaDiff: function(media) {
+			for(var format in this.media) {
+				if(this.media[format] !== media[format]) {
+					return true;
+				}
+			}
+			return false;
+		},
+
+		updateSolution: function() {
+			var wrapper = this.wrapper,
+				cssClass = 'solution';
+
+			if(this.youtube) {
+				hyperaudio.removeClass(wrapper.html, cssClass);
+				hyperaudio.addClass(wrapper.youtube, cssClass);
+			} else {
+				hyperaudio.removeClass(wrapper.youtube, cssClass);
+				hyperaudio.addClass(wrapper.html, cssClass);
+			}
+		},
+
 		load: function(media) {
-			var self = this;
+			var self = this,
+				newMedia = this.mediaDiff(media);
+
 			if(media) {
 				this.options.media = media;
 			}
-			if(this.videoElem && typeof this.options.media === 'object') {
-				this.killPopcorn();
 
-				// Remove any old source elements
-				while(this.videoElem.firstChild) {
-					this.videoElem.removeChild(this.videoElem.firstChild);
-				}
+			if(this.target) {
 
-				// Setup to work with mp4 and webm property names. See options.
-				hyperaudio.each(this.options.media, function(format, url) {
-					// Only create known formats, so we can add other info to the media object.
-					if(self.options.mediaType[format]) {
-						var source = document.createElement('source');
-						source.setAttribute('type', self.options.mediaType[format]);
-						source.setAttribute('src', url); // Could use 'this' but less easy to read.
-						self.videoElem.appendChild(source);
+				if(newMedia || true) { // TMP - need to correct initial condition when media set in options!
+
+					this.killPopcorn();
+
+					console.log('media: %o', this.options.media);
+
+					if(this.options.media.youtube) {
+						// The YT element needs to be recreated while bugs in wrapper.
+						this.empty(this.wrapper.youtube);
+						this.solution.youtube = Popcorn.HTMLYouTubeVideoElement(this.wrapper.youtube);
+						this.solution.youtube.src = this.options.media.youtube + '&html5=1';
+						this.videoElem = this.solution.youtube;
+						this.youtube = true;
+						this.updateSolution();
+					} else {
+
+						this.empty(this.solution.html);
+
+						// Setup to work with mp4 and webm property names. See options.
+						hyperaudio.each(this.options.media, function(format, url) {
+							// Only create known formats, so we can add other info to the media object.
+							if(self.options.mediaType[format]) {
+								var source = document.createElement('source');
+								source.setAttribute('type', self.options.mediaType[format]);
+								source.setAttribute('src', url); // Could use 'this' but less easy to read.
+								self.solution.html.appendChild(source);
+							}
+						});
+
+						this.solution.html.load();
+						this.videoElem = this.solution.html;
+						this.youtube = false;
+						this.updateSolution();
 					}
-				});
 
-				this.videoElem.load();
-
-				this.initPopcorn();
+					this.initPopcorn();
+				}
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
@@ -136,17 +197,30 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 		play: function(time) {
-			this.currentTime(time, true);
+			if(this.youtube) {
+				this.popcorn.play(time);
+			} else {
+				this.currentTime(time, true);
+			}
 		},
 		pause: function(time) {
-			this.videoElem.pause();
-			this.currentTime(time);
+			if(this.youtube) {
+				this.popcorn.pause(time);
+			} else {
+				this.videoElem.pause();
+				this.currentTime(time);
+			}
 		},
 		currentTime: function(time, play) {
 			var self = this,
 				media = this.videoElem;
 
 			clearTimeout(this.timeout.currentTime);
+
+			if(this.youtube) {
+				this.popcorn.currentTime(time);
+				return;
+			}
 
 			if(typeof time === 'number' && !isNaN(time)) {
 
