@@ -10,11 +10,10 @@
 
 <div id="wrapper">
 	<div id="source-video" class="transcript-video"></div>
-	<div id="target-stage" class="stage"></div> <!-- TMP -->
 	<div id="source-transcript" class="transcript"></div>
 </div>
 
-<script type="text/javascript" src="build/hyperaudio.js"></script>
+<script type="text/javascript" src="../../build/hyperaudio.js"></script>
 
 <script type="text/javascript">
 
@@ -27,7 +26,7 @@
 			this.transcript = HA.Transcript({
 				target: "#source-transcript",
 				media: {
-					transcript: "http://hyperaud.io/transcripts/ts-internetindians.htm",
+					transcript: "transcripts/ts-internetindians.htm",
 					mp4: "http://hyperaud.io/video/internetindians.mp4",
 					webm:"http://hyperaud.io/video/internetindians.webm"
 				},
