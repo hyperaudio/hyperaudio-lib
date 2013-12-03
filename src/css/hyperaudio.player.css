@@ -41,11 +41,11 @@
 	height:270px;
 }
 
-.hyperaudio-player:-webkit-full-screen { width: 100% }
-.hyperaudio-player:-moz-full-screen { width: 100% }
-.hyperaudio-player:-ms-full-screen { width: 100% }
-.hyperaudio-player:-o-full-screen { width: 100% }
-.hyperaudio-player:full-screen { width: 100% }
+.hyperaudio-player:-webkit-full-screen { width:100%; height:100%; }
+.hyperaudio-player:-moz-full-screen { width:100%; height:100%; }
+.hyperaudio-player:-ms-full-screen { width:100%; height:100%; }
+.hyperaudio-player:-o-full-screen { width:100%; height:100%; }
+.hyperaudio-player:full-screen { width:100%; height:100%; }
 
 .hyperaudio-player:-webkit-full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
 .hyperaudio-player:-moz-full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
