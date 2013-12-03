@@ -28,6 +28,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 			gui: false, // True to add a gui
 			cssClass: 'hyperaudio-player', // Class added to the target for the GUI CSS. (should move to GUI)
+			solutionClass: 'solution', // Class added to the solution that is active.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
@@ -124,7 +125,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 		updateSolution: function() {
 			var wrapper = this.wrapper,
-				cssClass = 'solution';
+				cssClass = this.options.solutionClass;
 
 			if(this.youtube) {
 				hyperaudio.removeClass(wrapper.html, cssClass);
@@ -133,6 +134,17 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				hyperaudio.removeClass(wrapper.youtube, cssClass);
 				hyperaudio.addClass(wrapper.html, cssClass);
 			}
+		},
+
+		show: function() {
+			this.updateSolution();
+		},
+		hide: function() {
+			var wrapper = this.wrapper,
+				cssClass = this.options.solutionClass;
+
+			hyperaudio.removeClass(wrapper.html, cssClass);
+			hyperaudio.removeClass(wrapper.youtube, cssClass);
 		},
 
 		load: function(media) {

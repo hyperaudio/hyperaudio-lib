@@ -74,6 +74,20 @@
 			} else {
 				console.log('test.setMedia: Parameters out of bounds');
 			}
+		},
+		show: function(p) {
+			if(p < player.length) {
+				player[p].show();
+			} else {
+				console.log('test.show: Parameter out of bounds');
+			}
+		},
+		hide: function(p) {
+			if(p < player.length) {
+				player[p].hide();
+			} else {
+				console.log('test.hide: Parameter out of bounds');
+			}
 		}
 	};
 
