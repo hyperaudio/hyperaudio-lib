@@ -108,12 +108,18 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		mediaDiff: function(media) {
-			for(var format in this.media) {
-				if(this.media[format] !== media[format]) {
-					return true;
+			var diff = false;
+			if(media) {
+				for(var format in this.options.media) {
+					if(this.options.media[format] !== media[format]) {
+						diff = true;
+						break;
+					}
 				}
+			} else {
+				diff = true;
 			}
-			return false;
+			return diff;
 		},
 
 		updateSolution: function() {
@@ -139,7 +145,9 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 			if(this.target) {
 
-				if(newMedia || true) { // TMP - need to correct initial condition when media set in options!
+				if(newMedia) {
+
+					this.pause(); // Pause the player, otherwise switching solution may leave 1 playing while hidden.
 
 					this.killPopcorn();
 
