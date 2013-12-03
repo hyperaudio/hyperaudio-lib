@@ -38,6 +38,7 @@
 
 .hyperaudio-player {
 	width: 480px;
+	height:270px;
 }
 
 .hyperaudio-player:-webkit-full-screen { width: 100% }
@@ -51,6 +52,19 @@
 .hyperaudio-player:-ms-full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
 .hyperaudio-player:-o-full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
 .hyperaudio-player:full-screen .hyperaudio-player-fullscreen:before { content: ']'; }
+
+.hyperaudio-player-video-wrapper,
+.hyperaudio-player-youtube-wrapper {
+	position:absolute;
+	top:0;
+	left:-9999px;
+	width:100%;
+	height:100%;
+}
+
+.hyperaudio-player .solution {
+	left:0;
+}
 
 .hyperaudio-player video {
 	width:100%;
