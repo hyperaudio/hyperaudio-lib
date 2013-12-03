@@ -40,6 +40,8 @@ var Tap = (function (window, document, hyperaudio) {
 
 		_start: function (e) {
 			if ( e.touches && e.touches.length > 1 ) return;
+			
+			e.preventDefault();
 
 			var point = e.touches ? e.touches[0] : e;
 			
