@@ -147,6 +147,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				if(newMedia) {
 
+					this.pause(); // Pause the player, otherwise switching solution may leave 1 playing while hidden.
+
 					this.killPopcorn();
 
 					console.log('media: %o', this.options.media);
