@@ -80,19 +80,16 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				if(this.options.gui) {
 
-					// The (effect of the) next line should probably be moved into the GUI.
-					hyperaudio.addClass(this.target, this.player[0].options.cssClass);
-
 					this.videoElem = this.player[0].videoElem; // TMP hack during dev
 
-					if(this.options.gui) {
-						this.GUI = new hyperaudio.PlayerGUI({
-							player: this,
+					this.GUI = new hyperaudio.PlayerGUI({
+						player: this,
 
-							navigation: true,		// next/prev buttons
-							fullscreen: true		// fullscreen button
-						});
-					}
+						navigation: true,		// next/prev buttons
+						fullscreen: true,		// fullscreen button
+
+						cssClass: this.player[0].options.cssClass
+					});
 				}
 				if(this.options.media) {
 					this.load();

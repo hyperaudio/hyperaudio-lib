@@ -27,7 +27,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			guiNative: false, // TMP during dev. Either we have a gui or we are chomeless.
 
 			gui: false, // True to add a gui
-			cssClass: 'hyperaudio-player', // Class added to the target for the GUI CSS. (should move to GUI)
+			cssClass: 'hyperaudio-player', // Class added to the target for the GUI CSS. (passed to GUI and Projector)
 			solutionClass: 'solution', // Class added to the solution that is active.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -93,14 +93,13 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 				if(this.options.gui) {
 
-					// The (effect of the) next line should probably be moved into the GUI.
-					hyperaudio.addClass(this.target, this.options.cssClass);
-
 					this.GUI = new hyperaudio.PlayerGUI({
 						player: this,
 
 						navigation: true,		// next/prev buttons
-						fullscreen: true		// fullscreen button
+						fullscreen: true,		// fullscreen button
+
+						cssClass: this.options.cssClass // Pass in the option, so only have to define it in this class
 					});
 				}
 

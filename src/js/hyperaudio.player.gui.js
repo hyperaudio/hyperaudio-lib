@@ -4,14 +4,16 @@
  *
  */
 
-var PlayerGUI = (function (window, document) {
+var PlayerGUI = (function (window, document, hyperaudio) {
 
 	function PlayerGUI (options) {
 		this.options = hyperaudio.extend({}, {
 			player:			null,	// mandatory instance to the player
 
 			navigation:		true,	// whether or not to display the next/prev buttons
-			fullscreen:		true	// display the fullscreen button
+			fullscreen:		true,	// display the fullscreen button
+
+			cssClass: 'hyperaudio-player' // Class added to the target for the GUI CSS. (should move to GUI)
 		}, options);
 
 		if ( !this.options.player ) {
@@ -22,25 +24,27 @@ var PlayerGUI = (function (window, document) {
 
 		var buttonCount = 1;
 
+		var cssClass = this.options.cssClass; // For mini opto
+
 		this.wrapperElem = document.createElement('div');
-		this.wrapperElem.className = 'hyperaudio-player-gui';
+		this.wrapperElem.className = cssClass + '-gui';
 		this.controlsElem = document.createElement('ul');
-		this.controlsElem.className = 'hyperaudio-player-controls';
+		this.controlsElem.className = cssClass + '-controls';
 
 		this.wrapperElem.appendChild(this.controlsElem);
 
 		// PLAY button
 		this.playButton = document.createElement('li');
-		this.playButton.className = 'hyperaudio-player-play';
+		this.playButton.className = cssClass + '-play';
 		this.controlsElem.appendChild(this.playButton);
 		this.playButton.addEventListener('click', this.play.bind(this), false);
 
 		// PREV/NEXT buttons
 		if ( this.options.navigation ) {
 			this.prevButton = document.createElement('li');
-			this.prevButton.className = 'hyperaudio-player-prev';
+			this.prevButton.className = cssClass + '-prev';
 			this.nextButton = document.createElement('li');
-			this.nextButton.className = 'hyperaudio-player-next';
+			this.nextButton.className = cssClass + '-next';
 
 			this.controlsElem.appendChild(this.prevButton);
 			this.controlsElem.appendChild(this.nextButton);
@@ -52,9 +56,9 @@ var PlayerGUI = (function (window, document) {
 
 		// PROGRESS BAR
 		this.progressBarElem = document.createElement('li');
-		this.progressBarElem.className = 'hyperaudio-player-bar';
+		this.progressBarElem.className = cssClass + '-bar';
 		this.progressIndicator = document.createElement('div');
-		this.progressIndicator.className = 'hyperaudio-player-progress';
+		this.progressIndicator.className = cssClass + '-progress';
 		this.progressIndicator.style.width = '0%';
 
 		this.progressBarElem.appendChild(this.progressIndicator);
@@ -68,7 +72,7 @@ var PlayerGUI = (function (window, document) {
 		// FULLSCREEN Button
 		if ( this.options.fullscreen ) {
 			this.fullscreenButton = document.createElement('li');
-			this.fullscreenButton.className = 'hyperaudio-player-fullscreen';
+			this.fullscreenButton.className = cssClass + '-fullscreen';
 			this.controlsElem.appendChild(this.fullscreenButton);
 
 			this.fullscreenButton.addEventListener('click', this.fullscreen.bind(this), false);
@@ -78,6 +82,7 @@ var PlayerGUI = (function (window, document) {
 
 		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
 
+		hyperaudio.addClass(this.player.target, cssClass);
 		this.player.target.appendChild(this.wrapperElem);
 	}
 
@@ -168,4 +173,4 @@ var PlayerGUI = (function (window, document) {
 
 	return PlayerGUI;
 
-})(window, document);
+})(window, document, hyperaudio);
