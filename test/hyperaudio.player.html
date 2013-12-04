@@ -4,14 +4,23 @@
 	<meta charset="utf-8" />
 	<title>Player demo</title>
 	<link rel="stylesheet" type="text/css" href="../src/css/hyperaudio.player.css" />
+<style>
+/* Usually the page CSS will position the player div with position:absolute;
+ * Here we need to use relative (or absolute) so that the children's CSS aligns correctly.
+ */
+.player-on-page {
+	position: relative;
+}
+
+</style>
 </head>
 <body>
 
-<div id="test-video-1"></div>
+<div id="test-video-1" class="player-on-page"></div>
 
-<div id="test-video-2"></div>
+<div id="test-video-2" class="player-on-page"></div>
 
-<div id="test-video-3"></div>
+<div id="test-video-3" class="player-on-page"></div>
 
 <script type="text/javascript" src="../lib/popcorn.js"></script>
 <script type="text/javascript" src="../lib/popcorn._MediaElementProto.js"></script>

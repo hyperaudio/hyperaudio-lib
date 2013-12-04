@@ -33,10 +33,6 @@
 .hyperaudio-player-fullscreen:before { content: 'p'; }
 
 .hyperaudio-player {
-	position: relative;
-}
-
-.hyperaudio-player {
 	width: 480px;
 	height:270px;
 }

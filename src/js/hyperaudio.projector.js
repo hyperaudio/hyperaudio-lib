@@ -79,8 +79,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.addHelpers();
 
 				if(this.options.gui) {
-					// Add the default Player GUI
-					// Player.prototype.addGUI.call(this);
+
+					// The (effect of the) next line should probably be moved into the GUI.
+					hyperaudio.addClass(this.target, this.player[0].options.cssClass);
 
 					this.videoElem = this.player[0].videoElem; // TMP hack during dev
 

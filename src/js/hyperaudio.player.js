@@ -58,9 +58,6 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 			if(this.target) {
 
-				// The (effect of the) next line should probably be moved into the GUI.
-				hyperaudio.addClass(this.target, this.options.cssClass);
-
 				this.wrapper = {
 					html: document.createElement('div'),
 					youtube: document.createElement('div')
@@ -95,6 +92,10 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this.target.appendChild(this.wrapper.youtube);
 
 				if(this.options.gui) {
+
+					// The (effect of the) next line should probably be moved into the GUI.
+					hyperaudio.addClass(this.target, this.options.cssClass);
+
 					this.GUI = new hyperaudio.PlayerGUI({
 						player: this,
 
