@@ -88,6 +88,18 @@
 			} else {
 				console.log('test.hide: Parameter out of bounds');
 			}
+		},
+		handler: function(event) {
+			console.log(Date.now() + ': this=%o', this);
+			console.log(Date.now() + ': event.target=%o', event.target);
+			console.log(Date.now() + ': player[1].solution.youtube=' + player[1].solution.youtube.currentTime);
+			console.log(Date.now() + ': timeupdate event - currentTime=' + event.target.currentTime);
+		},
+		add: function(p) {
+			this.handlers = player[p].addEventListener('timeupdate', this.handler);
+		},
+		remove: function(p) {
+			player[p].removeEventListener('timeupdate', this.handlers);
 		}
 	};
 

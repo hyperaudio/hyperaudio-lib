@@ -40,6 +40,9 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 		this.youtube = false; // A flag to indicate if the YT player being used.
 
+		// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+		this.ytFix = [];
+
 		if(this.options.DEBUG) {
 			this._debug();
 		}
@@ -163,7 +166,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 					this.killPopcorn();
 
-					console.log('media: %o', this.options.media);
+					// console.log('media: %o', this.options.media);
 
 					if(this.options.media.youtube) {
 						// The YT element needs to be recreated while bugs in wrapper.
@@ -173,6 +176,9 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 						this.videoElem = this.solution.youtube;
 						this.youtube = true;
 						this.updateSolution();
+
+						// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+						this._ytFixListeners();
 					} else {
 
 						this.empty(this.solution.html);
@@ -269,6 +275,54 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				if(play) {
 					media.play();
 				}
+			}
+		},
+		addEventListener: function(type, handler) {
+			var self = this,
+				handlers;
+
+			if(this.solution && typeof type === 'string' && typeof handler === 'function') {
+				handlers = {
+					html: function(event) {
+						if(!self.youtube) {
+							handler(event);
+						}
+					},
+					youtube: function(event) {
+						if(self.youtube) {
+							handler(event);
+						}
+					}
+				}
+				this.solution.html.addEventListener(type, handlers.html, false);
+				this.solution.youtube.addEventListener(type, handlers.youtube, false);
+
+				// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+				this.ytFix.push({
+					type: type,
+					handler: handlers.youtube
+				});
+			}
+
+			return handlers;
+		},
+		removeEventListener: function(type, handlers) {
+			if(this.solution && typeof type === 'string' && typeof handlers === 'object') {
+				this.solution.html.removeEventListener(type, handlers.html, false);
+				this.solution.youtube.removeEventListener(type, handlers.youtube, false);
+
+				// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+				for(var i=0, l=this.ytFix.length; i<l; i++) {
+					if(this.ytFix[i].type === type && this.ytFix[i].handler === handlers.youtube) {
+						this.ytFix.splice(i, 1);
+					}
+				}
+			}
+		},
+		_ytFixListeners: function() {
+			// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+			for(var i=0, l=this.ytFix.length; i<l; i++) {
+				this.solution.youtube.addEventListener(this.ytFix[i].type, this.ytFix[i].handler, false);
 			}
 		}
 	};

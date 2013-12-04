@@ -70,7 +70,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						target: player
 					});
 
-					this.player[i].videoElem.addEventListener('timeupdate', manager, false);
+					// this.player[i].videoElem.addEventListener('timeupdate', manager, false);
+					this.player[i].addEventListener('timeupdate', manager);
 
 					this.target.appendChild(player);
 				}
