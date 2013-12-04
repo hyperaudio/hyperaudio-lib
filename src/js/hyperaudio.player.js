@@ -68,7 +68,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this.solution = {
 					html: document.createElement('video'),
 					youtube: Popcorn.HTMLYouTubeVideoElement(this.wrapper.youtube)
-				}
+				};
 
 				// Default to a video element to start with
 				this.videoElem = this.solution.html;

@@ -19,6 +19,8 @@ module.exports = function(grunt) {
 
 						// The Popcorn lib and plugins
 						'lib/popcorn.js',
+						'lib/popcorn._MediaElementProto.js',
+						'lib/popcorn.HTMLYouTubeVideoElement.js',
 						'src/js/popcorn.transcript.js',
 
 						// Top closure wrapper
