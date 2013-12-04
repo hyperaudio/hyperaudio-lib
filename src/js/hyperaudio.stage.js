@@ -19,8 +19,10 @@ var Stage = (function(document, hyperaudio) {
 			type: 'beta',
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
+			transAttr: 'data-trans', // Attribute name that holds the transcript URL. [optional if ID not present]
 			mp4Attr: 'data-mp4', // Attribute name that holds the transcript mp4 URL.
 			webmAttr: 'data-webm', // Attribute name that holds the transcript webm URL.
+			ytAttr: 'data-yt', // Attribute name that holds the transcript youtube URL.
 			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
 			dragdropClass: 'dragdrop',

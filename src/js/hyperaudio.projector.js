@@ -213,6 +213,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.current.media = {
 				mp4: this.current.section.getAttribute(this.stage.options.mp4Attr),
 				webm: this.current.section.getAttribute(this.stage.options.webmAttr),
+				youtube: this.current.section.getAttribute(this.stage.options.ytAttr)
 			};
 
 			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);

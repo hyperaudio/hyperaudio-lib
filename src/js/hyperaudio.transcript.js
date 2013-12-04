@@ -75,16 +75,7 @@ var Transcript = (function(document, hyperaudio) {
 					this.options.media = {};
 				}
 			}
-/*
-			if(transcript) {
-				if(transcript.src) {
-					this.options.src = transcript.src;
-				}
-				if(transcript.video) {
-					this.options.video = transcript.video;
-				}
-			}
-*/
+
 			var setVideo = function() {
 				if(self.options.async) {
 					setTimeout(function() {
@@ -236,9 +227,19 @@ var Transcript = (function(document, hyperaudio) {
 										return;
 									}
 
-									el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
-									el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
-									el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
+									if(opts.id) {
+										el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
+									}
+									if(opts.media.transcript) {
+										el.setAttribute(opts.stage.options.transAttr, opts.media.transcript); // Pass the transcript url
+									}
+									if(opts.media.mp4) {
+										el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
+										el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
+									}
+									if(opts.media.youtube) {
+										el.setAttribute(opts.stage.options.ytAttr, opts.media.youtube); // Pass the transcript youtube url
+									}
 									el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
 									opts.stage.dropped(el);
 								}
