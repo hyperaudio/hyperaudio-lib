@@ -21,7 +21,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			unit: 0.001, // Unit used if not given in section attr of stage.
 
 			gui: true, // True to add a gui.
-			cssClassPrefix: 'hyperaudio-player-', // (See Player.addGUI) Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
@@ -33,7 +32,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.player = [];
 		this.media = [];
 		this.current = {};
-		this.gui = null;
 
 		// State Flags
 		this.paused = true;
@@ -152,17 +150,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this._pause();
 		},
 		_play: function(time) {
-			if(this.gui) {
-				this.gui.play.style.display = 'none';
-				this.gui.pause.style.display = '';
-			}
 			this.player[0].play(time);
 		},
 		_pause: function(time) {
-			if(this.gui) {
-				this.gui.play.style.display = '';
-				this.gui.pause.style.display = 'none';
-			}
 			this.player[0].pause(time);
 		},
 		currentTime: function(time, play) {
