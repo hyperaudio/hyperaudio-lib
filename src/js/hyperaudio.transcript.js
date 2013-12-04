@@ -138,10 +138,22 @@ var Transcript = (function(document, hyperaudio) {
 
 					var hapi = hyperaudio.api,
 						path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename;
-					this.options.media = {
-						mp4: path,
-						webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
-					};
+
+					// TMP - Have two types of media definition in the API during its dev.
+					// In final API, the URLs will be given explicitly - similar to the 1st clause.
+
+					if(hapi.transcript.media.meta.media) {
+						this.options.media = {
+							youtube: hapi.transcript.media.meta.media.youtube.url,
+							mp4: hapi.transcript.media.meta.media.mp4.url,
+							webm: hapi.transcript.media.meta.media.webm.url
+						};
+					} else {
+						this.options.media = {
+							mp4: path,
+							webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
+						};
+					}
 				}
 
 				this.options.player.load(this.options.media);
