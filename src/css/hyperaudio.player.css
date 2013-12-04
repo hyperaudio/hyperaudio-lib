@@ -1,16 +1,16 @@
 @font-face {
-  font-family: 'fontello';
-  src: url('../font/fontello.eot?1628630');
-  src: url('../font/fontello.eot?1628630#iefix') format('embedded-opentype'),
-       url('../font/fontello.woff?1628630') format('woff'),
-       url('../font/fontello.ttf?1628630') format('truetype'),
-       url('../font/fontello.svg?1628630#fontello') format('svg');
+  font-family: 'player';
+  src: url('../font/player.eot?1628630');
+  src: url('../font/player.eot?1628630#iefix') format('embedded-opentype'),
+       url('../font/player.woff?1628630') format('woff'),
+       url('../font/player.ttf?1628630') format('truetype'),
+       url('../font/player.svg?1628630#player') format('svg');
   font-weight: normal;
   font-style: normal;
 }
 
 .hyperaudio-player-controls li:before {
-  font-family: "fontello";
+  font-family: "player";
   font-style: normal;
   font-weight: normal;
   speak: none;
