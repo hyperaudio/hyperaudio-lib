@@ -20,6 +20,12 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			return false;
 		}
 
+		this.status = {
+			paused: true,
+			currentTime: 0,
+			duration: 0
+		};
+
 		this.player = this.options.player;
 
 		var buttonCount = 1;
@@ -67,7 +73,7 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 		this.progressBarElem.addEventListener('mousedown', this.startSeeking.bind(this), false);
 		this.progressBarElem.addEventListener('mousemove', this.seek.bind(this), false);
 		document.addEventListener('mouseup', this.stopSeeking.bind(this), false);
-		this.player.videoElem.addEventListener('timeupdate', this.timeUpdate.bind(this), false);
+		// this.player.videoElem.addEventListener('timeupdate', this.timeUpdate.bind(this), false);
 
 		// FULLSCREEN Button
 		if ( this.options.fullscreen ) {
@@ -87,8 +93,21 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 	}
 
 	PlayerGUI.prototype = {
+
+		setStatus: function(status) {
+			// Extending, since the new status might not hold all values.
+			hyperaudio.extend(this.status, status);
+
+			console.log('paused:' + this.status.paused + ' | currentTime:' + this.status.currentTime + ' | duration:' + this.status.duration);
+
+			this.timeUpdate();
+			// could also update the play pause button?
+			// - the playing to paused state is covered by timeUpdate()
+		},
+
 		play: function () {
-			if ( !this.player.videoElem.paused ) {
+			// if ( !this.player.videoElem.paused ) {
+			if ( !this.status.paused ) {
 				hyperaudio.removeClass(this.wrapperElem, 'playing');
 				this.player.pause();
 				return;
@@ -97,7 +116,7 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			this.player.play();
 			hyperaudio.addClass(this.wrapperElem, 'playing');
 		},
-
+/*
 		timeUpdate: function () {
 			var video = this.player.videoElem;
 			var percentage = Math.round(100 * video.currentTime / video.duration);
@@ -105,6 +124,19 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			this.progressIndicator.style.width = percentage + '%';
 			
 			if ( this.player.videoElem.paused ) {
+				hyperaudio.removeClass(this.wrapperElem, 'playing');
+			}
+		},
+*/
+		timeUpdate: function () {
+
+			// need a check for duration > 0 in here
+
+			var percentage = Math.round(100 * this.status.currentTime / this.status.duration);
+
+			this.progressIndicator.style.width = percentage + '%';
+			
+			if ( this.status.paused ) {
 				hyperaudio.removeClass(this.wrapperElem, 'playing');
 			}
 		},
@@ -166,8 +198,11 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			var width = rect.width;
 			var x = e.pageX - rect.left;
 			
-			var current = Math.round(this.player.videoElem.duration / width * x);
-			this.player.currentTime(current, !this.player.videoElem.paused);
+			// var current = Math.round(this.player.videoElem.duration / width * x);
+			// this.player.currentTime(current, !this.player.videoElem.paused);
+
+			var current = Math.round(this.status.duration / width * x);
+			this.player.currentTime(current);
 		}
 	};
 

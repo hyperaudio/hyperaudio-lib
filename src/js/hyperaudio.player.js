@@ -101,6 +101,20 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 						cssClass: this.options.cssClass // Pass in the option, so only have to define it in this class
 					});
+
+					var handler = function(event) {
+						var video = self.videoElem;
+						self.GUI.setStatus({
+							paused: video.paused,
+							currentTime: video.currentTime,
+							duration: video.duration
+						});
+					};
+
+					this.addEventListener('timeupdate', handler);
+					this.addEventListener('play', handler);
+					this.addEventListener('pause', handler);
+					this.addEventListener('ended', handler);
 				}
 
 				if(this.options.media.youtube || this.options.media.mp4) { // Assumes we have the webm
