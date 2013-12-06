@@ -304,7 +304,11 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					},
 					youtube: function(event) {
 						if(self.youtube) {
-							// handler.call(this, event); // Bugged YT wrapper context. Reported https://bugzilla.mozilla.org/show_bug.cgi?id=946293
+							// Bugged YT wrapper context.
+							// Reported https://bugzilla.mozilla.org/show_bug.cgi?id=946293
+							// handler.call(this, event); // Bugged
+							// this and event.target point at the document
+							// event.detail.target points at the youtube target element
 							handler.call(self.solution.youtube, event);
 						}
 					}

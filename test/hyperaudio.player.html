@@ -99,10 +99,12 @@
 			}
 		},
 		handler: function(event) {
+			console.log(Date.now() + ': event=%o', event);
 			console.log(Date.now() + ': this=%o', this);
 			console.log(Date.now() + ': event.target=%o', event.target);
-			console.log(Date.now() + ': player[1].solution.youtube=' + player[1].solution.youtube.currentTime);
-			console.log(Date.now() + ': timeupdate event - currentTime=' + event.target.currentTime);
+			console.log(Date.now() + ': event.detail=%o', event.detail);
+			console.log(Date.now() + ': this.currentTime=' + this.currentTime);
+			console.log(Date.now() + ': event.target.currentTime=' + event.target.currentTime);
 		},
 		add: function(p) {
 			this.handlers = player[p].addEventListener('timeupdate', this.handler);
