@@ -59,7 +59,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				// Making it work with a single player. Will dev 2 later.
 
 				var manager = function(event) {
-					self.manager(event);
+					// Passing the event context to manager
+					//  * The YouTube event object is useless.
+					//  * The YouTube event context was fixed in the Player class.
+					self.manager(this, event);
 				};
 
 				for(var i = 0; i < this.options.players; i++ ) {
@@ -78,7 +81,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				if(this.options.gui) {
 
-					this.videoElem = this.player[0].videoElem; // TMP hack during dev
+					// this.videoElem = this.player[0].videoElem; // TMP hack during dev
 
 					this.GUI = new hyperaudio.PlayerGUI({
 						player: this,
@@ -117,7 +120,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.media[0] = this.options.media;
 
 			if(this.player[0]) {
-				hyperaudio.addClass(this.player[0].videoElem, 'active');
+				hyperaudio.addClass(this.player[0].videoElem, 'active'); // Think this should affect the Player TARGET
 				this.player[0].load(this.media[0]);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
@@ -125,7 +128,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 		play: function() {
 
-			// ATM, we always play fromm the start.
+			// ATM, we always play from the start.
 
 			if(this.stage && this.stage.target) {
 				// Get the staged contents wrapper elem
@@ -219,11 +222,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			return weHaveMoreVideo;
 		},
-		manager: function(event) {
+		manager: function(videoElem, event) {
 			var self = this;
 
 			if(!this.paused) {
-				if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
+				// if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
+				if(videoElem.currentTime > this.current.end + this.options.tPadding) {
 					// Goto the next section
 
 					// Want to refactor the setCurrent() code... Maybe make it more like nextCurrent or something like that.
