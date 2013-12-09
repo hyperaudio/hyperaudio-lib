@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.16 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th December 2013 12:26:48 */
+/*! hyperaudio v0.2.0 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th December 2013 17:25:33 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -5335,7 +5335,8 @@ var api = (function(hyperaudio) {
 	return {
 		init: function(options) {
 			this.options = hyperaudio.extend({
-				api: 'http://data.hyperaud.io/',
+				// api: 'http://data.hyperaud.io/',
+				api: 'http://api.hyperaud.io/',
 				transcripts: 'transcripts/',
 				mixes: 'mixes/',
 				whoami: 'whoami/'
@@ -5587,6 +5588,9 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 
+		// List of the media types, used to check for changes in media.
+		this.mediaTypes = "youtube mp4 webm";
+
 		this.youtube = false; // A flag to indicate if the YT player being used.
 
 		// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
@@ -5681,14 +5685,15 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		mediaDiff: function(media) {
-			var diff = false;
+			var self = this,
+				diff = false;
 			if(media) {
-				for(var format in this.options.media) {
-					if(this.options.media[format] !== media[format]) {
+				hyperaudio.each(this.mediaTypes.split(/\s+/g), function() {
+					if(self.options.media[this] !== media[this]) {
 						diff = true;
-						break;
+						return false; // exit each
 					}
-				}
+				});
 			} else {
 				diff = true;
 			}
@@ -6249,6 +6254,7 @@ var Transcript = (function(document, hyperaudio) {
 
 				if(this.options.id && hyperaudio.api.transcript) {
 
+/*
 					var hapi = hyperaudio.api,
 						path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename;
 
@@ -6266,6 +6272,17 @@ var Transcript = (function(document, hyperaudio) {
 							mp4: path,
 							webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
 						};
+					}
+*/
+
+					var media = hyperaudio.api.transcript.media;
+
+					this.options.media = {};
+
+					if(media && media.source) {
+						for(var type in media.source) {
+							this.options.media[type] = media.source[type].url;
+						}
 					}
 				}
 
