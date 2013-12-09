@@ -38,6 +38,9 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		this.timeout = {};
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 
+		// List of the media types, used to check for changes in media.
+		this.mediaTypes = "youtube mp4 webm";
+
 		this.youtube = false; // A flag to indicate if the YT player being used.
 
 		// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
@@ -132,14 +135,15 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		mediaDiff: function(media) {
-			var diff = false;
+			var self = this,
+				diff = false;
 			if(media) {
-				for(var format in this.options.media) {
-					if(this.options.media[format] !== media[format]) {
+				hyperaudio.each(this.mediaTypes.split(/\s+/g), function() {
+					if(self.options.media[this] !== media[this]) {
 						diff = true;
-						break;
+						return false; // exit each
 					}
-				}
+				});
 			} else {
 				diff = true;
 			}
