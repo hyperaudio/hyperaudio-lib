@@ -138,6 +138,8 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			
 			if ( this.status.paused ) {
 				hyperaudio.removeClass(this.wrapperElem, 'playing');
+			} else {
+				hyperaudio.addClass(this.wrapperElem, 'playing');
 			}
 		},
 
