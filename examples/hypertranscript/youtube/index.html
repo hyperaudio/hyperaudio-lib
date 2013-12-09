@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>HyperTranscript demo</title>
+	<link rel="stylesheet" type="text/css" href="css/hyperaudio.transcript.css" />
+	<link rel="stylesheet" type="text/css" href="css/hyperaudio.player.css" />
+	<link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
+</head>
+<body>
+
+<div id="wrapper">
+	<div id="source-video" class="transcript-video"></div>
+	<div id="source-transcript" class="transcript"></div>
+</div>
+
+<script type="text/javascript" src="../../../build/hyperaudio.js"></script>
+
+<script type="text/javascript">
+
+	var ht = {
+		init: function() {
+			this.player = HA.Player({
+				target: "#source-video",
+				gui: {
+					navigation: false,
+					fullscreen: false
+				}
+			});
+			this.transcript = HA.Transcript({
+				target: "#source-transcript",
+				media: {
+					transcript: "transcripts/ts-obama-responds.htm",
+					youtube: "http://www.youtube.com/watch?v=etaCHoeJXCI"
+				},
+				player: this.player
+			});
+			this.hint();
+		},
+		logTweet: function() {
+			var selection = this.transcript.getSelection();
+			console.log('logTweet: selection = %o', selection);
+		},
+		hint: function() {
+			console.log('Execute "ht.logTweet()" in the console to get selection information');
+		}
+	}
+
+	window.onload = function(){
+		ht.init();
+	}
+</script>
+</body>
+</html>
