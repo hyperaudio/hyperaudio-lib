@@ -86,7 +86,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.GUI = new hyperaudio.PlayerGUI({
 						player: this,
 
-						navigation: true,		// next/prev buttons
+						navigation: false,		// next/prev buttons
 						fullscreen: true,		// fullscreen button
 
 						cssClass: this.player[0].options.cssClass

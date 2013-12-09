@@ -99,8 +99,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					var guiOptions = {
 						player: this,
 
-						navigation: true,		// next/prev buttons
-						fullscreen: true,		// fullscreen button
+						navigation: false,		// next/prev buttons
+						fullscreen: false,		// fullscreen button
 
 						cssClass: this.options.cssClass // Pass in the option, so only have to define it in this class
 					};
