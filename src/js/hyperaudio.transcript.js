@@ -127,6 +127,7 @@ var Transcript = (function(document, hyperaudio) {
 
 				if(this.options.id && hyperaudio.api.transcript) {
 
+/*
 					var hapi = hyperaudio.api,
 						path = hapi.options.api + hapi.transcript.media.owner + '/' + hapi.transcript.media.meta.filename;
 
@@ -144,6 +145,17 @@ var Transcript = (function(document, hyperaudio) {
 							mp4: path,
 							webm: path.replace(/\.mp4$/, '.webm') // Huge assumption!
 						};
+					}
+*/
+
+					var media = hyperaudio.api.transcript.media;
+
+					this.options.media = {};
+
+					if(media && media.source) {
+						for(var type in media.source) {
+							this.options.media[type] = media.source[type].url;
+						}
 					}
 				}
 
