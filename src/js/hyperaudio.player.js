@@ -102,7 +102,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 						cssClass: this.options.cssClass // Pass in the option, so only have to define it in this class
 					};
 
-					if(typeof this.options.gui === ' object') {
+					if(typeof this.options.gui === 'object') {
 						hyperaudio.extend(guiOptions, this.options.gui);
 					}
 

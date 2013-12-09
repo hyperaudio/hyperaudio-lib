@@ -22,8 +22,10 @@
 		init: function() {
 			this.player = HA.Player({
 				target: "#source-video",
-				gui: true
-				// guiNative: true // custom gui in dev
+				gui: {
+					navigation: false,
+					fullscreen: false
+				}
 			});
 			this.transcript = HA.Transcript({
 				target: "#source-transcript",
