@@ -318,7 +318,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 							handler.call(self.solution.youtube, event);
 						}
 					}
-				}
+				};
 				this.solution.html.addEventListener(type, handlers.html, false);
 				this.solution.youtube.addEventListener(type, handlers.youtube, false);
 

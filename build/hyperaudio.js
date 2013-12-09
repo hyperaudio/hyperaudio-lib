@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.13 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 4th December 2013 11:49:12 */
+/*! hyperaudio v0.1.14 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th December 2013 12:04:31 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -5575,8 +5575,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 			guiNative: false, // TMP during dev. Either we have a gui or we are chomeless.
 
-			gui: false, // True to add a gui
-			cssClass: 'hyperaudio-player', // Class added to the target for the GUI CSS. (should move to GUI)
+			gui: false, // True to add a gui, or Object to pass GUI options.
+			cssClass: 'hyperaudio-player', // Class added to the target for the GUI CSS. (passed to GUI and Projector)
 			solutionClass: 'solution', // Class added to the solution that is active.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -5588,6 +5588,9 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 
 		this.youtube = false; // A flag to indicate if the YT player being used.
+
+		// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+		this.ytFix = [];
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -5603,9 +5606,6 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 
 			if(this.target) {
-
-				// The (effect of the) next line should probably be moved into the GUI.
-				hyperaudio.addClass(this.target, this.options.cssClass);
 
 				this.wrapper = {
 					html: document.createElement('div'),
@@ -5641,12 +5641,35 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				this.target.appendChild(this.wrapper.youtube);
 
 				if(this.options.gui) {
-					this.GUI = new hyperaudio.PlayerGUI({
+
+					var guiOptions = {
 						player: this,
 
 						navigation: true,		// next/prev buttons
-						fullscreen: true		// fullscreen button
-					});
+						fullscreen: true,		// fullscreen button
+
+						cssClass: this.options.cssClass // Pass in the option, so only have to define it in this class
+					};
+
+					if(typeof this.options.gui === ' object') {
+						hyperaudio.extend(guiOptions, this.options.gui);
+					}
+
+					this.GUI = new hyperaudio.PlayerGUI(guiOptions);
+
+					var handler = function(event) {
+						var video = self.videoElem;
+						self.GUI.setStatus({
+							paused: video.paused,
+							currentTime: video.currentTime,
+							duration: video.duration
+						});
+					};
+
+					this.addEventListener('timeupdate', handler);
+					this.addEventListener('play', handler);
+					this.addEventListener('pause', handler);
+					this.addEventListener('ended', handler);
 				}
 
 				if(this.options.media.youtube || this.options.media.mp4) { // Assumes we have the webm
@@ -5712,7 +5735,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 					this.killPopcorn();
 
-					console.log('media: %o', this.options.media);
+					// console.log('media: %o', this.options.media);
 
 					if(this.options.media.youtube) {
 						// The YT element needs to be recreated while bugs in wrapper.
@@ -5722,6 +5745,9 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 						this.videoElem = this.solution.youtube;
 						this.youtube = true;
 						this.updateSolution();
+
+						// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+						this._ytFixListeners();
 					} else {
 
 						this.empty(this.solution.html);
@@ -5819,6 +5845,59 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					media.play();
 				}
 			}
+		},
+		addEventListener: function(type, handler) {
+			var self = this,
+				handlers;
+
+			if(this.solution && typeof type === 'string' && typeof handler === 'function') {
+				handlers = {
+					html: function(event) {
+						if(!self.youtube) {
+							handler.call(this, event);
+						}
+					},
+					youtube: function(event) {
+						if(self.youtube) {
+							// Bugged YT wrapper context.
+							// Reported https://bugzilla.mozilla.org/show_bug.cgi?id=946293
+							// handler.call(this, event); // Bugged
+							// this and event.target point at the document
+							// event.detail.target points at the youtube target element
+							handler.call(self.solution.youtube, event);
+						}
+					}
+				};
+				this.solution.html.addEventListener(type, handlers.html, false);
+				this.solution.youtube.addEventListener(type, handlers.youtube, false);
+
+				// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+				this.ytFix.push({
+					type: type,
+					handler: handlers.youtube
+				});
+			}
+
+			return handlers;
+		},
+		removeEventListener: function(type, handlers) {
+			if(this.solution && typeof type === 'string' && typeof handlers === 'object') {
+				this.solution.html.removeEventListener(type, handlers.html, false);
+				this.solution.youtube.removeEventListener(type, handlers.youtube, false);
+
+				// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+				for(var i=0, l=this.ytFix.length; i<l; i++) {
+					if(this.ytFix[i].type === type && this.ytFix[i].handler === handlers.youtube) {
+						this.ytFix.splice(i, 1);
+					}
+				}
+			}
+		},
+		_ytFixListeners: function() {
+			// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
+			for(var i=0, l=this.ytFix.length; i<l; i++) {
+				this.solution.youtube.addEventListener(this.ytFix[i].type, this.ytFix[i].handler, false);
+			}
 		}
 	};
 
@@ -5832,86 +5911,110 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
  *
  */
 
-var PlayerGUI = (function (window, document) {
+var PlayerGUI = (function (window, document, hyperaudio) {
 
 	function PlayerGUI (options) {
-	this.options = hyperaudio.extend({}, {
-		player:			null,	// mandatory instance to the player
+		this.options = hyperaudio.extend({}, {
+			player:			null,	// mandatory instance to the player
 
-		navigation:		true,	// whether or not to display the next/prev buttons
-		fullscreen:		true	// display the fullscreen button
-	}, options);
+			navigation:		true,	// whether or not to display the next/prev buttons
+			fullscreen:		true,	// display the fullscreen button
 
-	if ( !this.options.player ) {
-		return false;
-	}
+			cssClass: 'hyperaudio-player' // Class added to the target for the GUI CSS. (should move to GUI)
+		}, options);
 
-	this.player = this.options.player;
+		if ( !this.options.player ) {
+			return false;
+		}
 
-	var buttonCount = 1;
+		this.status = {
+			paused: true,
+			currentTime: 0,
+			duration: 0
+		};
 
-	this.wrapperElem = document.createElement('div');
-	this.wrapperElem.className = 'hyperaudio-player-gui';
-	this.controlsElem = document.createElement('ul');
-	this.controlsElem.className = 'hyperaudio-player-controls';
+		this.player = this.options.player;
 
-	this.wrapperElem.appendChild(this.controlsElem);
+		var buttonCount = 1;
 
-	// PLAY button
-	this.playButton = document.createElement('li');
-	this.playButton.className = 'hyperaudio-player-play';
-	this.controlsElem.appendChild(this.playButton);
-	this.playButton.addEventListener('click', this.play.bind(this), false);
+		var cssClass = this.options.cssClass; // For mini opto
 
-	// PREV/NEXT buttons
-	if ( this.options.navigation ) {
-		this.prevButton = document.createElement('li');
-		this.prevButton.className = 'hyperaudio-player-prev';
-		this.nextButton = document.createElement('li');
-		this.nextButton.className = 'hyperaudio-player-next';
+		this.wrapperElem = document.createElement('div');
+		this.wrapperElem.className = cssClass + '-gui';
+		this.controlsElem = document.createElement('ul');
+		this.controlsElem.className = cssClass + '-controls';
 
-		this.controlsElem.appendChild(this.prevButton);
-		this.controlsElem.appendChild(this.nextButton);
+		this.wrapperElem.appendChild(this.controlsElem);
 
-		//this.prevButton.addEventListener('click', this.prev.bind(this), false);
-		//this.nextButton.addEventListener('click', this.next.bind(this), false);
-		buttonCount += 2;
-	}
+		// PLAY button
+		this.playButton = document.createElement('li');
+		this.playButton.className = cssClass + '-play';
+		this.controlsElem.appendChild(this.playButton);
+		this.playButton.addEventListener('click', this.play.bind(this), false);
 
-	// PROGRESS BAR
-	this.progressBarElem = document.createElement('li');
-	this.progressBarElem.className = 'hyperaudio-player-bar';
-	this.progressIndicator = document.createElement('div');
-	this.progressIndicator.className = 'hyperaudio-player-progress';
-	this.progressIndicator.style.width = '0%';
+		// PREV/NEXT buttons
+		if ( this.options.navigation ) {
+			this.prevButton = document.createElement('li');
+			this.prevButton.className = cssClass + '-prev';
+			this.nextButton = document.createElement('li');
+			this.nextButton.className = cssClass + '-next';
 
-	this.progressBarElem.appendChild(this.progressIndicator);
-	this.controlsElem.appendChild(this.progressBarElem);
+			this.controlsElem.appendChild(this.prevButton);
+			this.controlsElem.appendChild(this.nextButton);
 
-	this.progressBarElem.addEventListener('mousedown', this.startSeeking.bind(this), false);
-	this.progressBarElem.addEventListener('mousemove', this.seek.bind(this), false);
-	document.addEventListener('mouseup', this.stopSeeking.bind(this), false);
-	this.player.videoElem.addEventListener('timeupdate', this.timeUpdate.bind(this), false);
+			//this.prevButton.addEventListener('click', this.prev.bind(this), false);
+			//this.nextButton.addEventListener('click', this.next.bind(this), false);
+			buttonCount += 2;
+		}
 
-	// FULLSCREEN Button
-	if ( this.options.fullscreen ) {
-		this.fullscreenButton = document.createElement('li');
-		this.fullscreenButton.className = 'hyperaudio-player-fullscreen';
-		this.controlsElem.appendChild(this.fullscreenButton);
+		// PROGRESS BAR
+		this.progressBarElem = document.createElement('li');
+		this.progressBarElem.className = cssClass + '-bar';
+		this.progressIndicator = document.createElement('div');
+		this.progressIndicator.className = cssClass + '-progress';
+		this.progressIndicator.style.width = '0%';
 
-		this.fullscreenButton.addEventListener('click', this.fullscreen.bind(this), false);
+		this.progressBarElem.appendChild(this.progressIndicator);
+		this.controlsElem.appendChild(this.progressBarElem);
 
-		buttonCount += 1;
-	}
+		this.progressBarElem.addEventListener('mousedown', this.startSeeking.bind(this), false);
+		this.progressBarElem.addEventListener('mousemove', this.seek.bind(this), false);
+		document.addEventListener('mouseup', this.stopSeeking.bind(this), false);
+		// this.player.videoElem.addEventListener('timeupdate', this.timeUpdate.bind(this), false);
 
-	this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
+		// FULLSCREEN Button
+		if ( this.options.fullscreen ) {
+			this.fullscreenButton = document.createElement('li');
+			this.fullscreenButton.className = cssClass + '-fullscreen';
+			this.controlsElem.appendChild(this.fullscreenButton);
 
-	this.player.target.appendChild(this.wrapperElem);
+			this.fullscreenButton.addEventListener('click', this.fullscreen.bind(this), false);
+
+			buttonCount += 1;
+		}
+
+		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
+
+		hyperaudio.addClass(this.player.target, cssClass);
+		this.player.target.appendChild(this.wrapperElem);
 	}
 
 	PlayerGUI.prototype = {
+
+		setStatus: function(status) {
+			// Extending, since the new status might not hold all values.
+			hyperaudio.extend(this.status, status);
+
+			console.log('paused:' + this.status.paused + ' | currentTime:' + this.status.currentTime + ' | duration:' + this.status.duration);
+
+			this.timeUpdate();
+			// could also update the play pause button?
+			// - the playing to paused state is covered by timeUpdate()
+		},
+
 		play: function () {
-			if ( !this.player.videoElem.paused ) {
+			// if ( !this.player.videoElem.paused ) {
+			if ( !this.status.paused ) {
 				hyperaudio.removeClass(this.wrapperElem, 'playing');
 				this.player.pause();
 				return;
@@ -5920,52 +6023,67 @@ var PlayerGUI = (function (window, document) {
 			this.player.play();
 			hyperaudio.addClass(this.wrapperElem, 'playing');
 		},
-
+/*
 		timeUpdate: function () {
 			var video = this.player.videoElem;
-		var percentage = Math.round(100 * video.currentTime / video.duration);
+			var percentage = Math.round(100 * video.currentTime / video.duration);
 
-		this.progressIndicator.style.width = percentage + '%';
-		
-		if ( this.player.videoElem.paused ) {
-			hyperaudio.removeClass(this.wrapperElem, 'playing');
-		}
+			this.progressIndicator.style.width = percentage + '%';
+			
+			if ( this.player.videoElem.paused ) {
+				hyperaudio.removeClass(this.wrapperElem, 'playing');
+			}
+		},
+*/
+		timeUpdate: function () {
+
+			// need a check for duration > 0 in here
+
+			var percentage = Math.round(100 * this.status.currentTime / this.status.duration);
+
+			this.progressIndicator.style.width = percentage + '%';
+			
+			if ( this.status.paused ) {
+				hyperaudio.removeClass(this.wrapperElem, 'playing');
+			} else {
+				hyperaudio.addClass(this.wrapperElem, 'playing');
+			}
 		},
 
 		fullscreen: function () {
-		if ( !this._isFullscreen() ) {
-			this._requestFullScreen();
-			return;
-		}
+			if ( !this._isFullscreen() ) {
+				this._requestFullScreen();
+				return;
+			}
 
-		this._cancelFullScreen();
+			this._cancelFullScreen();
 		},
 
-	_requestFullScreen: function () {
-		if (this.player.target.requestFullScreen) {
-			this.player.target.requestFullScreen();
-		} else if (this.player.target.mozRequestFullScreen) {
-			this.player.target.mozRequestFullScreen();
-		} else if (this.player.target.webkitRequestFullScreen) {
-			this.player.target.webkitRequestFullScreen();
-		}
-	},
+		_requestFullScreen: function () {
+			if (this.player.target.requestFullScreen) {
+				this.player.target.requestFullScreen();
+			} else if (this.player.target.mozRequestFullScreen) {
+				this.player.target.mozRequestFullScreen();
+			} else if (this.player.target.webkitRequestFullScreen) {
+				this.player.target.webkitRequestFullScreen();
+			}
+		},
 
-	_cancelFullScreen: function () {
-		if (document.exitFullscreen) {
-			document.exitFullscreen();
-		} else if (document.mozCancelFullScreen) {
-			document.mozCancelFullScreen();
-		} else if (document.webkitExitFullscreen) {
-			document.webkitExitFullscreen();
-		} else if (document.webkitCancelFullScreen) {
-			document.webkitCancelFullScreen();	
-		}
-	},
+		_cancelFullScreen: function () {
+			if (document.exitFullscreen) {
+				document.exitFullscreen();
+			} else if (document.mozCancelFullScreen) {
+				document.mozCancelFullScreen();
+			} else if (document.webkitExitFullscreen) {
+				document.webkitExitFullscreen();
+			} else if (document.webkitCancelFullScreen) {
+				document.webkitCancelFullScreen();	
+			}
+		},
 
-	_isFullscreen: function () {
-		return !!(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement || document.msFullscreenElement || false);
-	},
+		_isFullscreen: function () {
+			return !!(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement || document.msFullscreenElement || false);
+		},
 
 		startSeeking: function (e) {
 			this.seeking = true;
@@ -5989,14 +6107,18 @@ var PlayerGUI = (function (window, document) {
 			var width = rect.width;
 			var x = e.pageX - rect.left;
 			
-			var current = Math.round(this.player.videoElem.duration / width * x);
-			this.player.currentTime(current, !this.player.videoElem.paused);
+			// var current = Math.round(this.player.videoElem.duration / width * x);
+			// this.player.currentTime(current, !this.player.videoElem.paused);
+
+			var current = Math.round(this.status.duration / width * x);
+			this.player.currentTime(current);
 		}
 	};
 
 	return PlayerGUI;
 
-})(window, document);
+})(window, document, hyperaudio);
+
 
 /* Transcript
  *
@@ -6075,16 +6197,7 @@ var Transcript = (function(document, hyperaudio) {
 					this.options.media = {};
 				}
 			}
-/*
-			if(transcript) {
-				if(transcript.src) {
-					this.options.src = transcript.src;
-				}
-				if(transcript.video) {
-					this.options.video = transcript.video;
-				}
-			}
-*/
+
 			var setVideo = function() {
 				if(self.options.async) {
 					setTimeout(function() {
@@ -6236,9 +6349,19 @@ var Transcript = (function(document, hyperaudio) {
 										return;
 									}
 
-									el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
-									el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
-									el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
+									if(opts.id) {
+										el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
+									}
+									if(opts.media.transcript) {
+										el.setAttribute(opts.stage.options.transAttr, opts.media.transcript); // Pass the transcript url
+									}
+									if(opts.media.mp4) {
+										el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
+										el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
+									}
+									if(opts.media.youtube) {
+										el.setAttribute(opts.stage.options.ytAttr, opts.media.youtube); // Pass the transcript youtube url
+									}
 									el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
 									opts.stage.dropped(el);
 								}
@@ -6319,8 +6442,10 @@ var Stage = (function(document, hyperaudio) {
 			type: 'beta',
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
+			transAttr: 'data-trans', // Attribute name that holds the transcript URL. [optional if ID not present]
 			mp4Attr: 'data-mp4', // Attribute name that holds the transcript mp4 URL.
 			webmAttr: 'data-webm', // Attribute name that holds the transcript webm URL.
+			ytAttr: 'data-yt', // Attribute name that holds the transcript youtube URL.
 			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
 			dragdropClass: 'dragdrop',
@@ -6546,7 +6671,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			unit: 0.001, // Unit used if not given in section attr of stage.
 
 			gui: true, // True to add a gui.
-			cssClassPrefix: 'hyperaudio-player-', // (See Player.addGUI) Prefix of the class added to the GUI created.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
 
@@ -6558,7 +6682,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.player = [];
 		this.media = [];
 		this.current = {};
-		this.gui = null;
 
 		// State Flags
 		this.paused = true;
@@ -6586,7 +6709,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				// Making it work with a single player. Will dev 2 later.
 
 				var manager = function(event) {
-					self.manager(event);
+					// Passing the event context to manager
+					//  * The YouTube event object is useless.
+					//  * The YouTube event context was fixed in the Player class.
+					self.manager(this, event);
 				};
 
 				for(var i = 0; i < this.options.players; i++ ) {
@@ -6595,7 +6721,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						target: player
 					});
 
-					this.player[i].videoElem.addEventListener('timeupdate', manager, false);
+					// this.player[i].videoElem.addEventListener('timeupdate', manager, false);
+					this.player[i].addEventListener('timeupdate', manager);
 
 					this.target.appendChild(player);
 				}
@@ -6603,19 +6730,17 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.addHelpers();
 
 				if(this.options.gui) {
-					// Add the default Player GUI
-					// Player.prototype.addGUI.call(this);
 
-					this.videoElem = this.player[0].videoElem; // TMP hack during dev
+					// this.videoElem = this.player[0].videoElem; // TMP hack during dev
 
-					if(this.options.gui) {
-						this.GUI = new hyperaudio.PlayerGUI({
-							player: this,
+					this.GUI = new hyperaudio.PlayerGUI({
+						player: this,
 
-							navigation: true,		// next/prev buttons
-							fullscreen: true		// fullscreen button
-						});
-					}
+						navigation: true,		// next/prev buttons
+						fullscreen: true,		// fullscreen button
+
+						cssClass: this.player[0].options.cssClass
+					});
 				}
 				if(this.options.media) {
 					this.load();
@@ -6645,7 +6770,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.media[0] = this.options.media;
 
 			if(this.player[0]) {
-				hyperaudio.addClass(this.player[0].videoElem, 'active');
+				hyperaudio.addClass(this.player[0].videoElem, 'active'); // Think this should affect the Player TARGET
 				this.player[0].load(this.media[0]);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
@@ -6653,7 +6778,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 		play: function() {
 
-			// ATM, we always play fromm the start.
+			// ATM, we always play from the start.
 
 			if(this.stage && this.stage.target) {
 				// Get the staged contents wrapper elem
@@ -6678,17 +6803,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this._pause();
 		},
 		_play: function(time) {
-			if(this.gui) {
-				this.gui.play.style.display = 'none';
-				this.gui.pause.style.display = '';
-			}
 			this.player[0].play(time);
 		},
 		_pause: function(time) {
-			if(this.gui) {
-				this.gui.play.style.display = '';
-				this.gui.pause.style.display = 'none';
-			}
 			this.player[0].pause(time);
 		},
 		currentTime: function(time, play) {
@@ -6738,6 +6855,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.current.media = {
 				mp4: this.current.section.getAttribute(this.stage.options.mp4Attr),
 				webm: this.current.section.getAttribute(this.stage.options.webmAttr),
+				youtube: this.current.section.getAttribute(this.stage.options.ytAttr)
 			};
 
 			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);
@@ -6754,11 +6872,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			return weHaveMoreVideo;
 		},
-		manager: function(event) {
+		manager: function(videoElem, event) {
 			var self = this;
 
 			if(!this.paused) {
-				if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
+				// if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
+				if(videoElem.currentTime > this.current.end + this.options.tPadding) {
 					// Goto the next section
 
 					// Want to refactor the setCurrent() code... Maybe make it more like nextCurrent or something like that.
