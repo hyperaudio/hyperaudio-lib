@@ -43,6 +43,7 @@ p {
 }
 
 .transcript-video {
+	position:relative; /* The GUI needs a relative or absolute reference */
 	width:480px;
 	height:270px;
 	margin-left: auto;
@@ -53,11 +54,12 @@ p {
 /* Following rule only required when native controls being used.
  * The Player CSS deals with this when its GUI is inserted.
  */
+/*
 .transcript-video video{
 	width:100%;
 	height:100%;
 }
-
+*/
 .transcript {
 	position: absolute;
 	top: 300px;
