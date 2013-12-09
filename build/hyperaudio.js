@@ -1,4 +1,4 @@
-/*! hyperaudio v0.1.15 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th December 2013 12:10:36 */
+/*! hyperaudio v0.1.16 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th December 2013 12:26:48 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6173,7 +6173,7 @@ var Transcript = (function(document, hyperaudio) {
 		}
 
 		// If we have the info, kick things off
-		if(this.options.id || this.options.media.mp4) {
+		if(this.options.id || this.options.media.youtube || this.options.media.mp4) {
 			this.load();
 		}
 	}

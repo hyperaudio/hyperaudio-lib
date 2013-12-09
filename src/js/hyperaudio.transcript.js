@@ -51,7 +51,7 @@ var Transcript = (function(document, hyperaudio) {
 		}
 
 		// If we have the info, kick things off
-		if(this.options.id || this.options.media.mp4) {
+		if(this.options.id || this.options.media.youtube || this.options.media.mp4) {
 			this.load();
 		}
 	}
