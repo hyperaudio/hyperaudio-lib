@@ -1,4 +1,4 @@
-/*! hyperaudio v0.2.0 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th December 2013 17:25:33 */
+/*! hyperaudio v0.2.1 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 9th December 2013 19:04:15 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -5649,8 +5649,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					var guiOptions = {
 						player: this,
 
-						navigation: true,		// next/prev buttons
-						fullscreen: true,		// fullscreen button
+						navigation: false,		// next/prev buttons
+						fullscreen: false,		// fullscreen button
 
 						cssClass: this.options.cssClass // Pass in the option, so only have to define it in this class
 					};
@@ -6753,7 +6753,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.GUI = new hyperaudio.PlayerGUI({
 						player: this,
 
-						navigation: true,		// next/prev buttons
+						navigation: false,		// next/prev buttons
 						fullscreen: true,		// fullscreen button
 
 						cssClass: this.player[0].options.cssClass
