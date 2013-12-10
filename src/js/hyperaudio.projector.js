@@ -16,7 +16,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			tPadding: 1, // (Seconds) Time added to end word timings.
 
-			players: 1, // Number of Players to use. Mobile: 1, Desktop: 2.
+			players: 2, // Number of Players to use. Mobile: 1, Desktop: 2.
 
 			unit: 0.001, // Unit used if not given in section attr of stage.
 
@@ -32,6 +32,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.player = [];
 		this.media = [];
 		this.current = {};
+
+		this.activePlayer = -1; // Since it gets +1 before 1st use.
+		// this.nextPlayer = this.options.players > 1 ? 1 : 0;
 
 		// State Flags
 		this.paused = true;
@@ -57,16 +60,35 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(this.target) {
 
 				// Making it work with a single player. Will dev 2 later.
-
+/*
 				var manager = function(event) {
 					// Passing the event context to manager
 					//  * The YouTube event object is useless.
 					//  * The YouTube event context was fixed in the Player class.
 					self.manager(this, event);
 				};
-
+*/
 				for(var i = 0; i < this.options.players; i++ ) {
+
+					console.log('Create: i='+i);
+
+					var manager = (function(idx) {
+
+						console.log('Create: idx='+idx);
+
+						return function(event) {
+							console.log('activePlayer='+self.activePlayer+' | idx='+idx);
+							// Passing the event context to manager
+							//  * The YouTube event object is useless.
+							//  * The YouTube event context was fixed in the Player class.
+							if(self.activePlayer === idx) {
+								self.manager(this, event);
+							}
+						};
+					})(i);
+
 					var player = document.createElement('div');
+					hyperaudio.addClass(player, 'hyperaudio-projector');
 					this.player[i] = hyperaudio.Player({
 						target: player
 					});
@@ -111,14 +133,25 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 		load: function(media) {
 			var self = this;
+
+			// This is old DNA from the Player?
 			if(media) {
 				this.options.media = media;
 			}
-			this.media[0] = this.options.media;
 
-			if(this.player[0]) {
-				hyperaudio.addClass(this.player[0].videoElem, 'active'); // Think this should affect the Player TARGET
-				this.player[0].load(this.media[0]);
+			this.activePlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
+
+			// This is old DNA from the Player?
+			this.media[this.activePlayer] = this.options.media;
+
+			for(var i=0; i < this.player.length; i++) {
+				hyperaudio.removeClass(this.player[i].target, 'active');
+			}
+
+			if(this.player[this.activePlayer]) {
+				// hyperaudio.addClass(this.player[0].videoElem, 'active'); // Think this should affect the Player TARGET
+				hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
+				this.player[this.activePlayer].load(this.media[this.activePlayer]);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
@@ -150,13 +183,16 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this._pause();
 		},
 		_play: function(time) {
-			this.player[0].play(time);
+			// this.player[0].play(time);
+			this.player[this.activePlayer].play(time);
 		},
 		_pause: function(time) {
-			this.player[0].pause(time);
+			// this.player[0].pause(time);
+			this.player[this.activePlayer].pause(time);
 		},
 		currentTime: function(time, play) {
-			this.player[0].currentTime(time, play);
+			// this.player[0].currentTime(time, play);
+			this.player[this.activePlayer].currentTime(time, play);
 		},
 		setCurrent: function(index) {
 			var weHaveMoreVideo = false,

@@ -98,7 +98,7 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			// Extending, since the new status might not hold all values.
 			hyperaudio.extend(this.status, status);
 
-			console.log('paused:' + this.status.paused + ' | currentTime:' + this.status.currentTime + ' | duration:' + this.status.duration);
+			// console.log('paused:' + this.status.paused + ' | currentTime:' + this.status.currentTime + ' | duration:' + this.status.duration);
 
 			this.timeUpdate();
 			// could also update the play pause button?
