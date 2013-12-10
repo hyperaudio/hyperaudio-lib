@@ -71,7 +71,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						target: player
 					});
 
-					// this.player[i].videoElem.addEventListener('timeupdate', manager, false);
 					this.player[i].addEventListener('timeupdate', manager);
 
 					this.target.appendChild(player);
@@ -80,8 +79,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.addHelpers();
 
 				if(this.options.gui) {
-
-					// this.videoElem = this.player[0].videoElem; // TMP hack during dev
 
 					this.GUI = new hyperaudio.PlayerGUI({
 						player: this,
@@ -241,6 +238,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this._pause();
 					}
 				}
+			}
+
+			// Will need to be calculating the currentTime on the fly and the duration calcuated at the start and on changes to stage.
+			if(this.options.gui) {
+				this.GUI.setStatus({
+					paused: this.paused,
+					currentTime: 42,
+					duration: 69
+				});
 			}
 		}
 	};
