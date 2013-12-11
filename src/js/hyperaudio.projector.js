@@ -158,7 +158,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
 
 				// Get the sections
-				this.current.sections = this.stageArticle.getElementsByTagName('section');
+				this.current.sections = this.stageArticle.getElementsByTagName('section'); // old way
+				this.stageSections = this.stageArticle.getElementsByTagName('section');
 
 				this.setCurrent(0);
 
@@ -187,7 +188,44 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			// this.player[0].currentTime(time, play);
 			this.player[this.activePlayer].currentTime(time, play);
 		},
+
 		setCurrent: function(index) {
+			var weHaveMoreVideo = false;
+
+			this.current = this.getSection(index);
+
+			if(this.current.effect) {
+
+				switch(this.current.effect.type) {
+					case 'title':
+						if(this.current.effect.text && this.current.effect.duration) {
+							titleFX({
+								el: '#titleFXHelper',
+								text: this.current.effect.text,
+								duration: this.current.effect.duration * 1000
+							});
+						}
+						break;
+					case 'fade':
+						break;
+					case 'pause':
+						break;
+				}
+
+				if(++index < this.stageSections.length) {
+					weHaveMoreVideo = this.setCurrent(index);
+				}
+				// return weHaveMoreVideo;
+			} else {
+				if(this.current.end) {
+					weHaveMoreVideo = true;
+				}
+			}
+
+			return weHaveMoreVideo;
+		},
+
+		OLD_setCurrent: function(index) {
 			var weHaveMoreVideo = false,
 				effectType;
 
@@ -248,6 +286,59 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			return weHaveMoreVideo;
 		},
+
+		getSection: function(index) {
+
+			var stageOptions = this.stage ? this.stage.options : {};
+				section = {
+					index: index
+				};
+
+			if(index < this.stageSections.length) {
+
+				// Get the section
+				var el = section.element = this.stageSections[index];
+
+				// Get the ID
+				section.id = el.getAttribute(stageOptions.idAttr);
+
+				// Get the media
+				section.media = {
+					mp4: el.getAttribute(stageOptions.mp4Attr),
+					webm: el.getAttribute(stageOptions.webmAttr),
+					youtube: el.getAttribute(stageOptions.ytAttr)
+				};
+
+				var unit = 1 * el.getAttribute(stageOptions.unitAttr);
+				section.unit = unit = unit > 0 ? unit : this.options.unit;
+
+				// Still have attributes hard coded in here. Would need to pass from the transcript to stage and then to here.
+				var words = el.getElementsByTagName('a');
+				if(words.length) {
+					section.start = words[0].getAttribute('data-m') * unit;
+					section.end = words[words.length-1].getAttribute('data-m') * unit;
+				}
+
+				// Get the effect details
+				var effectType = el.getAttribute('data-effect');
+				if(effectType) {
+					var effectText = el.querySelector('input[type="text"]');
+					var effectDuration = el.querySelector('input[type="range"]');
+					section.effect = {
+						type: effectType,
+						text: effectText.value,
+						duration: effectDuration.value * 1 // Convert to number
+					};
+				} else {
+					section.effect = false;
+				}
+
+				return section;
+			} else {
+				return false;
+			}
+		},
+
 		manager: function(videoElem, event) {
 			var self = this;
 
@@ -257,7 +348,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					// Goto the next section
 
 					// Want to refactor the setCurrent() code... Maybe make it more like nextCurrent or something like that.
-					if(++this.current.index < this.current.sections.length && this.setCurrent(this.current.index)) {
+					// if(++this.current.index < this.current.sections.length && this.setCurrent(this.current.index)) {
+					if(++this.current.index < this.stageSections.length && this.setCurrent(this.current.index)) {
 						this.load(this.current.media);
 						this._play(this.current.start);
 					} else {
