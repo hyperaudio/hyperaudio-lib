@@ -12,8 +12,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			target: '#transcript-video', // The selector of element where the video is generated
 
-			// media: {}, // The URL of the video.
-
 			tPadding: 1, // (Seconds) Time added to end word timings.
 
 			players: 2, // Number of Players to use. Mobile: 1, Desktop: 2.
@@ -34,7 +32,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.current = {};
 
 		this.activePlayer = -1; // Since it gets +1 before 1st use.
-		// this.nextPlayer = this.options.players > 1 ? 1 : 0;
+		this.nextPlayer = this.options.players > 1 ? 1 : 0;
 
 		// State Flags
 		this.paused = true;
@@ -42,8 +40,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		if(this.options.DEBUG) {
 			this._debug();
 		}
-
-		// Probably want a media object, instead of a single SRC
 
 		if(this.target) {
 			this.create();
@@ -104,9 +100,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						cssClass: this.player[0].options.cssClass
 					});
 				}
-				if(this.options.media) {
-					this.load();
-				}
 			} else {
 				this._error('Target not found : ' + this.options.target);
 			}
@@ -127,27 +120,64 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		load: function(media) {
 			var self = this;
 
-			// This is old DNA from the Player?
-			if(media) {
-				this.options.media = media;
-			}
-
 			this.activePlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
 
-			// This is old DNA from the Player?
-			this.media[this.activePlayer] = this.options.media;
+			// This is old DNA - refactor
+			this.media[this.activePlayer] = media;
 
 			for(var i=0; i < this.player.length; i++) {
 				hyperaudio.removeClass(this.player[i].target, 'active');
 			}
 
 			if(this.player[this.activePlayer]) {
-				// hyperaudio.addClass(this.player[0].videoElem, 'active'); // Think this should affect the Player TARGET
 				hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
 				this.player[this.activePlayer].load(this.media[this.activePlayer]);
 			} else {
 				this._error('Video player not created : ' + this.options.target);
 			}
+		},
+		prepare: function(media) {
+			// Used when more than 1 player to prepare the next piece of media.
+
+			// 1. Want to be able to call this method and it deal with preparing the other player.
+			// 2. So it should check if the media is already available in a player.
+			// 3. If it is available, then do nothing.
+			// 4. If not, then setup the next player to play the media.
+
+			// 5. In principle this should support 1, 2 or more players.
+			// 6. If 1 player, should do nothing here.
+			// 7. If 2 or more players, then setup the next one. ie., The last one ever used before.
+
+			// 8. Normally just 1 or 2 players though, so "keep it real mofo!"
+
+
+			// Ignore if we are only using a single Player
+			if(media && this.player.length > 1) {
+
+				// See if a player already has it. NB: Zero is falsey, so strong comparison.
+				if(this.which(media) === false) {
+
+					// Get the next free player (Has flaws if more than 2, but still works. Just does not take full advantage of more than 2.)
+					this.nextPlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
+
+					if(this.player[this.nextPlayer]) {
+						this.player[this.nextPlayer].load(this.media[this.nextPlayer]);
+					}
+				}
+			}
+		},
+		which: function(media) {
+			var index = false;
+
+			if(media) {
+				for(var i=0; i < this.player.length; i++) {
+					if(!this.player[i].mediaDiff(media)) {
+						index = i;
+						break;
+					}
+				}
+			}
+			return index;
 		},
 		play: function() {
 
