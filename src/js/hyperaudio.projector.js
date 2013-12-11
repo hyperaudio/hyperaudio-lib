@@ -59,33 +59,26 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			if(this.target) {
 
-				// Making it work with a single player. Will dev 2 later.
-/*
-				var manager = function(event) {
-					// Passing the event context to manager
-					//  * The YouTube event object is useless.
-					//  * The YouTube event context was fixed in the Player class.
-					self.manager(this, event);
+				var getManager = function(idx) {
+
+					console.log('Create: idx='+idx);
+
+					return function(event) {
+						console.log('activePlayer='+self.activePlayer+' | idx='+idx);
+						// Passing the event context to manager
+						//  * The YouTube event object is useless.
+						//  * The YouTube event context was fixed in the Player class.
+						if(self.activePlayer === idx) {
+							self.manager(this, event);
+						}
+					};
 				};
-*/
+
 				for(var i = 0; i < this.options.players; i++ ) {
 
 					console.log('Create: i='+i);
 
-					var manager = (function(idx) {
-
-						console.log('Create: idx='+idx);
-
-						return function(event) {
-							console.log('activePlayer='+self.activePlayer+' | idx='+idx);
-							// Passing the event context to manager
-							//  * The YouTube event object is useless.
-							//  * The YouTube event context was fixed in the Player class.
-							if(self.activePlayer === idx) {
-								self.manager(this, event);
-							}
-						};
-					})(i);
+					var manager = getManager(i);
 
 					var player = document.createElement('div');
 					hyperaudio.addClass(player, 'hyperaudio-projector');
