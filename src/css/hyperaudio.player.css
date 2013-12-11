@@ -163,3 +163,14 @@
 	border-right: 1px solid #000;
 }
 
+.hyperaudio-projector {
+	position:absolute;
+	top:0;
+	left:-9999px;
+	width:100%;
+	height:100%;
+}
+
+.hyperaudio-projector.active {
+	left:0;
+}
