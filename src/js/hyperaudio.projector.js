@@ -12,7 +12,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			target: '#transcript-video', // The selector of element where the video is generated
 
-			tPadding: 1, // (Seconds) Time added to end word timings.
+			trim: 1, // (Seconds) Time added to end word timings.
 
 			players: 2, // Number of Players to use. Mobile: 1, Desktop: 2.
 
@@ -317,6 +317,94 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			return weHaveMoreVideo;
 		},
 
+		getContent: function() {
+			// Need a pointer to the stage section being examined.
+			// this.stageIndex;
+
+			// Content is a section with actual video and transcript.
+
+			// Will store the content as we go along...
+			// Pros -
+			//  1. We have a record of it all
+			//  2. and it may follow the structure required later when jumping to a start position
+			// Cons -
+			//  1. Could we not just use a current content and next content setup?
+
+
+
+
+			// New thought record...
+			// 1. We want to find the sections with content
+			// 2. Before we find content, we should store the effect (sections) encounted.
+			// 3. The section with content becomes "The content", basically a copy of the section.
+			// 4. The content then has any effects added to it.
+			// Store effects on an Effect Queue.
+
+			// The first time is a special case.
+
+			// Class properties needed:
+			this.stageIndex; // [Number] The next section
+			this.content; // [Array] Holding the sections found with content
+			this.firstContent; // [Boolean] True the first time
+
+			// Used elsewhere - noting here
+			this.contentIndex; // [Number] The content that is actually being played.
+
+			// We also want a return value...
+			// true - (Or truthy?) When we have stuff... Return the content?
+			// false - means no more sections.
+
+			var effect = [],
+				searching = true,
+				section;
+
+			while(searching) {
+
+				section = this.getSection(this.stageIndex);
+				// If there is another section
+				if(section) {
+					// If this section has content
+					if(section.media) {
+
+						// Need to add any stored affects here
+						section.effect = []; // Init the effect array
+						this.effectContent(section, effect);
+
+						// Store the content
+						this.content.push(section);
+
+						// The first time we need to get the 1st and 2nd content sections.
+						if(this.firstContent) {
+							this.firstContent = false;
+							effect = []; // reset the effect array
+						} else {
+							searching = false;
+						}
+					} else if(section.effect) {
+						// Some effects need to be applied to the previous content item
+						if(this.isPastEffect(section.effect)) {
+							// Have we got a previous section to affect?
+							if(this.content.length) {
+								this.effectContent(this.content[this.content.length-1], section.effect);
+							}
+						} else {
+							// Effect for the next section, so store it for later.
+							effect.push(section.effect);
+						}
+					} else {
+						// Something is wrong with section structure
+						searching = false;
+					}
+				} else {
+					searching = false;
+				}
+
+				if(searching) {
+					this.stageIndex++;
+				}
+			}
+		},
+
 		getSection: function(index) {
 
 			var stageOptions = this.stage ? this.stage.options : {};
@@ -333,11 +421,19 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				section.id = el.getAttribute(stageOptions.idAttr);
 
 				// Get the media
-				section.media = {
-					mp4: el.getAttribute(stageOptions.mp4Attr),
-					webm: el.getAttribute(stageOptions.webmAttr),
-					youtube: el.getAttribute(stageOptions.ytAttr)
-				};
+				var mp4 = el.getAttribute(stageOptions.mp4Attr),
+					webm = el.getAttribute(stageOptions.webmAttr),
+					youtube = el.getAttribute(stageOptions.ytAttr);
+
+				if(mp4 || webm || youtube) {
+					section.media = {
+						mp4: mp4,
+						webm: webm,
+						youtube: youtube
+					};
+				} else {
+					section.media = false;
+				}
 
 				var unit = 1 * el.getAttribute(stageOptions.unitAttr);
 				section.unit = unit = unit > 0 ? unit : this.options.unit;
@@ -347,6 +443,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				if(words.length) {
 					section.start = words[0].getAttribute('data-m') * unit;
 					section.end = words[words.length-1].getAttribute('data-m') * unit;
+					section.trim = this.options.trim;
 				}
 
 				// Get the effect details
@@ -369,12 +466,84 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 
+		isPastEffect: function(effect) {
+
+			// List of the effect types. (Separated by a space.)
+			var effectTypes = 'trim',
+				past = false;
+
+			hyperaudio.each(effectTypes.split(/\s+/g), function() {
+				if(effect.type === this) {
+					past = true;
+					return false; // exit each
+				}
+			});
+			return past;
+		},
+
+		effectContent: function(content, effect) {
+
+			// Allow effect to be a single object, or an array of them. Empty effect arrays do nothing.
+			if(effect && !effect.length && effect.length !== 0) {
+				effect = [effect];
+			}
+
+			for(var i=0, l=effect.length; i < l; i++) {
+				switch(effect[i].type) {
+					case 'title':
+						content.effect.push(effect[i]);
+						break;
+					case 'fade':
+						content.effect.push(effect[i]);
+						break;
+					case 'trim':
+						content.trim = effect[i].trim;
+						break;
+				}
+			}
+
+		},
+
+		effect: function(section) {
+
+			if(this.current.effect) {
+
+				switch(this.current.effect.type) {
+					case 'title':
+						if(this.current.effect.text && this.current.effect.duration) {
+							titleFX({
+								el: '#titleFXHelper',
+								text: this.current.effect.text,
+								duration: this.current.effect.duration * 1000
+							});
+						}
+						break;
+					case 'fade':
+						break;
+					case 'trim':
+						// Need to affect the previous section with content.
+						break;
+				}
+
+				if(++index < this.stageSections.length) {
+					weHaveMoreVideo = this.setCurrent(index);
+				}
+				// return weHaveMoreVideo;
+			} else {
+				if(this.current.end) {
+					weHaveMoreVideo = true;
+				}
+			}
+
+			return weHaveMoreVideo;
+		},
+
 		manager: function(videoElem, event) {
 			var self = this;
 
 			if(!this.paused) {
-				// if(this.player[0].videoElem.currentTime > this.current.end + this.options.tPadding) {
-				if(videoElem.currentTime > this.current.end + this.options.tPadding) {
+				// if(this.player[0].videoElem.currentTime > this.current.end + this.options.trim) {
+				if(videoElem.currentTime > this.current.end + this.options.trim) {
 					// Goto the next section
 
 					// Want to refactor the setCurrent() code... Maybe make it more like nextCurrent or something like that.
