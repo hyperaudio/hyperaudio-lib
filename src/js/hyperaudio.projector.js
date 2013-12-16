@@ -31,7 +31,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.media = [];
 		this.current = {};
 
-		this.activePlayer = -1; // Since it gets +1 before 1st use.
+		this.activePlayer = 0;
 		this.nextPlayer = this.options.players > 1 ? 1 : 0;
 
 		// State Flags
@@ -60,7 +60,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					console.log('Create: idx='+idx);
 
 					return function(event) {
-						console.log('activePlayer='+self.activePlayer+' | idx='+idx);
+						// console.log('activePlayer='+self.activePlayer+' | idx='+idx);
 						// Passing the event context to manager
 						//  * The YouTube event object is useless.
 						//  * The YouTube event context was fixed in the Player class.
@@ -120,6 +120,26 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		load: function(media) {
 			var self = this;
 
+			var activePlayer = this.which(media);
+
+			console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
+
+			if(activePlayer !== false) {
+				this.activePlayer = activePlayer;
+			} else {
+				this.player[this.activePlayer].load(media);
+			}
+
+			console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
+
+			for(var i=0; i < this.player.length; i++) {
+				hyperaudio.removeClass(this.player[i].target, 'active');
+			}
+			hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
+		},
+		OLD_load: function(media) {
+			var self = this;
+
 			this.activePlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
 
 			// This is old DNA - refactor
@@ -161,7 +181,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.nextPlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
 
 					if(this.player[this.nextPlayer]) {
-						this.player[this.nextPlayer].load(this.media[this.nextPlayer]);
+						this.player[this.nextPlayer].load(media);
 					}
 				}
 			}
@@ -188,6 +208,43 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
 
 				// Get the sections
+				this.stageSections = this.stageArticle.getElementsByTagName('section');
+
+				this.stageIndex = 0; // [Number] The next section
+				this.content = []; // [Array] Holding the sections found with content
+				this.firstContent = true; // [Boolean] True the first time
+				this.endedContent = false; // [Boolean] True when we have no more content
+
+				this.contentIndex = 0; // [Number] The content that is actually being played.
+
+				this.getContent();
+
+				if(this.content.length) {
+					this.paused = false;
+
+					this.load(this.content[this.contentIndex].media);
+					if(this.content[this.contentIndex+1]) {
+						this.prepare(this.content[this.contentIndex+1].media);
+					}
+					this._play(this.content[this.contentIndex].start);
+
+				} else {
+					// Nothing to play
+					this.paused = true;
+				}
+			} else {
+				this.paused = true;
+			}
+		},
+		OLD_play: function() {
+
+			// ATM, we always play from the start.
+
+			if(this.stage && this.stage.target) {
+				// Get the staged contents wrapper elem
+				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
+
+				// Get the sections
 				this.current.sections = this.stageArticle.getElementsByTagName('section'); // old way
 				this.stageSections = this.stageArticle.getElementsByTagName('section');
 
@@ -202,6 +259,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.paused = true;
 			}
 		},
+
 		pause: function() {
 			this.paused = true;
 			this._pause();
@@ -346,6 +404,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.stageIndex; // [Number] The next section
 			this.content; // [Array] Holding the sections found with content
 			this.firstContent; // [Boolean] True the first time
+			this.endedContent; // [Boolean] True when we have no more content
 
 			// Used elsewhere - noting here
 			this.contentIndex; // [Number] The content that is actually being played.
@@ -358,6 +417,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				searching = true,
 				section;
 
+			// Search for sections with content and apply sections with effects to that content
 			while(searching) {
 
 				section = this.getSection(this.stageIndex);
@@ -396,12 +456,27 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						searching = false;
 					}
 				} else {
+					this.endedContent = true;
 					searching = false;
 				}
 
-				if(searching) {
+				// if(searching) {
+				// if(!this.endedContent) {
 					this.stageIndex++;
-				}
+				// }
+			}
+
+			console.log('getContent: length=%d | content=%o',this.content.length,this.content);
+
+			// What about at the end?
+
+			// Normally we return the content 2 back.
+			if(this.content.length > 1 && !this.endedContent) {
+				return this.content[this.content.length-2];
+			} else if(this.content.length) {
+				return this.content[this.content.length-1];
+			} else {
+				return false;
 			}
 		},
 
@@ -504,6 +579,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		},
 
+		// This method needs work. It just a C&P from older code that did effects.
 		effect: function(section) {
 
 			if(this.current.effect) {
@@ -539,6 +615,46 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		manager: function(videoElem, event) {
+			var self = this;
+
+			if(!this.paused) {
+				if(videoElem.currentTime > this.content[this.contentIndex].end + this.content[this.contentIndex].trim) {
+					// Goto the next piece of content
+
+					this._pause();
+
+					this.getContent();
+
+					this.contentIndex++;
+
+					if(this.contentIndex < this.content.length) {
+						// this.paused = false;
+
+						this.load(this.content[this.contentIndex].media);
+						if(this.content[this.contentIndex+1]) {
+							this.prepare(this.content[this.contentIndex+1].media);
+						}
+						this._play(this.content[this.contentIndex].start);
+
+					} else {
+						// Nothing to play
+						this.paused = true;
+						// this._pause();
+					}
+				}
+			}
+
+			// Will need to be calculating the currentTime on the fly and the duration calcuated at the start and on changes to stage.
+			if(this.options.gui) {
+				this.GUI.setStatus({
+					paused: this.paused,
+					currentTime: 42,
+					duration: 69
+				});
+			}
+		},
+
+		OLD_manager: function(videoElem, event) {
 			var self = this;
 
 			if(!this.paused) {
