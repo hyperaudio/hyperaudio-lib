@@ -217,6 +217,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				this.contentIndex = 0; // [Number] The content that is actually being played.
 
+				// This bit is similar to the manager() code
+
 				this.getContent();
 
 				if(this.content.length) {
@@ -226,6 +228,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(this.content[this.contentIndex+1]) {
 						this.prepare(this.content[this.contentIndex+1].media);
 					}
+					this.effect(this.content[this.contentIndex].effect);
 					this._play(this.content[this.contentIndex].start);
 
 				} else {
@@ -579,39 +582,27 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		},
 
-		// This method needs work. It just a C&P from older code that did effects.
-		effect: function(section) {
+		effect: function(effect) {
 
-			if(this.current.effect) {
+			if(effect && effect.length) {
 
-				switch(this.current.effect.type) {
-					case 'title':
-						if(this.current.effect.text && this.current.effect.duration) {
-							titleFX({
-								el: '#titleFXHelper',
-								text: this.current.effect.text,
-								duration: this.current.effect.duration * 1000
-							});
-						}
-						break;
-					case 'fade':
-						break;
-					case 'trim':
-						// Need to affect the previous section with content.
-						break;
-				}
+				for(var i=0, l=effect.length; i < l; i++) {
 
-				if(++index < this.stageSections.length) {
-					weHaveMoreVideo = this.setCurrent(index);
-				}
-				// return weHaveMoreVideo;
-			} else {
-				if(this.current.end) {
-					weHaveMoreVideo = true;
+					switch(effect[i].type) {
+						case 'title':
+							if(effect[i].text && effect[i].duration) {
+								titleFX({
+									el: '#titleFXHelper',
+									text: effect[i].text,
+									duration: effect[i].duration * 1000
+								});
+							}
+							break;
+						case 'fade':
+							break;
+					}
 				}
 			}
-
-			return weHaveMoreVideo;
 		},
 
 		manager: function(videoElem, event) {
@@ -621,7 +612,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				if(videoElem.currentTime > this.content[this.contentIndex].end + this.content[this.contentIndex].trim) {
 					// Goto the next piece of content
 
-					this._pause();
+					this._pause(); // Need to stop, otherwise if we switch player, the hidden one keeps playing.
+
+					// This bit is similar to the play() code
 
 					this.getContent();
 
@@ -634,6 +627,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						if(this.content[this.contentIndex+1]) {
 							this.prepare(this.content[this.contentIndex+1].media);
 						}
+						this.effect(this.content[this.contentIndex].effect);
 						this._play(this.content[this.contentIndex].start);
 
 					} else {
