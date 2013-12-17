@@ -450,6 +450,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						if(this.isPastEffect(section.effect)) {
 							// Have we got a previous section to affect?
 							if(this.content.length) {
+
+								console.log('getContent: this.content[len-1]=%o | session.effect=%o',this.content[this.content.length-1],section.effect);
+
 								this.effectContent(this.content[this.content.length-1], section.effect);
 							}
 						} else {
@@ -561,6 +564,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					return false; // exit each
 				}
 			});
+
+			console.log('isPastEffect: effect.type=%s | past=%s',effect.type,past);
+
 			return past;
 		},
 
