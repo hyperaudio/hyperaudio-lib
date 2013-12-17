@@ -403,6 +403,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			// The first time is a special case.
 
+			// These vars are now in the play() method.
+/*
 			// Class properties needed:
 			this.stageIndex; // [Number] The next section
 			this.content; // [Array] Holding the sections found with content
@@ -411,7 +413,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			// Used elsewhere - noting here
 			this.contentIndex; // [Number] The content that is actually being played.
-
+*/
 			// We also want a return value...
 			// true - (Or truthy?) When we have stuff... Return the content?
 			// false - means no more sections.
@@ -472,6 +474,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			console.log('getContent: length=%d | content=%o',this.content.length,this.content);
 
 			// What about at the end?
+
+			// Currently, we do not even use the return value.
 
 			// Normally we return the content 2 back.
 			if(this.content.length > 1 && !this.endedContent) {
