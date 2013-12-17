@@ -1,4 +1,4 @@
-/*! hyperaudio v0.2.6 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 17th December 2013 18:52:06 */
+/*! hyperaudio v0.2.7 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 17th December 2013 19:09:18 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7225,11 +7225,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var effectTypes = 'trim',
 				past = false;
 
-			hyperaudio.each(effectTypes.split(/\s+/g), function() {
+			hyperaudio.each(effectTypes.split(/\s+/g), function(i,type) {
 
-				console.log('isPastEffect: [loop] effect.type=%s | this=%s | === ',effect.type,this,(effect.type === this));
+				console.log('isPastEffect: [loop] effect.type=%s | type=%s | ===%s',effect.type,this,(effect.type === type));
 
-				if(effect.type === this) {
+				if(effect.type === type) {
 					past = true;
 					return false; // exit each
 				}
