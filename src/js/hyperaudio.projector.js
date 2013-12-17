@@ -559,6 +559,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				past = false;
 
 			hyperaudio.each(effectTypes.split(/\s+/g), function() {
+
+				console.log('isPastEffect: [loop] effect.type=%s | this=%s | === ',effect.type,this,(effect.type === this));
+
 				if(effect.type === this) {
 					past = true;
 					return false; // exit each
