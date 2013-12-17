@@ -1,4 +1,4 @@
-/*! hyperaudio v0.2.3 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 17th December 2013 11:57:15 */
+/*! hyperaudio v0.2.4 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 17th December 2013 12:06:45 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7247,7 +7247,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						content.effect.push(effect[i]);
 						break;
 					case 'trim':
-						content.trim = effect[i].trim;
+						content.trim = effect[i].duration;
 						break;
 				}
 			}
