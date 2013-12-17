@@ -558,11 +558,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var effectTypes = 'trim',
 				past = false;
 
-			hyperaudio.each(effectTypes.split(/\s+/g), function() {
+			hyperaudio.each(effectTypes.split(/\s+/g), function(i,type) {
 
-				console.log('isPastEffect: [loop] effect.type=%s | this=%s | === ',effect.type,this,(effect.type === this));
+				console.log('isPastEffect: [loop] effect.type=%s | type=%s | ===%s',effect.type,this,(effect.type === type));
 
-				if(effect.type === this) {
+				if(effect.type === type) {
 					past = true;
 					return false; // exit each
 				}
