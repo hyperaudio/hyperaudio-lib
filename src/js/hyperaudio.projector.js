@@ -580,7 +580,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						content.effect.push(effect[i]);
 						break;
 					case 'trim':
-						content.trim = effect[i].trim;
+						content.trim = effect[i].duration;
 						break;
 				}
 			}
