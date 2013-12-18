@@ -14,8 +14,8 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 
-			title: 'Test from hyperaudio.stage.js',
-			desc: 'Testing initial save system',
+			title: 'Title not set',
+			desc: 'Description not set',
 			type: 'beta',
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
@@ -115,8 +115,6 @@ var Stage = (function(document, hyperaudio) {
 			hyperaudio.extend(this.mix, {
 				label: this.options.title,
 				desc: this.options.desc,
-				meta: {},
-				sort: 999,
 				type: this.options.type,
 				content: this.target.innerHTML
 			});
