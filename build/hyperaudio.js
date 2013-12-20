@@ -1,4 +1,4 @@
-/*! hyperaudio v0.2.9 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th December 2013 18:04:17 */
+/*! hyperaudio v0.2.10 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th December 2013 19:48:23 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4456,7 +4456,7 @@ var fadeFX = (function (window, document) {
 	var fxInstance;
 
 	function fade (options) {
-		if ( !fxInstance ) {
+		// if ( !fxInstance ) {
 			var opt = {
 				time: 2000,
 				color: '#000000',
@@ -4470,7 +4470,7 @@ var fadeFX = (function (window, document) {
 			}
 
 			fxInstance = new TransitionFade(opt);
-		}
+		// }
 
 		return fxInstance;
 	}
