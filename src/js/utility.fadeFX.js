@@ -29,7 +29,7 @@ var fadeFX = (function (window, document) {
 	var fxInstance;
 
 	function fade (options) {
-		if ( !fxInstance ) {
+		// if ( !fxInstance ) {
 			var opt = {
 				time: 2000,
 				color: '#000000',
@@ -43,7 +43,7 @@ var fadeFX = (function (window, document) {
 			}
 
 			fxInstance = new TransitionFade(opt);
-		}
+		// }
 
 		return fxInstance;
 	}
