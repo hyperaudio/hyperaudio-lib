@@ -279,7 +279,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			// this.player[0].currentTime(time, play);
 			this.player[this.activePlayer].currentTime(time, play);
 		},
-
+/*
 		setCurrent: function(index) {
 			var weHaveMoreVideo = false;
 
@@ -315,7 +315,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			return weHaveMoreVideo;
 		},
-
+*/
+/*
 		OLD_setCurrent: function(index) {
 			var weHaveMoreVideo = false,
 				effectType;
@@ -377,7 +378,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			return weHaveMoreVideo;
 		},
-
+*/
 		getContent: function() {
 
 			var effect = [],

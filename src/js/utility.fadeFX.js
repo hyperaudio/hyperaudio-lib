@@ -126,7 +126,14 @@ var fadeFX = (function (window, document) {
 		this.servo.addEventListener('oTransitionEnd', this, false);
 		this.servo.addEventListener('MSTransitionEnd', this, false);
 
-		this.servo.style.opacity = '0';
+		var trick = this.servo.offsetHeight;	// force refresh. Mandatory on FF
+
+		this.servo.style[transition] = 'opacity ' + this.options.time + 'ms';
+
+		var that = this;
+		setTimeout(function () {
+			that.servo.style.opacity = '0';
+		}, 0);
 	};
 
 	TransitionFade.prototype.destroy = function () {
