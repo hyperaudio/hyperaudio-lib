@@ -55,13 +55,13 @@ var fadeFX = (function (window, document) {
 
 		this.servo.style[transition] = 'opacity 0ms';
 		this.servo.style.left = '0px';
-		this.servo.style.opacity = '0';
 		this.servo.style.backgroundColor = this.options.color;
-//		this.servo.style.left = '-9999px';
 
 		if ( this.options.fadeOut ) {
+			this.servo.style.opacity = '0';
 			this.fadeOut();
 		} else if ( this.options.fadeIn ) {
+			this.servo.style.opacity = '1';
 			this.fadeIn();
 		}
 	}
