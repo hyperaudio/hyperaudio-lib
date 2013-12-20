@@ -1,4 +1,4 @@
-/*! hyperaudio v0.2.8 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th December 2013 17:44:42 */
+/*! hyperaudio v0.2.9 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th December 2013 18:04:17 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4553,7 +4553,14 @@ var fadeFX = (function (window, document) {
 		this.servo.addEventListener('oTransitionEnd', this, false);
 		this.servo.addEventListener('MSTransitionEnd', this, false);
 
-		this.servo.style.opacity = '0';
+		var trick = this.servo.offsetHeight;	// force refresh. Mandatory on FF
+
+		this.servo.style[transition] = 'opacity ' + this.options.time + 'ms';
+
+		var that = this;
+		setTimeout(function () {
+			that.servo.style.opacity = '0';
+		}, 0);
 	};
 
 	TransitionFade.prototype.destroy = function () {
@@ -6930,7 +6937,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			// this.player[0].currentTime(time, play);
 			this.player[this.activePlayer].currentTime(time, play);
 		},
-
+/*
 		setCurrent: function(index) {
 			var weHaveMoreVideo = false;
 
@@ -6966,7 +6973,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			return weHaveMoreVideo;
 		},
-
+*/
+/*
 		OLD_setCurrent: function(index) {
 			var weHaveMoreVideo = false,
 				effectType;
@@ -7028,7 +7036,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			return weHaveMoreVideo;
 		},
-
+*/
 		getContent: function() {
 
 			var effect = [],
