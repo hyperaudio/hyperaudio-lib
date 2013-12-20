@@ -1,4 +1,4 @@
-/*! hyperaudio v0.2.7 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 17th December 2013 19:09:18 */
+/*! hyperaudio v0.2.8 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th December 2013 17:44:42 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4460,27 +4460,23 @@ var fadeFX = (function (window, document) {
 			var opt = {
 				time: 2000,
 				color: '#000000',
-				autostart: true,
-				crossFade: true,
-				autoplay: true
+				fadeOut: false,
+				fadeIn: false,
+				outFirst: true // not implemented
 			};
 
 			for ( var i in options ) {
 				opt[i] = options[i];
 			}
 
-			video = document.querySelector('#stage-videos .active');
-			fxInstance = new TransitionFade(video, opt);
+			fxInstance = new TransitionFade(opt);
 		}
 
 		return fxInstance;
 	}
 
-	function TransitionFade (video, options) {
+	function TransitionFade (options) {
 		this.options = options;
-
-		this.video = video;
-		this.videoIncoming = document.getElementById('stage-video-' + (video.id == 'stage-video-1' ? '2' : '1'));
 
 		this.servo = document.getElementById('fxHelper');
 
@@ -4490,8 +4486,10 @@ var fadeFX = (function (window, document) {
 		this.servo.style.backgroundColor = this.options.color;
 //		this.servo.style.left = '-9999px';
 
-		if ( this.options.autostart ) {
-			this.start();
+		if ( this.options.fadeOut ) {
+			this.fadeOut();
+		} else if ( this.options.fadeIn ) {
+			this.fadeIn();
 		}
 	}
 
@@ -4507,7 +4505,7 @@ var fadeFX = (function (window, document) {
 		}
 	};
 
-	TransitionFade.prototype.start = function () {
+	TransitionFade.prototype.fadeOut = function () {
 		this.phase = 'fadeOut';
 
 		this.servo.addEventListener('transitionend', this, false);
@@ -4533,25 +4531,17 @@ var fadeFX = (function (window, document) {
 		this.servo.removeEventListener('oTransitionEnd', this, false);
 		this.servo.removeEventListener('MSTransitionEnd', this, false);
 
-		this.video.pause();
-
 		if ( this.phase == 'fadeOut' ) {
 			if ( this.options.onFadeOutEnd ) {
 				this.options.onFadeOutEnd.call(this);
-			}
-
-			if ( this.options.crossFade ) {
-				this.phase = 'waiting';
-				this.video.className = this.video.className.replace(/(^|\s)active($|\s)/, '');
-				this.videoIncoming.className += ' active';
-				this.fadeIn();
 			}
 		} else if ( this.phase == 'fadeIn' ) {
 			if ( this.options.onFadeInEnd ) {
 				this.options.onFadeInEnd.call(this);
 			}
 
-			this.destroy();
+			// Race conditions are a bitch, so taking this out for time being.
+			// this.destroy();
 		}
 	};
 
@@ -4562,10 +4552,6 @@ var fadeFX = (function (window, document) {
 		this.servo.addEventListener('webkitTransitionEnd', this, false);
 		this.servo.addEventListener('oTransitionEnd', this, false);
 		this.servo.addEventListener('MSTransitionEnd', this, false);
-
-		if ( this.options.autoplay ) {
-			this.videoIncoming.play();
-		}
 
 		this.servo.style.opacity = '0';
 	};
@@ -6454,8 +6440,8 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 
-			title: 'Test from hyperaudio.stage.js',
-			desc: 'Testing initial save system',
+			title: 'Title not set',
+			desc: 'Description not set',
 			type: 'beta',
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
@@ -6555,8 +6541,6 @@ var Stage = (function(document, hyperaudio) {
 			hyperaudio.extend(this.mix, {
 				label: this.options.title,
 				desc: this.options.desc,
-				meta: {},
-				sort: 999,
 				type: this.options.type,
 				content: this.target.innerHTML
 			});
@@ -7046,44 +7030,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		getContent: function() {
-			// Need a pointer to the stage section being examined.
-			// this.stageIndex;
-
-			// Content is a section with actual video and transcript.
-
-			// Will store the content as we go along...
-			// Pros -
-			//  1. We have a record of it all
-			//  2. and it may follow the structure required later when jumping to a start position
-			// Cons -
-			//  1. Could we not just use a current content and next content setup?
-
-
-
-
-			// New thought record...
-			// 1. We want to find the sections with content
-			// 2. Before we find content, we should store the effect (sections) encounted.
-			// 3. The section with content becomes "The content", basically a copy of the section.
-			// 4. The content then has any effects added to it.
-			// Store effects on an Effect Queue.
-
-			// The first time is a special case.
-
-			// These vars are now in the play() method.
-/*
-			// Class properties needed:
-			this.stageIndex; // [Number] The next section
-			this.content; // [Array] Holding the sections found with content
-			this.firstContent; // [Boolean] True the first time
-			this.endedContent; // [Boolean] True when we have no more content
-
-			// Used elsewhere - noting here
-			this.contentIndex; // [Number] The content that is actually being played.
-*/
-			// We also want a return value...
-			// true - (Or truthy?) When we have stuff... Return the content?
-			// false - means no more sections.
 
 			var effect = [],
 				searching = true,
@@ -7114,14 +7060,27 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						}
 					} else if(section.effect) {
 						// Some effects need to be applied to the previous content item
-						if(this.isPastEffect(section.effect)) {
+
+						// Trim affects previous content
+						if(section.effect.type === 'trim') {
 							// Have we got a previous section to affect?
 							if(this.content.length) {
-
-								console.log('getContent: this.content[len-1]=%o | session.effect=%o',this.content[this.content.length-1],section.effect);
-
 								this.effectContent(this.content[this.content.length-1], section.effect);
 							}
+
+						// Fade effects both previous and next content
+						} else if(section.effect.type === 'fade') {
+							// Make 2 copies of the fade effect. Out and In.
+							var fadeOutEffect = hyperaudio.extend({}, section.effect, {type: "fadeOut"}),
+								fadeInEffect = hyperaudio.extend({}, section.effect, {type: "fadeIn"});
+							// Have we got a previous section to affect?
+							if(this.content.length) {
+								this.effectContent(this.content[this.content.length-1], fadeOutEffect);
+							}
+							// Effect for the next section, so store it for later.
+							effect.push(fadeInEffect);
+
+						// The rest afect the next content
 						} else {
 							// Effect for the next section, so store it for later.
 							effect.push(section.effect);
@@ -7135,26 +7094,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					searching = false;
 				}
 
-				// if(searching) {
-				// if(!this.endedContent) {
-					this.stageIndex++;
-				// }
+				this.stageIndex++;
 			}
 
 			console.log('getContent: length=%d | content=%o',this.content.length,this.content);
-
-			// What about at the end?
-
-			// Currently, we do not even use the return value.
-
-			// Normally we return the content 2 back.
-			if(this.content.length > 1 && !this.endedContent) {
-				return this.content[this.content.length-2];
-			} else if(this.content.length) {
-				return this.content[this.content.length-1];
-			} else {
-				return false;
-			}
 		},
 
 		getSection: function(index) {
@@ -7219,25 +7162,36 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 
-		isPastEffect: function(effect) {
+		// Obsolete method... Effects are too unique to be classed in such a way
+		isPrevEffect: function(effect) {
 
 			// List of the effect types. (Separated by a space.)
 			var effectTypes = 'trim',
-				past = false;
+				flag = false;
 
 			hyperaudio.each(effectTypes.split(/\s+/g), function(i,type) {
-
-				console.log('isPastEffect: [loop] effect.type=%s | type=%s | ===%s',effect.type,this,(effect.type === type));
-
 				if(effect.type === type) {
-					past = true;
+					flag = true;
 					return false; // exit each
 				}
 			});
+			return flag;
+		},
 
-			console.log('isPastEffect: effect.type=%s | past=%s',effect.type,past);
+		// Obsolete method... Effects are too unique to be classed in such a way
+		isPrevAndNextEffect: function(effect) {
 
-			return past;
+			// List of the effect types. (Separated by a space.)
+			var effectTypes = 'fade',
+				flag = false;
+
+			hyperaudio.each(effectTypes.split(/\s+/g), function(i,type) {
+				if(effect.type === type) {
+					flag = true;
+					return false; // exit each
+				}
+			});
+			return flag;
 		},
 
 		effectContent: function(content, effect) {
@@ -7252,7 +7206,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					case 'title':
 						content.effect.push(effect[i]);
 						break;
-					case 'fade':
+					case 'fadeOut':
+						content.effect.push(effect[i]);
+						break;
+					case 'fadeIn':
 						content.effect.push(effect[i]);
 						break;
 					case 'trim':
@@ -7263,34 +7220,121 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		},
 
+		// Effecting the start of the content
 		effect: function(effect) {
 
 			if(effect && effect.length) {
 
 				for(var i=0, l=effect.length; i < l; i++) {
 
-					switch(effect[i].type) {
-						case 'title':
-							if(effect[i].text && effect[i].duration) {
-								titleFX({
-									el: '#titleFXHelper',
-									text: effect[i].text,
-									duration: effect[i].duration * 1000
-								});
-							}
-							break;
-						case 'fade':
-							break;
+					if(!effect[i].init) {
+
+						switch(effect[i].type) {
+							case 'title':
+								if(effect[i].text && effect[i].duration) {
+									titleFX({
+										el: '#titleFXHelper',
+										text: effect[i].text,
+										duration: effect[i].duration * 1000
+									});
+									effect[i].init = true;
+								}
+								break;
+							case 'fadeIn':
+								if(effect[i].duration) {
+									fadeFX({
+										el: '#fxHelper',
+										fadeIn: true,
+										time: effect[i].duration * 1000
+									});
+									effect[i].init = true;
+								}
+								break;
+						}
 					}
 				}
 			}
+		},
+
+		// Effecting the end of the content
+		effectEnd: function(effect) {
+
+			if(effect && effect.length) {
+
+				for(var i=0, l=effect.length; i < l; i++) {
+
+					if(!effect[i].init) {
+
+						switch(effect[i].type) {
+							case 'fadeOut':
+								if(effect[i].duration) {
+									fadeFX({
+										el: '#fxHelper',
+										fadeOut: true,
+										time: effect[i].duration * 1000
+									});
+									effect[i].init = true;
+								}
+								break;
+						}
+					}
+				}
+			}
+		},
+
+		checkEndEffects: function(currentTime, content) {
+
+			// 1. Do we have an end effect?
+			// 2. Yes, has it been init?
+			// 3. No, well is it time? - Calculate timings
+			// 4. Is it time to start it?
+			// 5. Yes, well execute the effect.
+
+			var endEffects = this.getEndEffects(content),
+				l = endEffects.length,
+				i = 0;
+
+			// Check each end effect
+			for(; i < l; i++) {
+				// Has the effect (not) been initiated?
+				if(!endEffects[i].init) {
+					// Is it time to start the effect?
+					if(currentTime > content.end + content.trim - endEffects[i].duration) {
+						// Boomshanka! Wrap it in an Array.
+						this.effectEnd([endEffects[i]]);
+					}
+				}
+			}
+			// wanna return something?
+			// return {buggerAll:true};
+		},
+
+		getEndEffects: function(content) {
+			// List of the effect types. (Separated by a space.)
+			var effectTypes = 'fadeOut',
+				endEffects = [];
+
+			hyperaudio.each(content.effect, function(n, effect) {
+				hyperaudio.each(effectTypes.split(/\s+/g), function(i,type) {
+					if(effect.type === type) {
+						endEffects.push(effect);
+					}
+				});
+			});
+			// return an array of all the end effects.
+			return endEffects;
 		},
 
 		manager: function(videoElem, event) {
 			var self = this;
 
 			if(!this.paused) {
-				if(videoElem.currentTime > this.content[this.contentIndex].end + this.content[this.contentIndex].trim) {
+
+				this.checkEndEffects(videoElem.currentTime, this.content[this.contentIndex]);
+
+				var endTime = this.content[this.contentIndex].end + this.content[this.contentIndex].trim;
+
+				if(videoElem.currentTime > endTime) {
 					// Goto the next piece of content
 
 					this._pause(); // Need to stop, otherwise if we switch player, the hidden one keeps playing.
