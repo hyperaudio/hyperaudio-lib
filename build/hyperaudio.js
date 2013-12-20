@@ -1,4 +1,4 @@
-/*! hyperaudio v0.2.10 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th December 2013 19:48:23 */
+/*! hyperaudio v0.2.11 ~ (c) 2012-2013 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th December 2013 19:57:01 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4482,13 +4482,13 @@ var fadeFX = (function (window, document) {
 
 		this.servo.style[transition] = 'opacity 0ms';
 		this.servo.style.left = '0px';
-		this.servo.style.opacity = '0';
 		this.servo.style.backgroundColor = this.options.color;
-//		this.servo.style.left = '-9999px';
 
 		if ( this.options.fadeOut ) {
+			this.servo.style.opacity = '0';
 			this.fadeOut();
 		} else if ( this.options.fadeIn ) {
+			this.servo.style.opacity = '1';
 			this.fadeIn();
 		}
 	}
