@@ -33,27 +33,23 @@ var fadeFX = (function (window, document) {
 			var opt = {
 				time: 2000,
 				color: '#000000',
-				autostart: true,
-				crossFade: true,
-				autoplay: true
+				fadeOut: false,
+				fadeIn: false,
+				outFirst: true // not implemented
 			};
 
 			for ( var i in options ) {
 				opt[i] = options[i];
 			}
 
-			video = document.querySelector('#stage-videos .active');
-			fxInstance = new TransitionFade(video, opt);
+			fxInstance = new TransitionFade(opt);
 		}
 
 		return fxInstance;
 	}
 
-	function TransitionFade (video, options) {
+	function TransitionFade (options) {
 		this.options = options;
-
-		this.video = video;
-		this.videoIncoming = document.getElementById('stage-video-' + (video.id == 'stage-video-1' ? '2' : '1'));
 
 		this.servo = document.getElementById('fxHelper');
 
@@ -63,8 +59,10 @@ var fadeFX = (function (window, document) {
 		this.servo.style.backgroundColor = this.options.color;
 //		this.servo.style.left = '-9999px';
 
-		if ( this.options.autostart ) {
-			this.start();
+		if ( this.options.fadeOut ) {
+			this.fadeOut();
+		} else if ( this.options.fadeIn ) {
+			this.fadeIn();
 		}
 	}
 
@@ -80,7 +78,7 @@ var fadeFX = (function (window, document) {
 		}
 	};
 
-	TransitionFade.prototype.start = function () {
+	TransitionFade.prototype.fadeOut = function () {
 		this.phase = 'fadeOut';
 
 		this.servo.addEventListener('transitionend', this, false);
@@ -106,25 +104,17 @@ var fadeFX = (function (window, document) {
 		this.servo.removeEventListener('oTransitionEnd', this, false);
 		this.servo.removeEventListener('MSTransitionEnd', this, false);
 
-		this.video.pause();
-
 		if ( this.phase == 'fadeOut' ) {
 			if ( this.options.onFadeOutEnd ) {
 				this.options.onFadeOutEnd.call(this);
-			}
-
-			if ( this.options.crossFade ) {
-				this.phase = 'waiting';
-				this.video.className = this.video.className.replace(/(^|\s)active($|\s)/, '');
-				this.videoIncoming.className += ' active';
-				this.fadeIn();
 			}
 		} else if ( this.phase == 'fadeIn' ) {
 			if ( this.options.onFadeInEnd ) {
 				this.options.onFadeInEnd.call(this);
 			}
 
-			this.destroy();
+			// Race conditions are a bitch, so taking this out for time being.
+			// this.destroy();
 		}
 	};
 
@@ -135,10 +125,6 @@ var fadeFX = (function (window, document) {
 		this.servo.addEventListener('webkitTransitionEnd', this, false);
 		this.servo.addEventListener('oTransitionEnd', this, false);
 		this.servo.addEventListener('MSTransitionEnd', this, false);
-
-		if ( this.options.autoplay ) {
-			this.videoIncoming.play();
-		}
 
 		this.servo.style.opacity = '0';
 	};
