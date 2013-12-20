@@ -364,6 +364,8 @@ p {
 	display: none;
 	padding: 10px;
 	font-size: 1.2em;
+	height: calc(100% - 48px);
+	overflow: auto;
 }
 
 #sidemenu .folder ul {
