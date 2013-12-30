@@ -7,8 +7,7 @@ var api = (function(hyperaudio) {
 	return {
 		init: function(options) {
 			this.options = hyperaudio.extend({
-				// api: 'http://data.hyperaud.io/',
-				api: 'http://api.hyperaud.io/',
+				api: 'http://api.hyperaud.io/v1/',
 				transcripts: 'transcripts/',
 				mixes: 'mixes/',
 				whoami: 'whoami/'
