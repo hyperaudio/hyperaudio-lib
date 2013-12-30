@@ -47,7 +47,7 @@ var api = (function(hyperaudio) {
 						var json = JSON.parse(this.responseText);
 						self.guest = !json.user;
 						if(!self.guest) {
-							self.username = json.user.username;
+							self.username = json.user;
 						} else {
 							self.username = '';
 						}
