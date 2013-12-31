@@ -90,6 +90,7 @@ var api = (function(hyperaudio) {
 					self.callback(callback, true);
 				}, 0);
 			} else {
+				// Do not need to get username for an ID specific request.
 				this.getUsername(function(success) {
 					if(success && id) {
 						xhr({
@@ -119,6 +120,7 @@ var api = (function(hyperaudio) {
 					self.callback(callback, true);
 				}, 0);
 			} else {
+				// Do not need to get username for a general request.
 				this.getUsername(function(success) {
 					if(success) {
 						xhr({
@@ -147,6 +149,7 @@ var api = (function(hyperaudio) {
 					self.callback(callback, true);
 				}, 0);
 			} else {
+				// Do not need to get username for an ID specific request.
 				this.getUsername(function(success) {
 					if(success && id) {
 						xhr({
