@@ -100,7 +100,7 @@ var Stage = (function(document, hyperaudio) {
 						self.initDragDrop();
 						self._trigger(hyperaudio.event.load, {msg: 'Loaded mix'});
 					} else {
-						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+						self._error(this.status + ' ' + this.statusText + ' : "' + id + '"');
 					}
 				});
 			}
@@ -131,7 +131,7 @@ var Stage = (function(document, hyperaudio) {
 						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
 						self.callback(callback, true);
 					} else {
-						self._error(this.status + ' ' + this.statusText + ' : "' + url + '"');
+						self._error(this.status + ' ' + this.statusText);
 						self.callback(callback, false);
 					}
 				});
