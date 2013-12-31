@@ -127,13 +127,18 @@ var Stage = (function(document, hyperaudio) {
 
 				hyperaudio.api.putMix(this.mix, function(success) {
 					if(success) {
-						self.mix = hyperaudio.extend({}, this.mix);
-						self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
-						self.callback(callback, true);
+						if(success.saved) {
+							self.mix = hyperaudio.extend({}, this.mix);
+							self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
+						} else if(success.needLogin) {
+							// We need to login
+						} else {
+							self._error('Stage: Save: Error with API putMix() response');
+						}
 					} else {
-						self._error(this.status + ' ' + this.statusText);
-						self.callback(callback, false);
+						self._error('Stage: Save: Error with API putMix() request');
 					}
+					self.callback(callback, success);
 				});
 			}
 		},

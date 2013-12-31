@@ -203,12 +203,19 @@ var api = (function(hyperaudio) {
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.mix = json;
-								self.callback(callback, true);
+								self.callback(callback, {
+									saved: true
+								});
 							},
 							error: function(event) {
 								self.error = true;
 								self.callback(callback, false);
 							}
+						});
+					} else if(success) {
+						// The user needs to login
+						self.callback(callback, {
+							needLogin: true
 						});
 					} else {
 						self.callback(callback, false);
