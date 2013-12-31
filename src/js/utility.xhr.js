@@ -27,7 +27,7 @@ var xhr = (function(hyperaudio) {
 		var xhr = new XMLHttpRequest();
 
 		xhr.addEventListener('load', function(event) {
-			if(this.status === 200) {
+			if(200 <= this.status && this.status < 300) {
 				if(typeof options.complete === 'function') {
 					options.complete.call(this, event);
 				}
