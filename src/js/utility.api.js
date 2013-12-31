@@ -68,6 +68,8 @@ var api = (function(hyperaudio) {
 				}, 0);
 			} else {
 				xhr({
+					// In future may want a version that returns only your own transcripts.
+					// url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.transcripts,
 					url: this.options.api + this.options.transcripts,
 					complete: function(event) {
 						var json = JSON.parse(this.responseText);
@@ -91,7 +93,8 @@ var api = (function(hyperaudio) {
 				this.getUsername(function(success) {
 					if(success && id) {
 						xhr({
-							url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.transcripts + id,
+							// url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.transcripts + id,
+							url: self.options.api + self.options.transcripts + id,
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.transcript = json;
