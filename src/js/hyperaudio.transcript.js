@@ -150,7 +150,9 @@ var Transcript = (function(document, hyperaudio) {
 
 					var media = hyperaudio.api.transcript.media;
 
-					this.options.media = {};
+					this.options.media = {
+						id: media ? media._id : '' // Store the media ID
+					};
 
 					if(media && media.source) {
 						for(var type in media.source) {
@@ -239,8 +241,8 @@ var Transcript = (function(document, hyperaudio) {
 										return;
 									}
 
-									if(opts.id) {
-										el.setAttribute(opts.stage.options.idAttr, opts.id); // Pass the transcript ID
+									if(opts.media.id) {
+										el.setAttribute(opts.stage.options.idAttr, opts.media.id); // Pass the media ID
 									}
 									if(opts.media.transcript) {
 										el.setAttribute(opts.stage.options.transAttr, opts.media.transcript); // Pass the transcript url
