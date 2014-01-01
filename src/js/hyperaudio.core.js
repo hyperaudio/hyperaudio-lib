@@ -189,6 +189,7 @@ var hyperaudio = (function() {
 			ready: 'ha:ready',
 			load: 'ha:load',
 			save: 'ha:save',
+			unauthenticated: 'ha:unauthenticated',
 			error: 'ha:error'
 		},
 		_commonMethods: {

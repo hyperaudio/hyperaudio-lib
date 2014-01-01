@@ -132,6 +132,7 @@ var Stage = (function(document, hyperaudio) {
 							self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
 						} else if(success.needLogin) {
 							// We need to login
+							self._trigger(hyperaudio.event.unauthenticated, {msg: 'Sign In required to save'});
 						} else {
 							self._error('Stage: Save: Error with API putMix() response');
 						}

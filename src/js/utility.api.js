@@ -10,6 +10,7 @@ var api = (function(hyperaudio) {
 				api: 'http://api.hyperaud.io/v1/',
 				transcripts: 'transcripts/',
 				mixes: 'mixes/',
+				signin: 'login/',
 				whoami: 'whoami/'
 			}, options);
 
@@ -30,6 +31,30 @@ var api = (function(hyperaudio) {
 			if(typeof callback === 'function') {
 				callback.call(this, success);
 			}
+		},
+		signin: function(auth, callback) {
+			var self = this;
+			// auth = {username,password}
+			xhr({
+				url: this.options.api + this.options.signin,
+				type: 'POST',
+				data: JSON.stringify(auth),
+				complete: function(event) {
+					var json = JSON.parse(this.responseText);
+					self.guest = !json.user;
+					if(!self.guest) {
+						self.username = json.user;
+						self.callback(callback, true);
+					} else {
+						self.username = '';
+						self.callback(callback, false);
+					}
+				},
+				error: function(event) {
+					self.error = true;
+					self.callback(callback, false);
+				}
+			});
 		},
 		getUsername: function(callback, force) {
 			var self = this;
