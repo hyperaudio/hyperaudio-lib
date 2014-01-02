@@ -154,6 +154,7 @@
 .hyperaudio-player-bar {
 	width: 60%;
 	background-color: rgba(0,0,0,0.5);
+	cursor:ew-resize;
 }
 
 .hyperaudio-player-progress {
@@ -161,6 +162,26 @@
 	width: 1%;
 	background: #387847;
 	border-right: 1px solid #000;
+}
+
+.hyperaudio-player-current-time,
+.hyperaudio-player-duration {
+	position:absolute;
+	top:0;
+	height:48px;
+	font-size:16px;
+	line-height:48px;
+	font-weight:normal;
+	padding:0;
+	font-family:'Varela Round', 'helvetica neue', arial, sans-serif;
+	color:#fff;
+}
+.hyperaudio-player-current-time {
+	padding-left:2%;
+}
+.hyperaudio-player-duration {
+	padding-right:2%;
+	text-align:right;
 }
 
 .hyperaudio-projector {

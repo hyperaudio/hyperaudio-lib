@@ -86,8 +86,20 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			buttonCount += 1;
 		}
 
-		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
+		// The time displays
+		this.currentTimeElem = document.createElement('div');
+		this.currentTimeElem.className = cssClass + '-current-time';
+		this.durationElem = document.createElement('div');
+		this.durationElem.className = cssClass + '-duration';
+		this.progressBarElem.appendChild(this.currentTimeElem);
+		this.progressBarElem.appendChild(this.durationElem);
 
+		// Adjust sizes according to options
+		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
+		this.currentTimeElem.style.width = 100 - buttonCount*10 + '%';
+		this.durationElem.style.width = 100 - buttonCount*10 + '%';
+
+		// Add the GUI
 		hyperaudio.addClass(this.player.target, cssClass);
 		this.player.target.appendChild(this.wrapperElem);
 	}
@@ -135,7 +147,10 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			var percentage = Math.round(100 * this.status.currentTime / this.status.duration);
 
 			this.progressIndicator.style.width = percentage + '%';
-			
+
+			this.currentTimeElem.innerHTML = time(this.status.currentTime);
+			this.durationElem.innerHTML = time(this.status.duration);
+
 			if ( this.status.paused ) {
 				hyperaudio.removeClass(this.wrapperElem, 'playing');
 			} else {
