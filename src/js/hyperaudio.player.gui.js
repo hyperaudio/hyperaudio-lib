@@ -226,7 +226,7 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 	// Adapted this from jPlayer code
 	function ConvertTime() {
 		this.init();
-	};
+	}
 	ConvertTime.prototype = {
 		init: function() {
 			this.options = {
@@ -265,7 +265,7 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 	var myConvertTime = new ConvertTime();
 	function time(s) {
 		return myConvertTime.time(s);
-	};
+	}
 
 	return PlayerGUI;
 

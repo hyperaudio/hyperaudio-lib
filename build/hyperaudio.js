@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.1 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 1st January 2014 19:28:25 */
+/*! hyperaudio v0.3.2 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 2nd January 2014 23:28:12 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6029,8 +6029,20 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			buttonCount += 1;
 		}
 
-		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
+		// The time displays
+		this.currentTimeElem = document.createElement('div');
+		this.currentTimeElem.className = cssClass + '-current-time';
+		this.durationElem = document.createElement('div');
+		this.durationElem.className = cssClass + '-duration';
+		this.progressBarElem.appendChild(this.currentTimeElem);
+		this.progressBarElem.appendChild(this.durationElem);
 
+		// Adjust sizes according to options
+		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
+		this.currentTimeElem.style.width = 100 - buttonCount*10 + '%';
+		this.durationElem.style.width = 100 - buttonCount*10 + '%';
+
+		// Add the GUI
 		hyperaudio.addClass(this.player.target, cssClass);
 		this.player.target.appendChild(this.wrapperElem);
 	}
@@ -6078,7 +6090,10 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			var percentage = Math.round(100 * this.status.currentTime / this.status.duration);
 
 			this.progressIndicator.style.width = percentage + '%';
-			
+
+			this.currentTimeElem.innerHTML = time(this.status.currentTime);
+			this.durationElem.innerHTML = time(this.status.duration);
+
 			if ( this.status.paused ) {
 				hyperaudio.removeClass(this.wrapperElem, 'playing');
 			} else {
@@ -6150,6 +6165,50 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			this.player.currentTime(current);
 		}
 	};
+
+	// Adapted this from jPlayer code
+	function ConvertTime() {
+		this.init();
+	}
+	ConvertTime.prototype = {
+		init: function() {
+			this.options = {
+				timeFormat: {
+					showHour: false,
+					showMin: true,
+					showSec: true,
+					padHour: false,
+					padMin: true,
+					padSec: true,
+					sepHour: ":",
+					sepMin: ":",
+					sepSec: ""
+				}
+			};
+		},
+		time: function(s) {
+			s = (s && typeof s === 'number') ? s : 0;
+
+			var myTime = new Date(s * 1000),
+				hour = myTime.getUTCHours(),
+				min = this.options.timeFormat.showHour ? myTime.getUTCMinutes() : myTime.getUTCMinutes() + hour * 60,
+				sec = this.options.timeFormat.showMin ? myTime.getUTCSeconds() : myTime.getUTCSeconds() + min * 60,
+				strHour = (this.options.timeFormat.padHour && hour < 10) ? "0" + hour : hour,
+				strMin = (this.options.timeFormat.padMin && min < 10) ? "0" + min : min,
+				strSec = (this.options.timeFormat.padSec && sec < 10) ? "0" + sec : sec,
+				strTime = "";
+
+			strTime += this.options.timeFormat.showHour ? strHour + this.options.timeFormat.sepHour : "";
+			strTime += this.options.timeFormat.showMin ? strMin + this.options.timeFormat.sepMin : "";
+			strTime += this.options.timeFormat.showSec ? strSec + this.options.timeFormat.sepSec : "";
+
+			return strTime;
+		}
+	};
+	var myConvertTime = new ConvertTime();
+	function time(s) {
+		return myConvertTime.time(s);
+	}
 
 	return PlayerGUI;
 
