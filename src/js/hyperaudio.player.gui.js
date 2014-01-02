@@ -208,6 +208,50 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 		}
 	};
 
+	// Adapted this from jPlayer code
+	function ConvertTime() {
+		this.init();
+	};
+	ConvertTime.prototype = {
+		init: function() {
+			this.options = {
+				timeFormat: {
+					showHour: false,
+					showMin: true,
+					showSec: true,
+					padHour: false,
+					padMin: true,
+					padSec: true,
+					sepHour: ":",
+					sepMin: ":",
+					sepSec: ""
+				}
+			};
+		},
+		time: function(s) {
+			s = (s && typeof s === 'number') ? s : 0;
+
+			var myTime = new Date(s * 1000),
+				hour = myTime.getUTCHours(),
+				min = this.options.timeFormat.showHour ? myTime.getUTCMinutes() : myTime.getUTCMinutes() + hour * 60,
+				sec = this.options.timeFormat.showMin ? myTime.getUTCSeconds() : myTime.getUTCSeconds() + min * 60,
+				strHour = (this.options.timeFormat.padHour && hour < 10) ? "0" + hour : hour,
+				strMin = (this.options.timeFormat.padMin && min < 10) ? "0" + min : min,
+				strSec = (this.options.timeFormat.padSec && sec < 10) ? "0" + sec : sec,
+				strTime = "";
+
+			strTime += this.options.timeFormat.showHour ? strHour + this.options.timeFormat.sepHour : "";
+			strTime += this.options.timeFormat.showMin ? strMin + this.options.timeFormat.sepMin : "";
+			strTime += this.options.timeFormat.showSec ? strSec + this.options.timeFormat.sepSec : "";
+
+			return strTime;
+		}
+	};
+	var myConvertTime = new ConvertTime();
+	function time(s) {
+		return myConvertTime.time(s);
+	};
+
 	return PlayerGUI;
 
 })(window, document, hyperaudio);
