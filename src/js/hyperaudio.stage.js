@@ -6,6 +6,8 @@ var Stage = (function(document, hyperaudio) {
 
 	function Stage(options) {
 
+		var self = this;
+
 		this.options = hyperaudio.extend({}, this.options, {
 
 			entity: 'STAGE', // Not really an option... More like a manifest
@@ -39,7 +41,14 @@ var Stage = (function(document, hyperaudio) {
 		this.article = document.createElement('article');
 		this.mix = {};
 
+		// The following lines assume that we found a target.
+
 		this.target.appendChild(this.article);
+
+		// Detect when an effect value is changed
+		this.target.addEventListener('change', function(e) {
+			self.changed();
+		});
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -212,8 +221,18 @@ var Stage = (function(document, hyperaudio) {
 					},
 					onDrop: function () {
 						hyperaudio.removeClass(self.target, self.options.dragdropClass);
+						self.changed();
 					}
 				});
+
+				this.changed();
+			}
+		},
+
+		changed: function() {
+			// Tell the projector the content changed
+			if(this.options.projector) {
+				this.options.projector.requestUpdate();
 			}
 		},
 

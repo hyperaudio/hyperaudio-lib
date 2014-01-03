@@ -18,6 +18,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			unit: 0.001, // Unit used if not given in section attr of stage.
 
+			stageChangeDelay: 1000, // (ms) Delay for content update after the stage is changed
+
 			gui: true, // True to add a gui.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -25,17 +27,17 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.stage = null;
-		// this.timeout = {};
+		this.timeout = {};
 
 		this.player = [];
-		this.media = [];
-		this.current = {};
 
 		this.activePlayer = 0;
 		this.nextPlayer = this.options.players > 1 ? 1 : 0;
 
 		// State Flags
 		this.paused = true;
+
+		this.time = {};
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -57,7 +59,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				var getManager = function(idx) {
 
-					console.log('Create: idx='+idx);
+					// console.log('Create: idx='+idx);
 
 					return function(event) {
 						// console.log('activePlayer='+self.activePlayer+' | idx='+idx);
@@ -72,7 +74,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				for(var i = 0; i < this.options.players; i++ ) {
 
-					console.log('Create: i='+i);
+					// console.log('Create: i='+i);
 
 					var manager = getManager(i);
 
@@ -122,7 +124,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			var activePlayer = this.which(media);
 
-			console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
+			// console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
 			if(activePlayer !== false) {
 				this.activePlayer = activePlayer;
@@ -130,7 +132,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.player[this.activePlayer].load(media);
 			}
 
-			console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
+			// console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
 			for(var i=0; i < this.player.length; i++) {
 				hyperaudio.removeClass(this.player[i].target, 'active');
@@ -240,7 +242,19 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.player[this.activePlayer].currentTime(time, play);
 		},
 
+		requestUpdate: function() {
+			var self = this;
+			// console.log('Projector: requestUpdate()');
+			clearTimeout(this.timeout.updateContent);
+			this.timeout.updateContent = setTimeout(function() {
+				self.updateContent();
+			}, this.options.stageChangeDelay);
+		},
+
 		updateContent: function() {
+
+			console.log('Projector: updateContent()');
+
 			if(this.stage && this.stage.target) {
 				// Get the staged contents wrapper elem
 				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
@@ -258,6 +272,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				while(!this.endedContent) {
 					this.getContent();
 				}
+
+				this.time.duration = 69;
 			}
 		},
 
@@ -329,7 +345,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.stageIndex++;
 			}
 
-			console.log('getContent: length=%d | content=%o',this.content.length,this.content);
+			// console.log('getContent: length=%d | content=%o',this.content.length,this.content);
 		},
 
 		getSection: function(index) {
@@ -600,7 +616,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.GUI.setStatus({
 					paused: this.paused,
 					currentTime: 42,
-					duration: 69
+					duration: this.time.duration
 				});
 			}
 		}
