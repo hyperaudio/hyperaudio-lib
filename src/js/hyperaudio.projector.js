@@ -211,6 +211,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.updateContent();
 				}
 
+				this.contentIndex = 0; // [Number] The content that is actually being played.
+
 				// This bit is similar to the manager() code
 
 				if(this.content.length) {
@@ -258,6 +260,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		updateContent: function() {
 
+			var i, len,
+				duration = 0;
+
 			console.log('Projector: updateContent()');
 
 			this.updateRequired = false;
@@ -281,7 +286,19 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.getContent();
 				}
 
-				this.time.duration = 69;
+				// Calculate the duration
+				for(i = 0, len = this.content.length; i < len; i++) {
+					duration += this.content[i].end + this.content[i].trim - this.content[i].start;
+
+				}
+				this.time.duration = duration;
+
+				// Update the duration on the GUI
+				if(this.options.gui) {
+					this.GUI.setStatus({
+						duration: this.time.duration
+					});
+				}
 			}
 		},
 
@@ -623,8 +640,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(this.options.gui) {
 				this.GUI.setStatus({
 					paused: this.paused,
-					currentTime: 42,
-					duration: this.time.duration
+					currentTime: 0
 				});
 			}
 		}
