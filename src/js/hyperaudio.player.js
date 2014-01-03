@@ -120,6 +120,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 						});
 					};
 
+					this.addEventListener('progress', handler); // Important for YT player GUI to update on set/change
 					this.addEventListener('timeupdate', handler);
 					this.addEventListener('play', handler);
 					this.addEventListener('pause', handler);
