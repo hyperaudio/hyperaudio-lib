@@ -34,6 +34,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.activePlayer = 0;
 		this.nextPlayer = this.options.players > 1 ? 1 : 0;
 
+		this.updateRequired = false;
+
 		// State Flags
 		this.paused = true;
 
@@ -205,7 +207,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.getContent();
 */
 
-				this.updateContent();
+				if(this.updateRequired) {
+					this.updateContent();
+				}
 
 				// This bit is similar to the manager() code
 
@@ -245,6 +249,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		requestUpdate: function() {
 			var self = this;
 			// console.log('Projector: requestUpdate()');
+			this.updateRequired = true;
 			clearTimeout(this.timeout.updateContent);
 			this.timeout.updateContent = setTimeout(function() {
 				self.updateContent();
@@ -254,6 +259,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		updateContent: function() {
 
 			console.log('Projector: updateContent()');
+
+			this.updateRequired = false;
+			clearTimeout(this.timeout.updateContent);
 
 			if(this.stage && this.stage.target) {
 				// Get the staged contents wrapper elem
