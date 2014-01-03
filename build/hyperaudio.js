@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.2 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 2nd January 2014 23:28:12 */
+/*! hyperaudio v0.3.3 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 3rd January 2014 18:17:49 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4626,10 +4626,12 @@ var SideMenu = (function (document, hyperaudio) {
 				var elem, trans;
 				for(var i = 0, l = this.transcripts.length; i < l; i++) {
 					trans = this.transcripts[i];
-					elem = document.createElement('li');
-					elem.setAttribute('data-id', trans._id);
-					elem.innerHTML = trans.label;
-					self.transcripts.appendChild(elem);
+					if(trans.type === 'html') {
+						elem = document.createElement('li');
+						elem.setAttribute('data-id', trans._id);
+						elem.innerHTML = trans.label;
+						self.transcripts.appendChild(elem);
+					}
 				}
 
 				self.transcripts._tap = new Tap({el: self.transcripts});
@@ -5701,6 +5703,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 						});
 					};
 
+					this.addEventListener('progress', handler); // Important for YT player GUI to update on set/change
 					this.addEventListener('timeupdate', handler);
 					this.addEventListener('play', handler);
 					this.addEventListener('pause', handler);
@@ -6538,6 +6541,8 @@ var Stage = (function(document, hyperaudio) {
 
 	function Stage(options) {
 
+		var self = this;
+
 		this.options = hyperaudio.extend({}, this.options, {
 
 			entity: 'STAGE', // Not really an option... More like a manifest
@@ -6571,7 +6576,14 @@ var Stage = (function(document, hyperaudio) {
 		this.article = document.createElement('article');
 		this.mix = {};
 
+		// The following lines assume that we found a target.
+
 		this.target.appendChild(this.article);
+
+		// Detect when an effect value is changed
+		this.target.addEventListener('change', function(e) {
+			self.changed();
+		});
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -6744,8 +6756,18 @@ var Stage = (function(document, hyperaudio) {
 					},
 					onDrop: function () {
 						hyperaudio.removeClass(self.target, self.options.dragdropClass);
+						self.changed();
 					}
 				});
+
+				this.changed();
+			}
+		},
+
+		changed: function() {
+			// Tell the projector the content changed
+			if(this.options.projector) {
+				this.options.projector.requestUpdate();
 			}
 		},
 
@@ -6781,6 +6803,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			unit: 0.001, // Unit used if not given in section attr of stage.
 
+			stageChangeDelay: 1000, // (ms) Delay for content update after the stage is changed
+
 			gui: true, // True to add a gui.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -6788,17 +6812,19 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.stage = null;
-		// this.timeout = {};
+		this.timeout = {};
 
 		this.player = [];
-		this.media = [];
-		this.current = {};
 
 		this.activePlayer = 0;
 		this.nextPlayer = this.options.players > 1 ? 1 : 0;
 
+		this.updateRequired = false;
+
 		// State Flags
 		this.paused = true;
+
+		this.time = {};
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -6820,7 +6846,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				var getManager = function(idx) {
 
-					console.log('Create: idx='+idx);
+					// console.log('Create: idx='+idx);
 
 					return function(event) {
 						// console.log('activePlayer='+self.activePlayer+' | idx='+idx);
@@ -6835,7 +6861,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				for(var i = 0; i < this.options.players; i++ ) {
 
-					console.log('Create: i='+i);
+					// console.log('Create: i='+i);
 
 					var manager = getManager(i);
 
@@ -6885,7 +6911,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			var activePlayer = this.which(media);
 
-			console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
+			// console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
 			if(activePlayer !== false) {
 				this.activePlayer = activePlayer;
@@ -6893,31 +6919,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.player[this.activePlayer].load(media);
 			}
 
-			console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
+			// console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
 			for(var i=0; i < this.player.length; i++) {
 				hyperaudio.removeClass(this.player[i].target, 'active');
 			}
 			hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
-		},
-		OLD_load: function(media) {
-			var self = this;
-
-			this.activePlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
-
-			// This is old DNA - refactor
-			this.media[this.activePlayer] = media;
-
-			for(var i=0; i < this.player.length; i++) {
-				hyperaudio.removeClass(this.player[i].target, 'active');
-			}
-
-			if(this.player[this.activePlayer]) {
-				hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
-				this.player[this.activePlayer].load(this.media[this.activePlayer]);
-			} else {
-				this._error('Video player not created : ' + this.options.target);
-			}
 		},
 		prepare: function(media) {
 			// Used when more than 1 player to prepare the next piece of media.
@@ -6967,6 +6974,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			// ATM, we always play from the start.
 
 			if(this.stage && this.stage.target) {
+
+/*
 				// Get the staged contents wrapper elem
 				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
 
@@ -6980,9 +6989,16 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				this.contentIndex = 0; // [Number] The content that is actually being played.
 
-				// This bit is similar to the manager() code
-
 				this.getContent();
+*/
+
+				if(this.updateRequired) {
+					this.updateContent();
+				}
+
+				this.contentIndex = 0; // [Number] The content that is actually being played.
+
+				// This bit is similar to the manager() code
 
 				if(this.content.length) {
 					this.paused = false;
@@ -7002,146 +7018,75 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.paused = true;
 			}
 		},
-		OLD_play: function() {
-
-			// ATM, we always play from the start.
-
-			if(this.stage && this.stage.target) {
-				// Get the staged contents wrapper elem
-				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
-
-				// Get the sections
-				this.current.sections = this.stageArticle.getElementsByTagName('section'); // old way
-				this.stageSections = this.stageArticle.getElementsByTagName('section');
-
-				this.setCurrent(0);
-
-				this.paused = false;
-
-				this.load(this.current.media);
-				this._play(this.current.start);
-
-			} else {
-				this.paused = true;
-			}
-		},
 
 		pause: function() {
 			this.paused = true;
 			this._pause();
 		},
 		_play: function(time) {
-			// this.player[0].play(time);
 			this.player[this.activePlayer].play(time);
 		},
 		_pause: function(time) {
-			// this.player[0].pause(time);
 			this.player[this.activePlayer].pause(time);
 		},
 		currentTime: function(time, play) {
-			// this.player[0].currentTime(time, play);
-			this.player[this.activePlayer].currentTime(time, play);
+			// this.player[this.activePlayer].currentTime(time, play);
 		},
-/*
-		setCurrent: function(index) {
-			var weHaveMoreVideo = false;
 
-			this.current = this.getSection(index);
+		requestUpdate: function() {
+			var self = this;
+			// console.log('Projector: requestUpdate()');
+			this.updateRequired = true;
+			clearTimeout(this.timeout.updateContent);
+			this.timeout.updateContent = setTimeout(function() {
+				self.updateContent();
+			}, this.options.stageChangeDelay);
+		},
 
-			if(this.current.effect) {
+		updateContent: function() {
 
-				switch(this.current.effect.type) {
-					case 'title':
-						if(this.current.effect.text && this.current.effect.duration) {
-							titleFX({
-								el: '#titleFXHelper',
-								text: this.current.effect.text,
-								duration: this.current.effect.duration * 1000
-							});
-						}
-						break;
-					case 'fade':
-						break;
-					case 'pause':
-						break;
+			var i, len,
+				duration = 0;
+
+			console.log('Projector: updateContent()');
+
+			this.updateRequired = false;
+			clearTimeout(this.timeout.updateContent);
+
+			if(this.stage && this.stage.target) {
+				// Get the staged contents wrapper elem
+				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
+
+				// Get the sections
+				this.stageSections = this.stageArticle.getElementsByTagName('section');
+
+				this.stageIndex = 0; // [Number] The next section
+				this.content = []; // [Array] Holding the sections found with content
+				this.firstContent = true; // [Boolean] True the first time
+				this.endedContent = false; // [Boolean] True when we have no more content
+
+				this.contentIndex = 0; // [Number] The content that is actually being played.
+
+				while(!this.endedContent) {
+					this.getContent();
 				}
 
-				if(++index < this.stageSections.length) {
-					weHaveMoreVideo = this.setCurrent(index);
+				// Calculate the duration
+				for(i = 0, len = this.content.length; i < len; i++) {
+					duration += this.content[i].end + this.content[i].trim - this.content[i].start;
+
 				}
-				// return weHaveMoreVideo;
-			} else {
-				if(this.current.end) {
-					weHaveMoreVideo = true;
+				this.time.duration = duration;
+
+				// Update the duration on the GUI
+				if(this.options.gui) {
+					this.GUI.setStatus({
+						duration: this.time.duration
+					});
 				}
 			}
-
-			return weHaveMoreVideo;
 		},
-*/
-/*
-		OLD_setCurrent: function(index) {
-			var weHaveMoreVideo = false,
-				effectType;
 
-			this.current.index = index;
-
-			// Get the first section
-			this.current.section = this.current.sections[this.current.index];
-
-			effectType = this.current.section.getAttribute('data-effect');
-			if(effectType) {
-
-				var ipText = this.current.section.querySelector('input[type="text"]');
-				var ipDuration = this.current.section.querySelector('input[type="range"]');
-
-				switch(effectType) {
-					case 'title':
-						if(ipText && ipDuration) {
-							titleFX({
-								el: '#titleFXHelper',
-								text: ipText.value,
-								duration: ipDuration.value * 1000
-							});
-						}
-						break;
-					case 'fade':
-						break;
-					case 'pause':
-						break;
-				}
-
-				if(++this.current.index < this.current.sections.length) {
-					weHaveMoreVideo = this.setCurrent(this.current.index);
-				}
-				return weHaveMoreVideo;
-			}
-
-			// Get the ID
-			this.current.id = this.current.section.getAttribute(this.stage.options.idAttr);
-
-			// Get the media
-			this.current.media = {
-				mp4: this.current.section.getAttribute(this.stage.options.mp4Attr),
-				webm: this.current.section.getAttribute(this.stage.options.webmAttr),
-				youtube: this.current.section.getAttribute(this.stage.options.ytAttr)
-			};
-
-			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);
-			this.current.unit = unit = unit > 0 ? unit : this.options.unit;
-
-			// Still have attributes hard coded in here. Would need to pass from the transcript to stage and then to here.
-			var words = this.current.section.getElementsByTagName('a');
-			if(words.length) {
-				this.current.start = words[0].getAttribute('data-m') * unit;
-				this.current.end = words[words.length-1].getAttribute('data-m') * unit;
-				weHaveMoreVideo = true;
-			} else {
-				weHaveMoreVideo = false;
-			}
-			return weHaveMoreVideo;
-		},
-*/
 		getContent: function() {
 
 			var effect = [],
@@ -7210,7 +7155,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.stageIndex++;
 			}
 
-			console.log('getContent: length=%d | content=%o',this.content.length,this.content);
+			// console.log('getContent: length=%d | content=%o',this.content.length,this.content);
 		},
 
 		getSection: function(index) {
@@ -7454,7 +7399,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 					// This bit is similar to the play() code
 
-					this.getContent();
+					// this.getContent();
 
 					this.contentIndex++;
 
@@ -7480,40 +7425,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(this.options.gui) {
 				this.GUI.setStatus({
 					paused: this.paused,
-					currentTime: 42,
-					duration: 69
-				});
-			}
-		},
-
-		OLD_manager: function(videoElem, event) {
-			var self = this;
-
-			if(!this.paused) {
-				// if(this.player[0].videoElem.currentTime > this.current.end + this.options.trim) {
-				if(videoElem.currentTime > this.current.end + this.options.trim) {
-					// Goto the next section
-
-					// Want to refactor the setCurrent() code... Maybe make it more like nextCurrent or something like that.
-					// if(++this.current.index < this.current.sections.length && this.setCurrent(this.current.index)) {
-					if(++this.current.index < this.stageSections.length && this.setCurrent(this.current.index)) {
-						this.load(this.current.media);
-						this._play(this.current.start);
-					} else {
-						this.current.index = 0;
-
-						this.paused = true;
-						this._pause();
-					}
-				}
-			}
-
-			// Will need to be calculating the currentTime on the fly and the duration calcuated at the start and on changes to stage.
-			if(this.options.gui) {
-				this.GUI.setStatus({
-					paused: this.paused,
-					currentTime: 42,
-					duration: 69
+					currentTime: 0
 				});
 			}
 		}
