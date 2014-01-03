@@ -44,10 +44,12 @@ var SideMenu = (function (document, hyperaudio) {
 				var elem, trans;
 				for(var i = 0, l = this.transcripts.length; i < l; i++) {
 					trans = this.transcripts[i];
-					elem = document.createElement('li');
-					elem.setAttribute('data-id', trans._id);
-					elem.innerHTML = trans.label;
-					self.transcripts.appendChild(elem);
+					if(trans.type === 'html') {
+						elem = document.createElement('li');
+						elem.setAttribute('data-id', trans._id);
+						elem.innerHTML = trans.label;
+						self.transcripts.appendChild(elem);
+					}
 				}
 
 				self.transcripts._tap = new Tap({el: self.transcripts});
