@@ -137,25 +137,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
 		},
-		OLD_load: function(media) {
-			var self = this;
-
-			this.activePlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
-
-			// This is old DNA - refactor
-			this.media[this.activePlayer] = media;
-
-			for(var i=0; i < this.player.length; i++) {
-				hyperaudio.removeClass(this.player[i].target, 'active');
-			}
-
-			if(this.player[this.activePlayer]) {
-				hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
-				this.player[this.activePlayer].load(this.media[this.activePlayer]);
-			} else {
-				this._error('Video player not created : ' + this.options.target);
-			}
-		},
 		prepare: function(media) {
 			// Used when more than 1 player to prepare the next piece of media.
 
@@ -239,146 +220,21 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.paused = true;
 			}
 		},
-		OLD_play: function() {
-
-			// ATM, we always play from the start.
-
-			if(this.stage && this.stage.target) {
-				// Get the staged contents wrapper elem
-				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
-
-				// Get the sections
-				this.current.sections = this.stageArticle.getElementsByTagName('section'); // old way
-				this.stageSections = this.stageArticle.getElementsByTagName('section');
-
-				this.setCurrent(0);
-
-				this.paused = false;
-
-				this.load(this.current.media);
-				this._play(this.current.start);
-
-			} else {
-				this.paused = true;
-			}
-		},
 
 		pause: function() {
 			this.paused = true;
 			this._pause();
 		},
 		_play: function(time) {
-			// this.player[0].play(time);
 			this.player[this.activePlayer].play(time);
 		},
 		_pause: function(time) {
-			// this.player[0].pause(time);
 			this.player[this.activePlayer].pause(time);
 		},
 		currentTime: function(time, play) {
-			// this.player[0].currentTime(time, play);
 			this.player[this.activePlayer].currentTime(time, play);
 		},
-/*
-		setCurrent: function(index) {
-			var weHaveMoreVideo = false;
 
-			this.current = this.getSection(index);
-
-			if(this.current.effect) {
-
-				switch(this.current.effect.type) {
-					case 'title':
-						if(this.current.effect.text && this.current.effect.duration) {
-							titleFX({
-								el: '#titleFXHelper',
-								text: this.current.effect.text,
-								duration: this.current.effect.duration * 1000
-							});
-						}
-						break;
-					case 'fade':
-						break;
-					case 'pause':
-						break;
-				}
-
-				if(++index < this.stageSections.length) {
-					weHaveMoreVideo = this.setCurrent(index);
-				}
-				// return weHaveMoreVideo;
-			} else {
-				if(this.current.end) {
-					weHaveMoreVideo = true;
-				}
-			}
-
-			return weHaveMoreVideo;
-		},
-*/
-/*
-		OLD_setCurrent: function(index) {
-			var weHaveMoreVideo = false,
-				effectType;
-
-			this.current.index = index;
-
-			// Get the first section
-			this.current.section = this.current.sections[this.current.index];
-
-			effectType = this.current.section.getAttribute('data-effect');
-			if(effectType) {
-
-				var ipText = this.current.section.querySelector('input[type="text"]');
-				var ipDuration = this.current.section.querySelector('input[type="range"]');
-
-				switch(effectType) {
-					case 'title':
-						if(ipText && ipDuration) {
-							titleFX({
-								el: '#titleFXHelper',
-								text: ipText.value,
-								duration: ipDuration.value * 1000
-							});
-						}
-						break;
-					case 'fade':
-						break;
-					case 'pause':
-						break;
-				}
-
-				if(++this.current.index < this.current.sections.length) {
-					weHaveMoreVideo = this.setCurrent(this.current.index);
-				}
-				return weHaveMoreVideo;
-			}
-
-			// Get the ID
-			this.current.id = this.current.section.getAttribute(this.stage.options.idAttr);
-
-			// Get the media
-			this.current.media = {
-				mp4: this.current.section.getAttribute(this.stage.options.mp4Attr),
-				webm: this.current.section.getAttribute(this.stage.options.webmAttr),
-				youtube: this.current.section.getAttribute(this.stage.options.ytAttr)
-			};
-
-			var unit = 1 * this.current.section.getAttribute(this.stage.options.unitAttr);
-			this.current.unit = unit = unit > 0 ? unit : this.options.unit;
-
-			// Still have attributes hard coded in here. Would need to pass from the transcript to stage and then to here.
-			var words = this.current.section.getElementsByTagName('a');
-			if(words.length) {
-				this.current.start = words[0].getAttribute('data-m') * unit;
-				this.current.end = words[words.length-1].getAttribute('data-m') * unit;
-				weHaveMoreVideo = true;
-			} else {
-				weHaveMoreVideo = false;
-			}
-			return weHaveMoreVideo;
-		},
-*/
 		getContent: function() {
 
 			var effect = [],
@@ -709,38 +565,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						// Nothing to play
 						this.paused = true;
 						// this._pause();
-					}
-				}
-			}
-
-			// Will need to be calculating the currentTime on the fly and the duration calcuated at the start and on changes to stage.
-			if(this.options.gui) {
-				this.GUI.setStatus({
-					paused: this.paused,
-					currentTime: 42,
-					duration: 69
-				});
-			}
-		},
-
-		OLD_manager: function(videoElem, event) {
-			var self = this;
-
-			if(!this.paused) {
-				// if(this.player[0].videoElem.currentTime > this.current.end + this.options.trim) {
-				if(videoElem.currentTime > this.current.end + this.options.trim) {
-					// Goto the next section
-
-					// Want to refactor the setCurrent() code... Maybe make it more like nextCurrent or something like that.
-					// if(++this.current.index < this.current.sections.length && this.setCurrent(this.current.index)) {
-					if(++this.current.index < this.stageSections.length && this.setCurrent(this.current.index)) {
-						this.load(this.current.media);
-						this._play(this.current.start);
-					} else {
-						this.current.index = 0;
-
-						this.paused = true;
-						this._pause();
 					}
 				}
 			}
