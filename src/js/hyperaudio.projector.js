@@ -239,7 +239,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.player[this.activePlayer].pause(time);
 		},
 		currentTime: function(time, play) {
-			this.player[this.activePlayer].currentTime(time, play);
+			// this.player[this.activePlayer].currentTime(time, play);
 		},
 
 		requestUpdate: function() {
