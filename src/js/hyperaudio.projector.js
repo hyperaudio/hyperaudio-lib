@@ -185,6 +185,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			// ATM, we always play from the start.
 
 			if(this.stage && this.stage.target) {
+
+/*
 				// Get the staged contents wrapper elem
 				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
 
@@ -198,9 +200,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				this.contentIndex = 0; // [Number] The content that is actually being played.
 
-				// This bit is similar to the manager() code
-
 				this.getContent();
+*/
+
+				this.updateContent();
+
+				// This bit is similar to the manager() code
 
 				if(this.content.length) {
 					this.paused = false;
@@ -233,6 +238,27 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 		currentTime: function(time, play) {
 			this.player[this.activePlayer].currentTime(time, play);
+		},
+
+		updateContent: function() {
+			if(this.stage && this.stage.target) {
+				// Get the staged contents wrapper elem
+				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
+
+				// Get the sections
+				this.stageSections = this.stageArticle.getElementsByTagName('section');
+
+				this.stageIndex = 0; // [Number] The next section
+				this.content = []; // [Array] Holding the sections found with content
+				this.firstContent = true; // [Boolean] True the first time
+				this.endedContent = false; // [Boolean] True when we have no more content
+
+				this.contentIndex = 0; // [Number] The content that is actually being played.
+
+				while(!this.endedContent) {
+					this.getContent();
+				}
+			}
 		},
 
 		getContent: function() {
@@ -547,7 +573,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 					// This bit is similar to the play() code
 
-					this.getContent();
+					// this.getContent();
 
 					this.contentIndex++;
 
