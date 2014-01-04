@@ -286,10 +286,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.getContent();
 				}
 
-				// Calculate the duration
+				// Calculate the duration and content offset
 				for(i = 0, len = this.content.length; i < len; i++) {
+					this.content[i].offset = duration;
 					duration += this.content[i].end + this.content[i].trim - this.content[i].start;
-
 				}
 				this.time.duration = duration;
 
@@ -607,6 +607,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				var endTime = this.content[this.contentIndex].end + this.content[this.contentIndex].trim;
 
+				// Calculte the (total) currentTime to display on the GUI
+				var totalCurrentTime = this.content[this.contentIndex].offset;
+				if(this.content[this.contentIndex].start < videoElem.currentTime && videoElem.currentTime < endTime) {
+					totalCurrentTime += videoElem.currentTime - this.content[this.contentIndex].start;
+				} else if(videoElem.currentTime >= endTime) {
+					totalCurrentTime += endTime - this.content[this.contentIndex].start;
+				}
+
 				if(videoElem.currentTime > endTime) {
 					// Goto the next piece of content
 
@@ -631,17 +639,22 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					} else {
 						// Nothing to play
 						this.paused = true;
-						// this._pause();
+						this.contentIndex = 0; // Reset this since YouTube player (or its Popcorn wrapper) generates the timeupdate all the time.
+						this.prepare(this.content[this.contentIndex].media);
 					}
 				}
-			}
-
-			// Will need to be calculating the currentTime on the fly and the duration calcuated at the start and on changes to stage.
-			if(this.options.gui) {
-				this.GUI.setStatus({
-					paused: this.paused,
-					currentTime: 0
-				});
+				if(this.options.gui) {
+					this.GUI.setStatus({
+						paused: this.paused,
+						currentTime: totalCurrentTime
+					});
+				}
+			} else {
+				if(this.options.gui) {
+					this.GUI.setStatus({
+						paused: this.paused
+					});
+				}
 			}
 		}
 	};
