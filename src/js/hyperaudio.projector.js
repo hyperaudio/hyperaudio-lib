@@ -36,6 +36,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		this.updateRequired = false;
 
+		this.stageArticle = null;
+		this.stageSections = null;
+		this.stageIndex = 0; // [Number] The next section
+		this.content = []; // [Array] Holding the sections found with content
+		this.contentIndex = 0; // [Number] The content that is actually being played.
+		this.firstContent = true; // [Boolean] True the first time
+		this.endedContent = false; // [Boolean] True when we have no more content
+
 		// State Flags
 		this.paused = true;
 
@@ -186,34 +194,37 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 		play: function() {
 
-			// ATM, we always play from the start.
+			var resume = false,
+				jumpTo;
+
+			if(arguments.length) {
+				if(typeof arguments[0] === 'object') {
+					jumpTo = arguments[0];
+				}
+			} else {
+				// resume = true;
+			}
 
 			if(this.stage && this.stage.target) {
-
-/*
-				// Get the staged contents wrapper elem
-				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
-
-				// Get the sections
-				this.stageSections = this.stageArticle.getElementsByTagName('section');
-
-				this.stageIndex = 0; // [Number] The next section
-				this.content = []; // [Array] Holding the sections found with content
-				this.firstContent = true; // [Boolean] True the first time
-				this.endedContent = false; // [Boolean] True when we have no more content
-
-				this.contentIndex = 0; // [Number] The content that is actually being played.
-
-				this.getContent();
-*/
 
 				if(this.updateRequired) {
 					this.updateContent();
 				}
 
-				this.contentIndex = 0; // [Number] The content that is actually being played.
+				// Not sure how to enable resume ATM... Might need a flag or something. The 1st time and the ended are a problem ATM.
+				if(resume) {
+					this._play();
+				}
 
-				// This bit is similar to the manager() code
+				if(jumpTo) {
+					this._pause();
+					this.contentIndex = jumpTo.contentIndex;
+				} else {
+					this.contentIndex = 0;
+				}
+
+
+				// This bit is similar to the manager() code - not sure if true any longer...
 
 				if(this.content.length) {
 					this.paused = false;
@@ -223,7 +234,13 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.prepare(this.content[this.contentIndex+1].media);
 					}
 					this.effect(this.content[this.contentIndex].effect);
-					this._play(this.content[this.contentIndex].start);
+
+					if(jumpTo) {
+						this._play(jumpTo.start);
+					} else {
+						this._play(this.content[this.contentIndex].start);
+					}
+
 
 				} else {
 					// Nothing to play
@@ -246,6 +263,27 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 		currentTime: function(time, play) {
 			// this.player[this.activePlayer].currentTime(time, play);
+		},
+
+		playWord: function(sectionElem, wordElem) {
+			var jumpTo = {},
+				i, len;
+			if(this.stage && this.stage.target) {
+				console.log('playWord()');
+				if(this.updateRequired) {
+					this.updateContent();
+				}
+				for(i = 0, len = this.content.length; i < len; i++) {
+					console.log('playWord(): i='+i);
+					if(this.content[i].element === sectionElem) {
+						jumpTo.contentIndex = i;
+						jumpTo.start = wordElem.getAttribute('data-m') * this.content[i].unit;
+						console.log('playWord(): jumpTo=%o',jumpTo);
+						this.play(jumpTo);
+						break;
+					}
+				}
+			}
 		},
 
 		requestUpdate: function() {
@@ -280,7 +318,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.firstContent = true; // [Boolean] True the first time
 				this.endedContent = false; // [Boolean] True when we have no more content
 
-				this.contentIndex = 0; // [Number] The content that is actually being played.
+				// this.contentIndex = 0; // [Number] The content that is actually being played.
 
 				while(!this.endedContent) {
 					this.getContent();

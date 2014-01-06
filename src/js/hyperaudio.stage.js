@@ -27,6 +27,10 @@ var Stage = (function(document, hyperaudio) {
 			ytAttr: 'data-yt', // Attribute name that holds the transcript youtube URL.
 			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
+			word: 'a',
+			section: 'section',
+			// timeAttr: 'data-m', // Attribute name that holds the timing information.
+
 			dragdropClass: 'dragdrop',
 			async: true, // When true, some operations are delayed by a timeout.
 			projector: null
@@ -48,7 +52,33 @@ var Stage = (function(document, hyperaudio) {
 		// Detect when an effect value is changed
 		this.target.addEventListener('change', function(e) {
 			self.changed();
-		});
+		}, false);
+
+		this.target.addEventListener('click', function(event) {
+			var section, word, search;
+			event.preventDefault();
+			if(event.target.nodeName.toLowerCase() === self.options.word) {
+				word = event.target;
+				search = word;
+
+				// Search up the parent tree for the section.
+				while(search = search.parentNode) {
+					console.log('el.nodeName='+search.nodeName);
+					if(search.nodeName.toLowerCase() === self.options.section) {
+						section = search;
+						break; // exit while loop
+					}
+				}
+
+				console.log('section.nodeName='+section.nodeName+' | word.nodeName='+word.nodeName);
+
+				// tAttr = event.target.getAttribute(self.options.timeAttr);
+				// time = tAttr * opts.unit;
+				if(self.options.projector) {
+					self.options.projector.playWord(section,word);
+				}
+			}
+		}, false);
 
 		if(this.options.DEBUG) {
 			this._debug();
