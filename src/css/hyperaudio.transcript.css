@@ -109,7 +109,7 @@ p {
 .transcript a {
 	display: inline-block;
 	position: relative;
-	z-index: 1;
+	/* z-index: 1; */
 	cursor:pointer;
 
 	white-space: pre-wrap;
@@ -297,6 +297,25 @@ p {
 .draggable p {
 	margin-bottom:0;
 }
+
+.stage a {
+	display: inline-block;
+	position: relative;
+	/* z-index: 1; */
+	cursor:pointer;
+
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+}
+
+.stage a:hover {
+	background: #ffc;
+	color: #a00;
+}
+
 
 /* Side Menu Rules */
 
