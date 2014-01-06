@@ -62,12 +62,13 @@ var Stage = (function(document, hyperaudio) {
 				search = word;
 
 				// Search up the parent tree for the section.
-				while(search = search.parentNode) {
+				while(search) {
 					console.log('el.nodeName='+search.nodeName);
 					if(search.nodeName.toLowerCase() === self.options.section) {
 						section = search;
 						break; // exit while loop
 					}
+					search = search.parentNode;
 				}
 
 				console.log('section.nodeName='+section.nodeName+' | word.nodeName='+word.nodeName);
