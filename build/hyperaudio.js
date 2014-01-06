@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.3 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 3rd January 2014 18:17:49 */
+/*! hyperaudio v0.3.4 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 6th January 2014 20:06:18 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6562,6 +6562,10 @@ var Stage = (function(document, hyperaudio) {
 			ytAttr: 'data-yt', // Attribute name that holds the transcript youtube URL.
 			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
+			word: 'a',
+			section: 'section',
+			// timeAttr: 'data-m', // Attribute name that holds the timing information.
+
 			dragdropClass: 'dragdrop',
 			async: true, // When true, some operations are delayed by a timeout.
 			projector: null
@@ -6583,7 +6587,34 @@ var Stage = (function(document, hyperaudio) {
 		// Detect when an effect value is changed
 		this.target.addEventListener('change', function(e) {
 			self.changed();
-		});
+		}, false);
+
+		this.target.addEventListener('click', function(event) {
+			var section, word, search;
+			event.preventDefault();
+			if(event.target.nodeName.toLowerCase() === self.options.word) {
+				word = event.target;
+				search = word;
+
+				// Search up the parent tree for the section.
+				while(search) {
+					console.log('el.nodeName='+search.nodeName);
+					if(search.nodeName.toLowerCase() === self.options.section) {
+						section = search;
+						break; // exit while loop
+					}
+					search = search.parentNode;
+				}
+
+				console.log('section.nodeName='+section.nodeName+' | word.nodeName='+word.nodeName);
+
+				// tAttr = event.target.getAttribute(self.options.timeAttr);
+				// time = tAttr * opts.unit;
+				if(self.options.projector) {
+					self.options.projector.playWord(section,word);
+				}
+			}
+		}, false);
 
 		if(this.options.DEBUG) {
 			this._debug();
@@ -6821,6 +6852,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		this.updateRequired = false;
 
+		this.stageArticle = null;
+		this.stageSections = null;
+		this.stageIndex = 0; // [Number] The next section
+		this.content = []; // [Array] Holding the sections found with content
+		this.contentIndex = 0; // [Number] The content that is actually being played.
+		this.firstContent = true; // [Boolean] True the first time
+		this.endedContent = false; // [Boolean] True when we have no more content
+
 		// State Flags
 		this.paused = true;
 
@@ -6971,34 +7010,37 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 		play: function() {
 
-			// ATM, we always play from the start.
+			var resume = false,
+				jumpTo;
+
+			if(arguments.length) {
+				if(typeof arguments[0] === 'object') {
+					jumpTo = arguments[0];
+				}
+			} else {
+				// resume = true;
+			}
 
 			if(this.stage && this.stage.target) {
-
-/*
-				// Get the staged contents wrapper elem
-				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
-
-				// Get the sections
-				this.stageSections = this.stageArticle.getElementsByTagName('section');
-
-				this.stageIndex = 0; // [Number] The next section
-				this.content = []; // [Array] Holding the sections found with content
-				this.firstContent = true; // [Boolean] True the first time
-				this.endedContent = false; // [Boolean] True when we have no more content
-
-				this.contentIndex = 0; // [Number] The content that is actually being played.
-
-				this.getContent();
-*/
 
 				if(this.updateRequired) {
 					this.updateContent();
 				}
 
-				this.contentIndex = 0; // [Number] The content that is actually being played.
+				// Not sure how to enable resume ATM... Might need a flag or something. The 1st time and the ended are a problem ATM.
+				if(resume) {
+					this._play();
+				}
 
-				// This bit is similar to the manager() code
+				if(jumpTo) {
+					this._pause();
+					this.contentIndex = jumpTo.contentIndex;
+				} else {
+					this.contentIndex = 0;
+				}
+
+
+				// This bit is similar to the manager() code - not sure if true any longer...
 
 				if(this.content.length) {
 					this.paused = false;
@@ -7008,7 +7050,13 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.prepare(this.content[this.contentIndex+1].media);
 					}
 					this.effect(this.content[this.contentIndex].effect);
-					this._play(this.content[this.contentIndex].start);
+
+					if(jumpTo) {
+						this._play(jumpTo.start);
+					} else {
+						this._play(this.content[this.contentIndex].start);
+					}
+
 
 				} else {
 					// Nothing to play
@@ -7031,6 +7079,27 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 		currentTime: function(time, play) {
 			// this.player[this.activePlayer].currentTime(time, play);
+		},
+
+		playWord: function(sectionElem, wordElem) {
+			var jumpTo = {},
+				i, len;
+			if(this.stage && this.stage.target) {
+				console.log('playWord()');
+				if(this.updateRequired) {
+					this.updateContent();
+				}
+				for(i = 0, len = this.content.length; i < len; i++) {
+					console.log('playWord(): i='+i);
+					if(this.content[i].element === sectionElem) {
+						jumpTo.contentIndex = i;
+						jumpTo.start = wordElem.getAttribute('data-m') * this.content[i].unit;
+						console.log('playWord(): jumpTo=%o',jumpTo);
+						this.play(jumpTo);
+						break;
+					}
+				}
+			}
 		},
 
 		requestUpdate: function() {
@@ -7065,16 +7134,16 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.firstContent = true; // [Boolean] True the first time
 				this.endedContent = false; // [Boolean] True when we have no more content
 
-				this.contentIndex = 0; // [Number] The content that is actually being played.
+				// this.contentIndex = 0; // [Number] The content that is actually being played.
 
 				while(!this.endedContent) {
 					this.getContent();
 				}
 
-				// Calculate the duration
+				// Calculate the duration and content offset
 				for(i = 0, len = this.content.length; i < len; i++) {
+					this.content[i].offset = duration;
 					duration += this.content[i].end + this.content[i].trim - this.content[i].start;
-
 				}
 				this.time.duration = duration;
 
@@ -7392,6 +7461,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				var endTime = this.content[this.contentIndex].end + this.content[this.contentIndex].trim;
 
+				// Calculte the (total) currentTime to display on the GUI
+				var totalCurrentTime = this.content[this.contentIndex].offset;
+				if(this.content[this.contentIndex].start < videoElem.currentTime && videoElem.currentTime < endTime) {
+					totalCurrentTime += videoElem.currentTime - this.content[this.contentIndex].start;
+				} else if(videoElem.currentTime >= endTime) {
+					totalCurrentTime += endTime - this.content[this.contentIndex].start;
+				}
+
 				if(videoElem.currentTime > endTime) {
 					// Goto the next piece of content
 
@@ -7416,17 +7493,22 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					} else {
 						// Nothing to play
 						this.paused = true;
-						// this._pause();
+						this.contentIndex = 0; // Reset this since YouTube player (or its Popcorn wrapper) generates the timeupdate all the time.
+						this.prepare(this.content[this.contentIndex].media);
 					}
 				}
-			}
-
-			// Will need to be calculating the currentTime on the fly and the duration calcuated at the start and on changes to stage.
-			if(this.options.gui) {
-				this.GUI.setStatus({
-					paused: this.paused,
-					currentTime: 0
-				});
+				if(this.options.gui) {
+					this.GUI.setStatus({
+						paused: this.paused,
+						currentTime: totalCurrentTime
+					});
+				}
+			} else {
+				if(this.options.gui) {
+					this.GUI.setStatus({
+						paused: this.paused
+					});
+				}
 			}
 		}
 	};
