@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.4 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 6th January 2014 20:06:18 */
+/*! hyperaudio v0.3.5 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 7th January 2014 12:46:10 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6589,6 +6589,8 @@ var Stage = (function(document, hyperaudio) {
 			self.changed();
 		}, false);
 
+		// this.target._tap = new Tap({el: this.target});
+		// this.target.addEventListener('tap', function(event) {
 		this.target.addEventListener('click', function(event) {
 			var section, word, search;
 			event.preventDefault();
@@ -6598,7 +6600,6 @@ var Stage = (function(document, hyperaudio) {
 
 				// Search up the parent tree for the section.
 				while(search) {
-					console.log('el.nodeName='+search.nodeName);
 					if(search.nodeName.toLowerCase() === self.options.section) {
 						section = search;
 						break; // exit while loop
@@ -6606,10 +6607,6 @@ var Stage = (function(document, hyperaudio) {
 					search = search.parentNode;
 				}
 
-				console.log('section.nodeName='+section.nodeName+' | word.nodeName='+word.nodeName);
-
-				// tAttr = event.target.getAttribute(self.options.timeAttr);
-				// time = tAttr * opts.unit;
 				if(self.options.projector) {
 					self.options.projector.playWord(section,word);
 				}
@@ -7078,19 +7075,34 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.player[this.activePlayer].pause(time);
 		},
 		currentTime: function(time, play) {
-			// this.player[this.activePlayer].currentTime(time, play);
+			var jumpTo = {},
+				i, len;
+			if(this.stage && this.stage.target) {
+				// console.log('currentTime()');
+				if(this.updateRequired) {
+					this.updateContent();
+				}
+				for(i = 0, len = this.content.length; i < len; i++) {
+					// console.log('currentTime(): i='+i+' | time='+time+' | totalStart='+this.content[i].totalStart+' | totalEnd='+this.content[i].totalEnd);
+					if(this.content[i].totalStart <= time && time < this.content[i].totalEnd) {
+						jumpTo.contentIndex = i;
+						jumpTo.start = time - this.content[i].totalStart + this.content[i].start;
+						console.log('currentTime(): jumpTo=%o',jumpTo);
+						this.play(jumpTo);
+						break;
+					}
+				}
+			}
 		},
 
 		playWord: function(sectionElem, wordElem) {
 			var jumpTo = {},
 				i, len;
 			if(this.stage && this.stage.target) {
-				console.log('playWord()');
 				if(this.updateRequired) {
 					this.updateContent();
 				}
 				for(i = 0, len = this.content.length; i < len; i++) {
-					console.log('playWord(): i='+i);
 					if(this.content[i].element === sectionElem) {
 						jumpTo.contentIndex = i;
 						jumpTo.start = wordElem.getAttribute('data-m') * this.content[i].unit;
@@ -7104,7 +7116,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		requestUpdate: function() {
 			var self = this;
-			// console.log('Projector: requestUpdate()');
 			this.updateRequired = true;
 			clearTimeout(this.timeout.updateContent);
 			this.timeout.updateContent = setTimeout(function() {
@@ -7116,8 +7127,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			var i, len,
 				duration = 0;
-
-			console.log('Projector: updateContent()');
 
 			this.updateRequired = false;
 			clearTimeout(this.timeout.updateContent);
@@ -7140,10 +7149,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.getContent();
 				}
 
-				// Calculate the duration and content offset
+				// Calculate the duration and start/end of this piece of content, compared to to the whole
 				for(i = 0, len = this.content.length; i < len; i++) {
-					this.content[i].offset = duration;
+					this.content[i].totalStart = duration;
 					duration += this.content[i].end + this.content[i].trim - this.content[i].start;
+					this.content[i].totalEnd = duration;
 				}
 				this.time.duration = duration;
 
@@ -7462,7 +7472,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				var endTime = this.content[this.contentIndex].end + this.content[this.contentIndex].trim;
 
 				// Calculte the (total) currentTime to display on the GUI
-				var totalCurrentTime = this.content[this.contentIndex].offset;
+				var totalCurrentTime = this.content[this.contentIndex].totalStart;
 				if(this.content[this.contentIndex].start < videoElem.currentTime && videoElem.currentTime < endTime) {
 					totalCurrentTime += videoElem.currentTime - this.content[this.contentIndex].start;
 				} else if(videoElem.currentTime >= endTime) {
