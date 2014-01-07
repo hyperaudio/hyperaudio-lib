@@ -65,7 +65,6 @@ var Stage = (function(document, hyperaudio) {
 
 				// Search up the parent tree for the section.
 				while(search) {
-					console.log('el.nodeName='+search.nodeName);
 					if(search.nodeName.toLowerCase() === self.options.section) {
 						section = search;
 						break; // exit while loop
@@ -73,10 +72,6 @@ var Stage = (function(document, hyperaudio) {
 					search = search.parentNode;
 				}
 
-				console.log('section.nodeName='+section.nodeName+' | word.nodeName='+word.nodeName);
-
-				// tAttr = event.target.getAttribute(self.options.timeAttr);
-				// time = tAttr * opts.unit;
 				if(self.options.projector) {
 					self.options.projector.playWord(section,word);
 				}
