@@ -192,6 +192,42 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			return index;
 		},
+
+		cue: function(jumpTo, play) {
+
+			if(this.stage && this.stage.target) {
+
+				if(this.updateRequired) {
+					this.updateContent();
+				}
+
+				this._pause();
+				this.contentIndex = jumpTo.contentIndex;
+
+				if(this.contentIndex < this.content.length) {
+
+					this.load(this.content[this.contentIndex].media);
+					if(this.content[this.contentIndex+1]) {
+						this.prepare(this.content[this.contentIndex+1].media);
+					}
+					// this.effect(this.content[this.contentIndex].effect);
+
+					if(play) {
+						this._play(jumpTo.start);
+					} else {
+						this._pause(jumpTo.start);
+					}
+
+
+				} else {
+					// Nothing to play
+					this.paused = true;
+				}
+			} else {
+				this.paused = true;
+			}
+		},
+
 		play: function() {
 
 			var resume = false,
@@ -233,6 +269,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(this.content[this.contentIndex+1]) {
 						this.prepare(this.content[this.contentIndex+1].media);
 					}
+					// The effect is not in cue!!!
 					this.effect(this.content[this.contentIndex].effect);
 
 					if(jumpTo) {
@@ -256,9 +293,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this._pause();
 		},
 		_play: function(time) {
+			this.paused = false;
 			this.player[this.activePlayer].play(time);
 		},
 		_pause: function(time) {
+			this.paused = true;
 			this.player[this.activePlayer].pause(time);
 		},
 		currentTime: function(time, play) {
