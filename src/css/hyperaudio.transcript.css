@@ -260,6 +260,7 @@ p {
 	line-height: 34px;
 	font-size: 1.2em;
 	color: #fff;
+	z-index:1;
 }
 
 .stage .actions:after {
