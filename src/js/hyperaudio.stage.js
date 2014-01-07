@@ -54,6 +54,8 @@ var Stage = (function(document, hyperaudio) {
 			self.changed();
 		}, false);
 
+		// this.target._tap = new Tap({el: this.target});
+		// this.target.addEventListener('tap', function(event) {
 		this.target.addEventListener('click', function(event) {
 			var section, word, search;
 			event.preventDefault();
