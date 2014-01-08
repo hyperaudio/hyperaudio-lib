@@ -218,6 +218,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					}
 					// this.effect(this.content[this.contentIndex].effect);
 
+					this.resetEffects(jumpTo);
+
 					if(this.options.gui) {
 						this.GUI.setStatus({
 							// paused: this.paused,
@@ -631,6 +633,22 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				}
 			}
 
+		},
+
+		resetEffects: function() {
+			var i, iLen, e, eLen, effect;
+			for(i = 0, iLen = this.content.length; i < iLen; i++) {
+				effect = this.content[i].effect;
+				for(e=0, eLen=effect.length; e < eLen; e++) {
+					effect[e].init = false;
+				}
+			}
+			// force a fadeIn - as in remove any fadeOuts!
+			fadeFX({
+				el: '#fxHelper',
+				fadeIn: true,
+				time: 0
+			});
 		},
 
 		// Effecting the start of the content
