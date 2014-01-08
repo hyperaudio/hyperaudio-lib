@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.5 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 7th January 2014 12:46:10 */
+/*! hyperaudio v0.3.6 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 8th January 2014 16:01:23 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6857,6 +6857,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.firstContent = true; // [Boolean] True the first time
 		this.endedContent = false; // [Boolean] True when we have no more content
 
+		this.isReadyToPlay = false; // [Boolean] True is the projector is setup and only needs a play to resume.
+
 		// State Flags
 		this.paused = true;
 
@@ -7005,7 +7007,82 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			return index;
 		},
+
+		cue: function(play, jumpTo) {
+
+			if(this.stage && this.stage.target) {
+
+				if(this.updateRequired) {
+					this.updateContent();
+				}
+
+				this._pause();
+				this.contentIndex = jumpTo.contentIndex;
+
+				if(this.contentIndex < this.content.length) {
+
+					this.load(this.content[this.contentIndex].media);
+					if(this.content[this.contentIndex+1]) {
+						this.prepare(this.content[this.contentIndex+1].media);
+					}
+					// this.effect(this.content[this.contentIndex].effect);
+
+					if(this.options.gui) {
+						this.GUI.setStatus({
+							paused: this.paused,
+							currentTime: this.getTotalCurrentTime(jumpTo.start, jumpTo.contentIndex)
+						});
+					}
+
+					// Believe this is a good place to set this flag
+					this.isReadyToPlay = true;
+
+					if(play) {
+						this._play(jumpTo.start);
+					} else {
+						this._pause(jumpTo.start);
+					}
+				}
+			}
+		},
+
 		play: function() {
+
+			var resume = false,
+				jumpTo;
+
+			if(arguments.length) {
+				if(typeof arguments[0] === 'object') {
+					jumpTo = arguments[0];
+				}
+			} else if(this.isReadyToPlay) {
+				resume = true;
+			}
+
+			if(this.content.length) {
+
+				if(resume) {
+					this._play();
+				} else if(jumpTo) {
+					this._pause();
+					this.cue(true, {
+						contentIndex: jumpTo.contentIndex,
+						start: jumpTo.start
+					});
+					// The effect is not in cue!!!
+					// this.effect(this.content[this.contentIndex].effect);
+				} else {
+					this.contentIndex = 0;
+					this.cue(true, {
+						contentIndex: 0,
+						start: this.content[0].start
+					});
+					this.effect(this.content[0].effect);
+				}
+			}
+		},
+
+		play_OLD: function() {
 
 			var resume = false,
 				jumpTo;
@@ -7036,7 +7113,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.contentIndex = 0;
 				}
 
-
 				// This bit is similar to the manager() code - not sure if true any longer...
 
 				if(this.content.length) {
@@ -7046,6 +7122,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(this.content[this.contentIndex+1]) {
 						this.prepare(this.content[this.contentIndex+1].media);
 					}
+					// The effect is not in cue!!!
 					this.effect(this.content[this.contentIndex].effect);
 
 					if(jumpTo) {
@@ -7065,13 +7142,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		pause: function() {
-			this.paused = true;
+			// Really need pause to do similar to play by using cue()
 			this._pause();
 		},
 		_play: function(time) {
+			this.paused = false;
 			this.player[this.activePlayer].play(time);
 		},
 		_pause: function(time) {
+			this.paused = true;
 			this.player[this.activePlayer].pause(time);
 		},
 		currentTime: function(time, play) {
@@ -7088,7 +7167,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						jumpTo.contentIndex = i;
 						jumpTo.start = time - this.content[i].totalStart + this.content[i].start;
 						console.log('currentTime(): jumpTo=%o',jumpTo);
-						this.play(jumpTo);
+						// this.play(jumpTo);
+						this.cue(!this.paused, jumpTo);
 						break;
 					}
 				}
@@ -7130,6 +7210,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			this.updateRequired = false;
 			clearTimeout(this.timeout.updateContent);
+
+			// Believe this is a good place to unset this flag
+			this.isReadyToPlay = false;
 
 			if(this.stage && this.stage.target) {
 				// Get the staged contents wrapper elem
@@ -7462,8 +7545,30 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			return endEffects;
 		},
 
+		getTotalCurrentTime: function(currentTime, index) {
+			var start, end, totalCurrentTime = 0;
+			if(index < this.content.length) {
+				start = this.content[index].start;
+				end = this.content[index].end + this.content[index].trim;
+
+				// Calculte the (total) currentTime to display on the GUI
+				totalCurrentTime = this.content[index].totalStart;
+				if(start < currentTime && currentTime < end) {
+					totalCurrentTime += currentTime - start;
+				} else if(currentTime >= end) {
+					// totalCurrentTime += end - start;
+					totalCurrentTime = this.content[index].totalEnd;
+				}
+			}
+			return totalCurrentTime;
+		},
+
 		manager: function(videoElem, event) {
 			var self = this;
+
+			// console.log('manager: video.paused='+videoElem.paused);
+
+			this.paused = videoElem.paused;
 
 			if(!this.paused) {
 
@@ -7471,13 +7576,18 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				var endTime = this.content[this.contentIndex].end + this.content[this.contentIndex].trim;
 
+/*
 				// Calculte the (total) currentTime to display on the GUI
 				var totalCurrentTime = this.content[this.contentIndex].totalStart;
 				if(this.content[this.contentIndex].start < videoElem.currentTime && videoElem.currentTime < endTime) {
 					totalCurrentTime += videoElem.currentTime - this.content[this.contentIndex].start;
 				} else if(videoElem.currentTime >= endTime) {
-					totalCurrentTime += endTime - this.content[this.contentIndex].start;
+					// totalCurrentTime += endTime - this.content[this.contentIndex].start;
+					totalCurrentTime = this.content[this.contentIndex].totalEnd;
 				}
+*/
+
+				var totalCurrentTime = this.getTotalCurrentTime(videoElem.currentTime, this.contentIndex);
 
 				if(videoElem.currentTime > endTime) {
 					// Goto the next piece of content
@@ -7503,6 +7613,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					} else {
 						// Nothing to play
 						this.paused = true;
+						this.isReadyToPlay = false; // ended so needs a reset to the start
 						this.contentIndex = 0; // Reset this since YouTube player (or its Popcorn wrapper) generates the timeupdate all the time.
 						this.prepare(this.content[this.contentIndex].media);
 					}
