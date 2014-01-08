@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.6 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 8th January 2014 16:01:23 */
+/*! hyperaudio v0.3.7 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 8th January 2014 18:24:20 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6909,7 +6909,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						target: player
 					});
 
+					this.player[i].addEventListener('progress', manager); // Important for YT player GUI to update on set/change
 					this.player[i].addEventListener('timeupdate', manager);
+					this.player[i].addEventListener('play', manager);
+					this.player[i].addEventListener('pause', manager);
+					this.player[i].addEventListener('ended', manager);
 
 					this.target.appendChild(player);
 				}
@@ -7027,9 +7031,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					}
 					// this.effect(this.content[this.contentIndex].effect);
 
+					this.resetEffects(jumpTo);
+
 					if(this.options.gui) {
 						this.GUI.setStatus({
-							paused: this.paused,
+							// paused: this.paused,
 							currentTime: this.getTotalCurrentTime(jumpTo.start, jumpTo.contentIndex)
 						});
 					}
@@ -7062,8 +7068,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(this.content.length) {
 
 				if(resume) {
+					console.log('play: resume');
 					this._play();
 				} else if(jumpTo) {
+					console.log('play: jumpTo');
 					this._pause();
 					this.cue(true, {
 						contentIndex: jumpTo.contentIndex,
@@ -7072,7 +7080,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					// The effect is not in cue!!!
 					// this.effect(this.content[this.contentIndex].effect);
 				} else {
-					this.contentIndex = 0;
+					console.log('play: else');
 					this.cue(true, {
 						contentIndex: 0,
 						start: this.content[0].start
@@ -7438,6 +7446,22 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				}
 			}
 
+		},
+
+		resetEffects: function() {
+			var i, iLen, e, eLen, effect;
+			for(i = 0, iLen = this.content.length; i < iLen; i++) {
+				effect = this.content[i].effect;
+				for(e=0, eLen=effect.length; e < eLen; e++) {
+					effect[e].init = false;
+				}
+			}
+			// force a fadeIn - as in remove any fadeOuts!
+			fadeFX({
+				el: '#fxHelper',
+				fadeIn: true,
+				time: 0
+			});
 		},
 
 		// Effecting the start of the content
