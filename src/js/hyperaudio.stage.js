@@ -192,6 +192,7 @@ var Stage = (function(document, hyperaudio) {
 			this.article.innerHTML = '';
 			this.mix = {};
 			this.options.id = '';
+			this.changed(true);
 		},
 
 		parse: function() {
@@ -257,10 +258,10 @@ var Stage = (function(document, hyperaudio) {
 			}
 		},
 
-		changed: function() {
+		changed: function(reset) {
 			// Tell the projector the content changed
 			if(this.options.projector) {
-				this.options.projector.requestUpdate();
+				this.options.projector.requestUpdate(reset);
 			}
 		},
 

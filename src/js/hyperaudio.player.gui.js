@@ -125,26 +125,16 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 				return;
 			}
 
-			this.player.play();
 			hyperaudio.addClass(this.wrapperElem, 'playing');
+			this.player.play();
 		},
-/*
-		timeUpdate: function () {
-			var video = this.player.videoElem;
-			var percentage = Math.round(100 * video.currentTime / video.duration);
 
-			this.progressIndicator.style.width = percentage + '%';
-			
-			if ( this.player.videoElem.paused ) {
-				hyperaudio.removeClass(this.wrapperElem, 'playing');
+		timeUpdate: function () {
+
+			var percentage = 0;
+			if(this.status.duration > 0) {
+				percentage = Math.round(100 * this.status.currentTime / this.status.duration);	
 			}
-		},
-*/
-		timeUpdate: function () {
-
-			// need a check for duration > 0 in here
-
-			var percentage = Math.round(100 * this.status.currentTime / this.status.duration);
 
 			this.progressIndicator.style.width = percentage + '%';
 
@@ -218,7 +208,8 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			// var current = Math.round(this.player.videoElem.duration / width * x);
 			// this.player.currentTime(current, !this.player.videoElem.paused);
 
-			var current = Math.round(this.status.duration / width * x);
+			// var current = Math.round(this.status.duration / width * x);
+			var current = Math.round(100 * this.status.duration * x / width) / 100;
 			this.player.currentTime(current);
 		}
 	};

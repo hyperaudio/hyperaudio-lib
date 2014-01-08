@@ -45,6 +45,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.endedContent = false; // [Boolean] True when we have no more content
 
 		this.isReadyToPlay = false; // [Boolean] True is the projector is setup and only needs a play to resume.
+		this.needsInitVideo = true; // [Boolean] True when the projector is empty and the first video should be loaded in.
 
 		// State Flags
 		this.paused = true;
@@ -255,10 +256,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(this.content.length) {
 
 				if(resume) {
-					console.log('play: resume');
 					this._play();
 				} else if(jumpTo) {
-					console.log('play: jumpTo');
 					this._pause();
 					this.cue(true, {
 						contentIndex: jumpTo.contentIndex,
@@ -267,72 +266,18 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					// The effect is not in cue!!!
 					// this.effect(this.content[this.contentIndex].effect);
 				} else {
-					console.log('play: else');
 					this.cue(true, {
 						contentIndex: 0,
 						start: this.content[0].start
 					});
 					this.effect(this.content[0].effect);
 				}
-			}
-		},
-
-		play_OLD: function() {
-
-			var resume = false,
-				jumpTo;
-
-			if(arguments.length) {
-				if(typeof arguments[0] === 'object') {
-					jumpTo = arguments[0];
-				}
 			} else {
-				// resume = true;
-			}
-
-			if(this.stage && this.stage.target) {
-
-				if(this.updateRequired) {
-					this.updateContent();
+				if(this.options.gui) {
+					this.GUI.setStatus({
+						paused: this.paused
+					});
 				}
-
-				// Not sure how to enable resume ATM... Might need a flag or something. The 1st time and the ended are a problem ATM.
-				if(resume) {
-					this._play();
-				}
-
-				if(jumpTo) {
-					this._pause();
-					this.contentIndex = jumpTo.contentIndex;
-				} else {
-					this.contentIndex = 0;
-				}
-
-				// This bit is similar to the manager() code - not sure if true any longer...
-
-				if(this.content.length) {
-					this.paused = false;
-
-					this.load(this.content[this.contentIndex].media);
-					if(this.content[this.contentIndex+1]) {
-						this.prepare(this.content[this.contentIndex+1].media);
-					}
-					// The effect is not in cue!!!
-					this.effect(this.content[this.contentIndex].effect);
-
-					if(jumpTo) {
-						this._play(jumpTo.start);
-					} else {
-						this._play(this.content[this.contentIndex].start);
-					}
-
-
-				} else {
-					// Nothing to play
-					this.paused = true;
-				}
-			} else {
-				this.paused = true;
 			}
 		},
 
@@ -389,13 +334,26 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 
-		requestUpdate: function() {
-			var self = this;
+		requestUpdate: function(reset) {
+			var self = this,
+				delay = this.options.stageChangeDelay;
+			if(reset) {
+				this.pause();
+				if(this.options.gui) {
+					this.GUI.setStatus({
+						paused: this.paused,
+						currentTime: 0,
+						duration: 0
+					});
+				}
+				this.needsInitVideo = true;
+				delay = 0;
+			}
 			this.updateRequired = true;
 			clearTimeout(this.timeout.updateContent);
 			this.timeout.updateContent = setTimeout(function() {
 				self.updateContent();
-			}, this.options.stageChangeDelay);
+			}, delay);
 		},
 
 		updateContent: function() {
@@ -440,6 +398,16 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					this.GUI.setStatus({
 						duration: this.time.duration
 					});
+				}
+
+				if(this.needsInitVideo && this.content.length) {
+					this.needsInitVideo = false;
+					this.cue(false, {
+						contentIndex: 0,
+						start: this.content[0].start
+					});
+					//Unset this flag so that any initial effects get played - when play begins.
+					this.isReadyToPlay = false;
 				}
 			}
 		},
