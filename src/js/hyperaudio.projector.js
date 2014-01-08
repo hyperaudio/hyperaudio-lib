@@ -96,7 +96,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						target: player
 					});
 
+					this.player[i].addEventListener('progress', manager); // Important for YT player GUI to update on set/change
 					this.player[i].addEventListener('timeupdate', manager);
+					this.player[i].addEventListener('play', manager);
+					this.player[i].addEventListener('pause', manager);
+					this.player[i].addEventListener('ended', manager);
 
 					this.target.appendChild(player);
 				}
@@ -249,8 +253,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(this.content.length) {
 
 				if(resume) {
+					console.log('play: resume');
 					this._play();
 				} else if(jumpTo) {
+					console.log('play: jumpTo');
 					this._pause();
 					this.cue(true, {
 						contentIndex: jumpTo.contentIndex,
@@ -259,6 +265,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					// The effect is not in cue!!!
 					// this.effect(this.content[this.contentIndex].effect);
 				} else {
+					console.log('play: else');
 					this.cue(true, {
 						contentIndex: 0,
 						start: this.content[0].start
