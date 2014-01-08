@@ -216,7 +216,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 					if(this.options.gui) {
 						this.GUI.setStatus({
-							paused: this.paused,
+							// paused: this.paused,
 							currentTime: this.getTotalCurrentTime(jumpTo.start, jumpTo.contentIndex)
 						});
 					}
@@ -259,7 +259,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					// The effect is not in cue!!!
 					// this.effect(this.content[this.contentIndex].effect);
 				} else {
-					this.contentIndex = 0;
 					this.cue(true, {
 						contentIndex: 0,
 						start: this.content[0].start

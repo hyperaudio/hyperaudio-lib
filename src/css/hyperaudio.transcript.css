@@ -317,6 +317,29 @@ p {
 	color: #a00;
 }
 
+.video-transition-servo {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+
+.title-effect-servo {
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	padding: 20px;
+	bottom: 0;
+	font-size: 1.2em;
+	left: -9999px;
+	line-height: 140%;
+	-webkit-transition-property: -webkit-transform;
+	-moz-transition-property: -moz-transform;
+	-ms-transition-property: -ms-transform;
+	-o-transition-property: -o-transform;
+	transition-property: transform;
+}
 
 /* Side Menu Rules */
 
