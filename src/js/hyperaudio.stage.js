@@ -228,7 +228,7 @@ var Stage = (function(document, hyperaudio) {
 			};
 
 			if(this.target) {
-				hyperaudio.removeClass(this.target, this.options.dragdropClass);
+				// hyperaudio.removeClass(this.target, this.options.dragdropClass);
 
 				// add edit action if needed
 				if ( !(/(^|\s)effect($|\s)/.test(el.className)) ) {

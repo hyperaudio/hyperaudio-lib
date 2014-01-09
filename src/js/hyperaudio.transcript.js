@@ -234,12 +234,15 @@ var Transcript = (function(document, hyperaudio) {
 								dropArea: opts.stage.target,
 								init: false,
 								onDrop: function(el) {
-									self.textSelect.clearSelection();
+									hyperaudio.removeClass(opts.stage.target, opts.stage.options.dragdropClass);
 									this.destroy();
 
 									if ( !el ) {
 										return;
 									}
+
+									// Only clear the selection if dropped on the stage. Otherwise it can be annoying.
+									self.textSelect.clearSelection();
 
 									if(opts.media.id) {
 										el.setAttribute(opts.stage.options.idAttr, opts.media.id); // Pass the media ID
