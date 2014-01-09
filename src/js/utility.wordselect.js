@@ -14,7 +14,8 @@ var WordSelect = (function (window, document, hyperaudio) {
 			addHelpers: false,
 			touch: true,
 			mouse: true,
-			threshold: 10
+			threshold: 10,
+			timeout: 500
 		};
 
 		for ( var i in options ) {
@@ -81,7 +82,7 @@ var WordSelect = (function (window, document, hyperaudio) {
 		}
 
 		if ( hyperaudio.hasClass(e.target, 'selected') ) {
-			this.dragTimeout = setTimeout(this.dragStart.bind(this, e), 500);
+			this.dragTimeout = setTimeout(this.dragStart.bind(this, e), this.options.timeout);
 		}
 	};
 
