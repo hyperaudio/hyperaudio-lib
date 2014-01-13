@@ -201,6 +201,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		cue: function(play, jumpTo) {
+			var i, iLen, elems, e, eLen;
 
 			if(this.stage && this.stage.target) {
 
@@ -226,6 +227,24 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 							// paused: this.paused,
 							currentTime: this.getTotalCurrentTime(jumpTo.start, jumpTo.contentIndex)
 						});
+					}
+
+					for(i = 0, iLen = this.content.length; i < iLen; i++) {
+						if(i < this.contentIndex) {
+							// Remove the class
+							elems = this.content[i].element.getElementsByTagName('a');
+							for(e = 0, eLen = elems.length; e < eLen; e++) {
+								hyperaudio.removeClass(elems[e], 'transcript-grey');
+							}
+						} if(i > this.contentIndex) {
+							// Add the class
+							elems = this.content[i].element.getElementsByTagName('a');
+							for(e = 0, eLen = elems.length; e < eLen; e++) {
+								hyperaudio.addClass(elems[e], 'transcript-grey');
+							}
+						} else {
+							// Setup the Popcorn Transcript Plugin
+						}
 					}
 
 					// Believe this is a good place to set this flag
