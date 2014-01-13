@@ -20,6 +20,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			stageChangeDelay: 1000, // (ms) Delay for content update after the stage is changed
 
+			timeAttr: 'data-m',
+
 			gui: true, // True to add a gui.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -201,7 +203,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		cue: function(play, jumpTo) {
-			var i, iLen, elems, e, eLen;
+			var opts = this.options,
+				i, iLen, elems, e, eLen;
+
+			var onNewPara = function(parent) {
+				// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+			};
 
 			if(this.stage && this.stage.target) {
 
@@ -229,21 +236,43 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						});
 					}
 
+					// All the elems for loops below could move outside the if()s and then only need 1 loop... And same amount of if() stuff.
+
 					for(i = 0, iLen = this.content.length; i < iLen; i++) {
+						elems = this.content[i].element.getElementsByTagName('a');
 						if(i < this.contentIndex) {
 							// Remove the class
-							elems = this.content[i].element.getElementsByTagName('a');
-							for(e = 0, eLen = elems.length; e < eLen; e++) {
+							for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
 								hyperaudio.removeClass(elems[e], 'transcript-grey');
 							}
-						} if(i > this.contentIndex) {
+						} else if(i > this.contentIndex) {
 							// Add the class
-							elems = this.content[i].element.getElementsByTagName('a');
-							for(e = 0, eLen = elems.length; e < eLen; e++) {
+							for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
 								hyperaudio.addClass(elems[e], 'transcript-grey');
 							}
 						} else {
 							// Setup the Popcorn Transcript Plugin
+							for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
+								this.player[this.activePlayer].popcorn.transcript({
+									time: elems[e].getAttribute(opts.timeAttr) * this.content[i].unit, // seconds
+									futureClass: "transcript-grey",
+									target: elems[e],
+									onNewPara: onNewPara
+								});
+							}
+							console.log('this.player[this.activePlayer].popcorn.media=%o',this.player[this.activePlayer].popcorn.media);
+							var fakeTime = hyperaudio.extend({}, this.player[this.activePlayer].popcorn.media, {
+								currentTime:0
+							});
+							console.log('fakeTime=%o',fakeTime);
+							// 1. Review how we fixed the YT event in the player
+							// Believe we:
+							// 2. put the fakeTime obj onto a custom event details
+							// 3. dispatch that event on the popcorn instance.
+							this.player[this.activePlayer].popcorn.media.dispatchEvent.call(fakeTime, "timeupdate");
+							// TODO
+							// 4. Add a on() listener for the timeupdate event and review its contents.
+							// 5. Review other important events, since maybe this event is occurring at the incorrect time.
 						}
 					}
 
@@ -344,7 +373,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				for(i = 0, len = this.content.length; i < len; i++) {
 					if(this.content[i].element === sectionElem) {
 						jumpTo.contentIndex = i;
-						jumpTo.start = wordElem.getAttribute('data-m') * this.content[i].unit;
+						jumpTo.start = wordElem.getAttribute(this.options.timeAttr) * this.content[i].unit;
 						console.log('playWord(): jumpTo=%o',jumpTo);
 						this.play(jumpTo);
 						break;
@@ -538,8 +567,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				// Still have attributes hard coded in here. Would need to pass from the transcript to stage and then to here.
 				var words = el.getElementsByTagName('a');
 				if(words.length) {
-					section.start = words[0].getAttribute('data-m') * unit;
-					section.end = words[words.length-1].getAttribute('data-m') * unit;
+					section.start = words[0].getAttribute(this.options.timeAttr) * unit;
+					section.end = words[words.length-1].getAttribute(this.options.timeAttr) * unit;
 					section.trim = this.options.trim;
 				}
 
