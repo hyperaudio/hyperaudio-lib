@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.8 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 8th January 2014 21:52:55 */
+/*! hyperaudio v0.3.9 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 14th January 2014 17:33:00 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -3663,9 +3663,13 @@
 
 	Popcorn.plugin( "transcript" , (function() {
 
+		// Define plugin wide variables out here
+
 		var pParent;
 
-		return {		
+		return {
+
+			// Plugin manifest for Butter
 			manifest: {
 				about:{
 					name: "Popcorn Transcript Plugin",
@@ -3681,89 +3685,85 @@
 				}
 			},
 
-			// The popcorn docs appears to have renamed 'options' with 'track', but its operation seems the same.
-			// Believe that this is to identify the parameter as the track object, rather than 'options', which is probably used all over the place.
+			_setup: function( track ) {
 
-			_setup: function( options ) {
+				// setup code, fire on initialization
+
+				// |track| refers to the TrackEvent created by the options passed into the plugin on init
+				// this refers to the popcorn object
 
 				var parent, iAmNewPara;
 
 				// if a target is specified and is a string, use that - Requires every word <span> to have a unique ID.
 				// else if target is specified and is an object, use object as DOM reference
 				// else Throw an error.
-				if ( options.target && typeof options.target === "string" && options.target !== 'Transcript-container' ) {
-					options.container = document.getElementById( options.target );
-				} else if ( options.target && typeof options.target === "object" ) {
-					options.container = options.target;
+				if ( track.target && typeof track.target === "string" && track.target !== 'Transcript-container' ) {
+					track.container = document.getElementById( track.target );
+				} else if ( track.target && typeof track.target === "object" ) {
+					track.container = track.target;
 				} else {
 					throw "Popcorn.transcript: target property must be an ID string or a pointer to the DOM of the transcript word.";
 				}
 
-				options.start = 0;
-				options.end = options.time;
+				track.start = 0;
+				track.end = track.time;
 
-				if(!options.futureClass) {
-					options.futureClass = "transcript-future";
+				if(!track.futureClass) {
+					track.futureClass = "transcript-future";
 				}
 
-				parent = options.target.parentNode;
+				parent = track.target.parentNode;
 				if(parent !== pParent) {
 					iAmNewPara = true;
 					pParent = parent;
 				}
 
-				options.transcriptRead = function() {
-					if( options.container.classList ) {
-						options.container.classList.remove(options.futureClass);
+				track.transcriptRead = function() {
+					if( track.container.classList ) {
+						track.container.classList.remove(track.futureClass);
 					} else {
-						options.container.className = "";
+						track.container.className = "";
 					}
-					if(iAmNewPara && typeof options.onNewPara === 'function') {
-						options.onNewPara(options.target.parentNode);
+					if(iAmNewPara && typeof track.onNewPara === 'function') {
+						track.onNewPara(track.target.parentNode);
 					}
 				};
 
-				options.transcriptFuture = function() {
-					if( options.container.classList ) {
-						options.container.classList.add(options.futureClass);
+				track.transcriptFuture = function() {
+					if( track.container.classList ) {
+						track.container.classList.add(track.futureClass);
 					} else {
-						options.container.className = options.futureClass;
+						track.container.className = track.futureClass;
 					}
 				};
 
 				// Note: end times close to zero can have issues. (Firefox 4.0 worked with 100ms. Chrome needed 200ms. iOS needed 500ms)
-				if(options.end > options.start) {
-					options.transcriptFuture();
+				// if(track.end > track.start) {
+					// track.transcriptFuture();
+				// }
+
+				if(track.end <= this.media.currentTime) {
+					track.transcriptRead();
+				} else {
+					track.transcriptFuture();
 				}
 
 			},
 
-			_update: function( options ) {
+			_update: function( track ) {
 				// update code, fire on update/modification of a plugin created track event.
 			},
 
-			_teardown: function( options ) {
+			_teardown: function( track ) {
 				// teardown code, fire on removal of plugin or destruction of instance
 			},
 
-			/**
-			 * @member transcript 
-			 * The start function will be executed when the currentTime 
-			 * of the video reaches the start time provided by the 
-			 * options variable
-			 */
-			start: function( event, options ) {
-				options.transcriptFuture();
+			start: function( event, track ) {
+				track.transcriptFuture();
 			},
 
-			/**
-			 * @member transcript 
-			 * The end function will be executed when the currentTime 
-			 * of the video reaches the end time provided by the 
-			 * options variable
-			 */
-			end: function( event, options ) {
-				options.transcriptRead();
+			end: function( event, track ) {
+				track.transcriptRead();
 			}
 		};
 	})());
@@ -4998,7 +4998,8 @@ var WordSelect = (function (window, document, hyperaudio) {
 			addHelpers: false,
 			touch: true,
 			mouse: true,
-			threshold: 10
+			threshold: 10,
+			timeout: 500
 		};
 
 		for ( var i in options ) {
@@ -5065,7 +5066,7 @@ var WordSelect = (function (window, document, hyperaudio) {
 		}
 
 		if ( hyperaudio.hasClass(e.target, 'selected') ) {
-			this.dragTimeout = setTimeout(this.dragStart.bind(this, e), 500);
+			this.dragTimeout = setTimeout(this.dragStart.bind(this, e), this.options.timeout);
 		}
 	};
 
@@ -6445,12 +6446,15 @@ var Transcript = (function(document, hyperaudio) {
 								dropArea: opts.stage.target,
 								init: false,
 								onDrop: function(el) {
-									self.textSelect.clearSelection();
+									hyperaudio.removeClass(opts.stage.target, opts.stage.options.dragdropClass);
 									this.destroy();
 
 									if ( !el ) {
 										return;
 									}
+
+									// Only clear the selection if dropped on the stage. Otherwise it can be annoying.
+									self.textSelect.clearSelection();
 
 									if(opts.media.id) {
 										el.setAttribute(opts.stage.options.idAttr, opts.media.id); // Pass the media ID
@@ -6754,7 +6758,7 @@ var Stage = (function(document, hyperaudio) {
 			};
 
 			if(this.target) {
-				hyperaudio.removeClass(this.target, this.options.dragdropClass);
+				// hyperaudio.removeClass(this.target, this.options.dragdropClass);
 
 				// add edit action if needed
 				if ( !(/(^|\s)effect($|\s)/.test(el.className)) ) {
@@ -6824,6 +6828,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			unit: 0.001, // Unit used if not given in section attr of stage.
 
 			stageChangeDelay: 1000, // (ms) Delay for content update after the stage is changed
+
+			timeAttr: 'data-m',
 
 			gui: true, // True to add a gui.
 			async: true // When true, some operations are delayed by a timeout.
@@ -6941,10 +6947,38 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.target.appendChild(titleFXHelper);
 
 		},
-		load: function(media) {
-			var self = this;
+		initPopcorn: function(index, player) {
+			var elems, e, eLen;
+			var onNewPara = function(parent) {
+				// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+			};
 
-			var activePlayer = this.which(media);
+			if(index < this.content.length && player < this.player.length) {
+
+				// Reset the popcorn... Maybe want to only do this if necessary, ie., if any transcript plugins added.
+				this.player[player].initPopcorn();
+
+				elems = this.content[index].element.getElementsByTagName('a');
+				// Setup the Popcorn Transcript Plugin
+				for(e = 0, eLen = elems.length; e < eLen; e++) {
+
+					// Might want to move this (behaviour) to the plugin
+					// hyperaudio.removeClass(elems[e], 'transcript-grey');
+
+					this.player[player].popcorn.transcript({
+						time: elems[e].getAttribute(this.options.timeAttr) * this.content[index].unit, // seconds
+						futureClass: "transcript-grey",
+						target: elems[e],
+						onNewPara: onNewPara
+					});
+				}
+			}
+		},
+		load: function(index) {
+			var media = this.content[index].media,
+				activePlayer = this.which(media);
+
+			this.contentIndex = index;
 
 			// console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
@@ -6954,6 +6988,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.player[this.activePlayer].load(media);
 			}
 
+			this.initPopcorn(index, this.activePlayer);
+
 			// console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
 			for(var i=0; i < this.player.length; i++) {
@@ -6961,7 +6997,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
 		},
-		prepare: function(media) {
+		prepare: function(index) {
 			// Used when more than 1 player to prepare the next piece of media.
 
 			// 1. Want to be able to call this method and it deal with preparing the other player.
@@ -6975,18 +7011,28 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			// 8. Normally just 1 or 2 players though, so "keep it real mofo!"
 
+			var media = this.content[index].media;
 
 			// Ignore if we are only using a single Player
 			if(media && this.player.length > 1) {
 
 				// See if a player already has it. NB: Zero is falsey, so strong comparison.
-				if(this.which(media) === false) {
+				var prepared = this.which(media);
+				var alignStart = Math.max(0, this.content[index].start - 1); // 
+				if(prepared === false) {
 
 					// Get the next free player (Has flaws if more than 2, but still works. Just does not take full advantage of more than 2.)
 					this.nextPlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
 
 					if(this.player[this.nextPlayer]) {
 						this.player[this.nextPlayer].load(media);
+						this.player[this.nextPlayer].pause(alignStart);
+					}
+				} else {
+					// Reset popcorn and move the video to the start time.
+					if(prepared !== this.activePlayer) {
+						this.player[prepared].initPopcorn();
+						this.player[this.nextPlayer].pause(alignStart);
 					}
 				}
 			}
@@ -7006,7 +7052,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		cue: function(play, jumpTo) {
-
+			var i, iLen, elems, e, eLen;
+/*
+			var onNewPara = function(parent) {
+				// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+			};
+*/
 			if(this.stage && this.stage.target) {
 
 				if(this.updateRequired) {
@@ -7018,9 +7069,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				if(this.contentIndex < this.content.length) {
 
-					this.load(this.content[this.contentIndex].media);
+					this.load(this.contentIndex);
 					if(this.content[this.contentIndex+1]) {
-						this.prepare(this.content[this.contentIndex+1].media);
+						this.prepare(this.contentIndex+1);
 					}
 					// this.effect(this.content[this.contentIndex].effect);
 
@@ -7031,6 +7082,31 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 							// paused: this.paused,
 							currentTime: this.getTotalCurrentTime(jumpTo.start, jumpTo.contentIndex)
 						});
+					}
+
+					for(i = 0, iLen = this.content.length; i < iLen; i++) {
+						elems = this.content[i].element.getElementsByTagName('a');
+						for(e = 0, eLen = elems.length; e < eLen; e++) {
+							if(i < this.contentIndex) {
+								// Remove the class
+								hyperaudio.removeClass(elems[e], 'transcript-grey');
+							} else if(i > this.contentIndex) {
+								// Add the class
+								hyperaudio.addClass(elems[e], 'transcript-grey');
+							} else {
+/*
+								// Setup the Popcorn Transcript Plugin
+								for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
+									this.player[this.activePlayer].popcorn.transcript({
+										time: elems[e].getAttribute(opts.timeAttr) * this.content[i].unit, // seconds
+										futureClass: "transcript-grey",
+										target: elems[e],
+										onNewPara: onNewPara
+									});
+								}
+*/
+							}
+						}
 					}
 
 					// Believe this is a good place to set this flag
@@ -7130,7 +7206,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				for(i = 0, len = this.content.length; i < len; i++) {
 					if(this.content[i].element === sectionElem) {
 						jumpTo.contentIndex = i;
-						jumpTo.start = wordElem.getAttribute('data-m') * this.content[i].unit;
+						jumpTo.start = wordElem.getAttribute(this.options.timeAttr) * this.content[i].unit;
 						console.log('playWord(): jumpTo=%o',jumpTo);
 						this.play(jumpTo);
 						break;
@@ -7324,8 +7400,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				// Still have attributes hard coded in here. Would need to pass from the transcript to stage and then to here.
 				var words = el.getElementsByTagName('a');
 				if(words.length) {
-					section.start = words[0].getAttribute('data-m') * unit;
-					section.end = words[words.length-1].getAttribute('data-m') * unit;
+					section.start = words[0].getAttribute(this.options.timeAttr) * unit;
+					section.end = words[words.length-1].getAttribute(this.options.timeAttr) * unit;
 					section.trim = this.options.trim;
 				}
 
@@ -7587,9 +7663,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(this.contentIndex < this.content.length) {
 						// this.paused = false;
 
-						this.load(this.content[this.contentIndex].media);
+						this.load(this.contentIndex);
 						if(this.content[this.contentIndex+1]) {
-							this.prepare(this.content[this.contentIndex+1].media);
+							this.prepare(this.contentIndex+1);
 						}
 						this.effect(this.content[this.contentIndex].effect);
 						this._play(this.content[this.contentIndex].start);
@@ -7599,7 +7675,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.paused = true;
 						this.isReadyToPlay = false; // ended so needs a reset to the start
 						this.contentIndex = 0; // Reset this since YouTube player (or its Popcorn wrapper) generates the timeupdate all the time.
-						this.prepare(this.content[this.contentIndex].media);
+						this.prepare(this.contentIndex);
 					}
 				}
 				if(this.options.gui) {
