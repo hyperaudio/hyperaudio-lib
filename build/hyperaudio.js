@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.9 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 14th January 2014 17:33:00 */
+/*! hyperaudio v0.3.10 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 14th January 2014 22:22:13 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4621,22 +4621,62 @@ var SideMenu = (function (document, hyperaudio) {
 	SideMenu.prototype.initTranscripts = function () {
 		var self = this;
 
-		hyperaudio.api.getTranscripts(function(success) {
-			if(success) {
-				var elem, trans;
-				for(var i = 0, l = this.transcripts.length; i < l; i++) {
-					trans = this.transcripts[i];
-					if(trans.type === 'html') {
-						elem = document.createElement('li');
-						elem.setAttribute('data-id', trans._id);
-						elem.innerHTML = trans.label;
-						self.transcripts.appendChild(elem);
-					}
-				}
+		var mkdir = function(parent, title) {
+			var li = document.createElement('li'),
+				div = document.createElement('div'),
+				ul = document.createElement('ul');
+			hyperaudio.addClass(li, 'folder');
+			div.innerHTML = title;
+			li.appendChild(div);
+			li.appendChild(ul);
+			parent.appendChild(li);
+			return ul;
+		};
 
-				self.transcripts._tap = new Tap({el: self.transcripts});
-				self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
+		hyperaudio.api.getUsername(function(success) {
+
+			var username = '';
+			var filter = false;
+
+			if(success) {
+				username = this.username;
+				filter = !this.guest;
 			}
+
+			hyperaudio.api.getTranscripts(function(success) {
+				if(success) {
+					var yourTrans, otherTrans, userTrans, elem, trans;
+
+					if(username) {
+						yourTrans = mkdir(self.transcripts, 'Your Transcripts');
+					}
+					otherTrans = mkdir(self.transcripts, 'Other Transcripts');
+
+					// Nesting not supported ATM.
+					// userTrans = mkdir(self.transcripts, 'By User');
+					// mkdir(userTrans, 'Scooby');
+					// mkdir(userTrans, 'Mark');
+
+					for(var i = 0, l = this.transcripts.length; i < l; i++) {
+						trans = this.transcripts[i];
+						if(trans.type === 'html') {
+							elem = document.createElement('li');
+							elem.setAttribute('data-id', trans._id);
+							elem.innerHTML = trans.label;
+							// self.transcripts.appendChild(elem);
+
+							if(trans.owner === username) {
+								yourTrans.appendChild(elem);
+							} else {
+								otherTrans.appendChild(elem);
+							}
+						}
+					}
+
+					self.transcripts._tap = new Tap({el: self.transcripts});
+					self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
+				}
+			});
 		});
 	};
 
@@ -6883,10 +6923,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				var getManager = function(idx) {
 
-					// console.log('Create: idx='+idx);
-
 					return function(event) {
-						// console.log('activePlayer='+self.activePlayer+' | idx='+idx);
 						// Passing the event context to manager
 						//  * The YouTube event object is useless.
 						//  * The YouTube event context was fixed in the Player class.
@@ -6897,8 +6934,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				};
 
 				for(var i = 0; i < this.options.players; i++ ) {
-
-					// console.log('Create: i='+i);
 
 					var manager = getManager(i);
 
@@ -6980,8 +7015,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			this.contentIndex = index;
 
-			// console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
-
 			if(activePlayer !== false) {
 				this.activePlayer = activePlayer;
 			} else {
@@ -6989,8 +7022,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 
 			this.initPopcorn(index, this.activePlayer);
-
-			// console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
 			for(var i=0; i < this.player.length; i++) {
 				hyperaudio.removeClass(this.player[i].target, 'active');
@@ -7093,18 +7124,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 							} else if(i > this.contentIndex) {
 								// Add the class
 								hyperaudio.addClass(elems[e], 'transcript-grey');
-							} else {
-/*
-								// Setup the Popcorn Transcript Plugin
-								for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
-									this.player[this.activePlayer].popcorn.transcript({
-										time: elems[e].getAttribute(opts.timeAttr) * this.content[i].unit, // seconds
-										futureClass: "transcript-grey",
-										target: elems[e],
-										onNewPara: onNewPara
-									});
-								}
-*/
 							}
 						}
 					}
@@ -7178,17 +7197,13 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var jumpTo = {},
 				i, len;
 			if(this.stage && this.stage.target) {
-				// console.log('currentTime()');
 				if(this.updateRequired) {
 					this.updateContent();
 				}
 				for(i = 0, len = this.content.length; i < len; i++) {
-					// console.log('currentTime(): i='+i+' | time='+time+' | totalStart='+this.content[i].totalStart+' | totalEnd='+this.content[i].totalEnd);
 					if(this.content[i].totalStart <= time && time < this.content[i].totalEnd) {
 						jumpTo.contentIndex = i;
 						jumpTo.start = time - this.content[i].totalStart + this.content[i].start;
-						console.log('currentTime(): jumpTo=%o',jumpTo);
-						// this.play(jumpTo);
 						this.cue(!this.paused, jumpTo);
 						break;
 					}
@@ -7207,7 +7222,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(this.content[i].element === sectionElem) {
 						jumpTo.contentIndex = i;
 						jumpTo.start = wordElem.getAttribute(this.options.timeAttr) * this.content[i].unit;
-						console.log('playWord(): jumpTo=%o',jumpTo);
 						this.play(jumpTo);
 						break;
 					}
@@ -7360,8 +7374,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				this.stageIndex++;
 			}
-
-			// console.log('getContent: length=%d | content=%o',this.content.length,this.content);
 		},
 
 		getSection: function(index) {
@@ -7626,8 +7638,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		manager: function(videoElem, event) {
 			var self = this;
 
-			// console.log('manager: video.paused='+videoElem.paused);
-
 			this.paused = videoElem.paused;
 
 			if(!this.paused) {
@@ -7636,27 +7646,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				var endTime = this.content[this.contentIndex].end + this.content[this.contentIndex].trim;
 
-/*
-				// Calculte the (total) currentTime to display on the GUI
-				var totalCurrentTime = this.content[this.contentIndex].totalStart;
-				if(this.content[this.contentIndex].start < videoElem.currentTime && videoElem.currentTime < endTime) {
-					totalCurrentTime += videoElem.currentTime - this.content[this.contentIndex].start;
-				} else if(videoElem.currentTime >= endTime) {
-					// totalCurrentTime += endTime - this.content[this.contentIndex].start;
-					totalCurrentTime = this.content[this.contentIndex].totalEnd;
-				}
-*/
-
 				var totalCurrentTime = this.getTotalCurrentTime(videoElem.currentTime, this.contentIndex);
 
 				if(videoElem.currentTime > endTime) {
 					// Goto the next piece of content
 
 					this._pause(); // Need to stop, otherwise if we switch player, the hidden one keeps playing.
-
-					// This bit is similar to the play() code
-
-					// this.getContent();
 
 					this.contentIndex++;
 
