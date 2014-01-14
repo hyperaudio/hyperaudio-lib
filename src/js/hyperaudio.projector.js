@@ -138,9 +138,42 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			this.target.appendChild(titleFXHelper);
 
 		},
+		initPopcorn: function(index, player) {
+			var elems, e, eLen;
+			var onNewPara = function(parent) {
+				// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+			};
+
+			if(index < this.content.length && player < this.player.length) {
+
+				// Reset the popcorn... Maybe want to only do this if necessary, ie., if any transcript plugins added.
+				this.player[player].initPopcorn();
+
+				elems = this.content[index].element.getElementsByTagName('a');
+				// Setup the Popcorn Transcript Plugin
+				for(e = 0, eLen = elems.length; e < eLen; e++) {
+
+					// Might want to move this (behaviour) to the plugin
+					hyperaudio.removeClass(elems[e], 'transcript-grey');
+
+					this.player[player].popcorn.transcript({
+						time: elems[e].getAttribute(this.options.timeAttr) * this.content[index].unit, // seconds
+						futureClass: "transcript-grey",
+						target: elems[e],
+						onNewPara: onNewPara
+					});
+				}
+			}
+		},
+		// Consider passing in the contentIndex instead of the media... Since you cannot give any old media here. It must relate to the content[]
 		load: function(media) {
 			var self = this;
-
+			// elems, e, eLen;
+/*
+			var onNewPara = function(parent) {
+				// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+			};
+*/
 			var activePlayer = this.which(media);
 
 			// console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
@@ -149,7 +182,23 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.activePlayer = activePlayer;
 			} else {
 				this.player[this.activePlayer].load(media);
+
+				// this.initPopcorn(this.contentIndex, this.activePlayer);
+/*
+				elems = this.content[this.contentIndex].element.getElementsByTagName('a');
+				// Setup the Popcorn Transcript Plugin
+				for(e = 0, eLen = elems.length; e < eLen; e++) {
+					this.player[this.activePlayer].popcorn.transcript({
+						time: elems[e].getAttribute(this.options.timeAttr) * this.content[this.contentIndex].unit, // seconds
+						futureClass: "transcript-grey",
+						target: elems[e],
+						onNewPara: onNewPara
+					});
+				}
+*/
 			}
+
+			this.initPopcorn(this.contentIndex, this.activePlayer);
 
 			// console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
@@ -158,6 +207,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
 		},
+		// Consider passing in the contentIndex instead of the media... Since you cannot give any old media here. It must relate to the content[]
 		prepare: function(media) {
 			// Used when more than 1 player to prepare the next piece of media.
 
@@ -203,13 +253,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		},
 
 		cue: function(play, jumpTo) {
-			var opts = this.options,
-				i, iLen, elems, e, eLen;
-
+			var i, iLen, elems, e, eLen;
+/*
 			var onNewPara = function(parent) {
 				// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
 			};
-
+*/
 			if(this.stage && this.stage.target) {
 
 				if(this.updateRequired) {
@@ -236,43 +285,28 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						});
 					}
 
-					// All the elems for loops below could move outside the if()s and then only need 1 loop... And same amount of if() stuff.
-
 					for(i = 0, iLen = this.content.length; i < iLen; i++) {
 						elems = this.content[i].element.getElementsByTagName('a');
-						if(i < this.contentIndex) {
-							// Remove the class
-							for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
+						for(e = 0, eLen = elems.length; e < eLen; e++) {
+							if(i < this.contentIndex) {
+								// Remove the class
 								hyperaudio.removeClass(elems[e], 'transcript-grey');
-							}
-						} else if(i > this.contentIndex) {
-							// Add the class
-							for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
+							} else if(i > this.contentIndex) {
+								// Add the class
 								hyperaudio.addClass(elems[e], 'transcript-grey');
+							} else {
+/*
+								// Setup the Popcorn Transcript Plugin
+								for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
+									this.player[this.activePlayer].popcorn.transcript({
+										time: elems[e].getAttribute(opts.timeAttr) * this.content[i].unit, // seconds
+										futureClass: "transcript-grey",
+										target: elems[e],
+										onNewPara: onNewPara
+									});
+								}
+*/
 							}
-						} else {
-							// Setup the Popcorn Transcript Plugin
-							for(e = 0, eLen = elems.length; e < eLen; e++) { // See comment above
-								this.player[this.activePlayer].popcorn.transcript({
-									time: elems[e].getAttribute(opts.timeAttr) * this.content[i].unit, // seconds
-									futureClass: "transcript-grey",
-									target: elems[e],
-									onNewPara: onNewPara
-								});
-							}
-							console.log('this.player[this.activePlayer].popcorn.media=%o',this.player[this.activePlayer].popcorn.media);
-							var fakeTime = hyperaudio.extend({}, this.player[this.activePlayer].popcorn.media, {
-								currentTime:0
-							});
-							console.log('fakeTime=%o',fakeTime);
-							// 1. Review how we fixed the YT event in the player
-							// Believe we:
-							// 2. put the fakeTime obj onto a custom event details
-							// 3. dispatch that event on the popcorn instance.
-							this.player[this.activePlayer].popcorn.media.dispatchEvent.call(fakeTime, "timeupdate");
-							// TODO
-							// 4. Add a on() listener for the timeupdate event and review its contents.
-							// 5. Review other important events, since maybe this event is occurring at the incorrect time.
 						}
 					}
 
