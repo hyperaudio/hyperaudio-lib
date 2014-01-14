@@ -39,22 +39,62 @@ var SideMenu = (function (document, hyperaudio) {
 	SideMenu.prototype.initTranscripts = function () {
 		var self = this;
 
-		hyperaudio.api.getTranscripts(function(success) {
-			if(success) {
-				var elem, trans;
-				for(var i = 0, l = this.transcripts.length; i < l; i++) {
-					trans = this.transcripts[i];
-					if(trans.type === 'html') {
-						elem = document.createElement('li');
-						elem.setAttribute('data-id', trans._id);
-						elem.innerHTML = trans.label;
-						self.transcripts.appendChild(elem);
-					}
-				}
+		var mkdir = function(parent, title) {
+			var li = document.createElement('li'),
+				div = document.createElement('div'),
+				ul = document.createElement('ul');
+			hyperaudio.addClass(li, 'folder');
+			div.innerHTML = title;
+			li.appendChild(div);
+			li.appendChild(ul);
+			parent.appendChild(li);
+			return ul;
+		};
 
-				self.transcripts._tap = new Tap({el: self.transcripts});
-				self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
+		hyperaudio.api.getUsername(function(success) {
+
+			var username = '';
+			var filter = false;
+
+			if(success) {
+				username = this.username;
+				filter = !this.guest;
 			}
+
+			hyperaudio.api.getTranscripts(function(success) {
+				if(success) {
+					var yourTrans, otherTrans, userTrans, elem, trans;
+
+					if(username) {
+						yourTrans = mkdir(self.transcripts, 'Your Transcripts');
+					}
+					otherTrans = mkdir(self.transcripts, 'Other Transcripts');
+
+					// Nesting not supported ATM.
+					// userTrans = mkdir(self.transcripts, 'By User');
+					// mkdir(userTrans, 'Scooby');
+					// mkdir(userTrans, 'Mark');
+
+					for(var i = 0, l = this.transcripts.length; i < l; i++) {
+						trans = this.transcripts[i];
+						if(trans.type === 'html') {
+							elem = document.createElement('li');
+							elem.setAttribute('data-id', trans._id);
+							elem.innerHTML = trans.label;
+							// self.transcripts.appendChild(elem);
+
+							if(trans.owner === username) {
+								yourTrans.appendChild(elem);
+							} else {
+								otherTrans.appendChild(elem);
+							}
+						}
+					}
+
+					self.transcripts._tap = new Tap({el: self.transcripts});
+					self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
+				}
+			});
 		});
 	};
 
