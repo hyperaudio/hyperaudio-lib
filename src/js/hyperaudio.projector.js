@@ -154,7 +154,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				for(e = 0, eLen = elems.length; e < eLen; e++) {
 
 					// Might want to move this (behaviour) to the plugin
-					hyperaudio.removeClass(elems[e], 'transcript-grey');
+					// hyperaudio.removeClass(elems[e], 'transcript-grey');
 
 					this.player[player].popcorn.transcript({
 						time: elems[e].getAttribute(this.options.timeAttr) * this.content[index].unit, // seconds
@@ -227,13 +227,19 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(media && this.player.length > 1) {
 
 				// See if a player already has it. NB: Zero is falsey, so strong comparison.
-				if(this.which(media) === false) {
+				var prepared = this.which(media);
+				if(prepared === false) {
 
 					// Get the next free player (Has flaws if more than 2, but still works. Just does not take full advantage of more than 2.)
 					this.nextPlayer = this.activePlayer + 1 < this.player.length ? this.activePlayer + 1 : 0;
 
 					if(this.player[this.nextPlayer]) {
 						this.player[this.nextPlayer].load(media);
+					}
+				} else {
+					// TODO move the video to the start time.
+					if(prepared !== this.activePlayer) {
+						this.player[prepared].initPopcorn();
 					}
 				}
 			}

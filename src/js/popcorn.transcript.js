@@ -36,9 +36,13 @@
 
 	Popcorn.plugin( "transcript" , (function() {
 
+		// Define plugin wide variables out here
+
 		var pParent;
 
-		return {		
+		return {
+
+			// Plugin manifest for Butter
 			manifest: {
 				about:{
 					name: "Popcorn Transcript Plugin",
@@ -54,89 +58,85 @@
 				}
 			},
 
-			// The popcorn docs appears to have renamed 'options' with 'track', but its operation seems the same.
-			// Believe that this is to identify the parameter as the track object, rather than 'options', which is probably used all over the place.
+			_setup: function( track ) {
 
-			_setup: function( options ) {
+				// setup code, fire on initialization
+
+				// |track| refers to the TrackEvent created by the options passed into the plugin on init
+				// this refers to the popcorn object
 
 				var parent, iAmNewPara;
 
 				// if a target is specified and is a string, use that - Requires every word <span> to have a unique ID.
 				// else if target is specified and is an object, use object as DOM reference
 				// else Throw an error.
-				if ( options.target && typeof options.target === "string" && options.target !== 'Transcript-container' ) {
-					options.container = document.getElementById( options.target );
-				} else if ( options.target && typeof options.target === "object" ) {
-					options.container = options.target;
+				if ( track.target && typeof track.target === "string" && track.target !== 'Transcript-container' ) {
+					track.container = document.getElementById( track.target );
+				} else if ( track.target && typeof track.target === "object" ) {
+					track.container = track.target;
 				} else {
 					throw "Popcorn.transcript: target property must be an ID string or a pointer to the DOM of the transcript word.";
 				}
 
-				options.start = 0;
-				options.end = options.time;
+				track.start = 0;
+				track.end = track.time;
 
-				if(!options.futureClass) {
-					options.futureClass = "transcript-future";
+				if(!track.futureClass) {
+					track.futureClass = "transcript-future";
 				}
 
-				parent = options.target.parentNode;
+				parent = track.target.parentNode;
 				if(parent !== pParent) {
 					iAmNewPara = true;
 					pParent = parent;
 				}
 
-				options.transcriptRead = function() {
-					if( options.container.classList ) {
-						options.container.classList.remove(options.futureClass);
+				track.transcriptRead = function() {
+					if( track.container.classList ) {
+						track.container.classList.remove(track.futureClass);
 					} else {
-						options.container.className = "";
+						track.container.className = "";
 					}
-					if(iAmNewPara && typeof options.onNewPara === 'function') {
-						options.onNewPara(options.target.parentNode);
+					if(iAmNewPara && typeof track.onNewPara === 'function') {
+						track.onNewPara(track.target.parentNode);
 					}
 				};
 
-				options.transcriptFuture = function() {
-					if( options.container.classList ) {
-						options.container.classList.add(options.futureClass);
+				track.transcriptFuture = function() {
+					if( track.container.classList ) {
+						track.container.classList.add(track.futureClass);
 					} else {
-						options.container.className = options.futureClass;
+						track.container.className = track.futureClass;
 					}
 				};
 
 				// Note: end times close to zero can have issues. (Firefox 4.0 worked with 100ms. Chrome needed 200ms. iOS needed 500ms)
-				if(options.end > options.start) {
-					// options.transcriptFuture();
+				// if(track.end > track.start) {
+					// track.transcriptFuture();
+				// }
+
+				if(track.end < this.media.currentTime) {
+					track.transcriptRead();
+				} else {
+					track.transcriptFuture();
 				}
 
 			},
 
-			_update: function( options ) {
+			_update: function( track ) {
 				// update code, fire on update/modification of a plugin created track event.
 			},
 
-			_teardown: function( options ) {
+			_teardown: function( track ) {
 				// teardown code, fire on removal of plugin or destruction of instance
 			},
 
-			/**
-			 * @member transcript 
-			 * The start function will be executed when the currentTime 
-			 * of the video reaches the start time provided by the 
-			 * options variable
-			 */
-			start: function( event, options ) {
-				options.transcriptFuture();
+			start: function( event, track ) {
+				track.transcriptFuture();
 			},
 
-			/**
-			 * @member transcript 
-			 * The end function will be executed when the currentTime 
-			 * of the video reaches the end time provided by the 
-			 * options variable
-			 */
-			end: function( event, options ) {
-				options.transcriptRead();
+			end: function( event, track ) {
+				track.transcriptRead();
 			}
 		};
 	})());
