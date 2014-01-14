@@ -106,7 +106,7 @@
 
 				// Note: end times close to zero can have issues. (Firefox 4.0 worked with 100ms. Chrome needed 200ms. iOS needed 500ms)
 				if(options.end > options.start) {
-					options.transcriptFuture();
+					// options.transcriptFuture();
 				}
 
 			},
