@@ -115,7 +115,7 @@
 					// track.transcriptFuture();
 				// }
 
-				if(track.end < this.media.currentTime) {
+				if(track.end <= this.media.currentTime) {
 					track.transcriptRead();
 				} else {
 					track.transcriptFuture();

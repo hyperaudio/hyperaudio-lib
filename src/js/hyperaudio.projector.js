@@ -165,16 +165,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				}
 			}
 		},
-		// Consider passing in the contentIndex instead of the media... Since you cannot give any old media here. It must relate to the content[]
-		load: function(media) {
-			var self = this;
-			// elems, e, eLen;
-/*
-			var onNewPara = function(parent) {
-				// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
-			};
-*/
-			var activePlayer = this.which(media);
+		load: function(index) {
+			var media = this.content[index].media,
+				activePlayer = this.which(media);
+
+			this.contentIndex = index;
 
 			// console.log('load#1: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
@@ -182,23 +177,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.activePlayer = activePlayer;
 			} else {
 				this.player[this.activePlayer].load(media);
-
-				// this.initPopcorn(this.contentIndex, this.activePlayer);
-/*
-				elems = this.content[this.contentIndex].element.getElementsByTagName('a');
-				// Setup the Popcorn Transcript Plugin
-				for(e = 0, eLen = elems.length; e < eLen; e++) {
-					this.player[this.activePlayer].popcorn.transcript({
-						time: elems[e].getAttribute(this.options.timeAttr) * this.content[this.contentIndex].unit, // seconds
-						futureClass: "transcript-grey",
-						target: elems[e],
-						onNewPara: onNewPara
-					});
-				}
-*/
 			}
 
-			this.initPopcorn(this.contentIndex, this.activePlayer);
+			this.initPopcorn(index, this.activePlayer);
 
 			// console.log('load#2: activePlayer=%d | this.activePlayer=%d',activePlayer,this.activePlayer);
 
@@ -207,8 +188,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 			hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
 		},
-		// Consider passing in the contentIndex instead of the media... Since you cannot give any old media here. It must relate to the content[]
-		prepare: function(media) {
+		prepare: function(index) {
 			// Used when more than 1 player to prepare the next piece of media.
 
 			// 1. Want to be able to call this method and it deal with preparing the other player.
@@ -222,12 +202,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			// 8. Normally just 1 or 2 players though, so "keep it real mofo!"
 
+			var media = this.content[index].media;
 
 			// Ignore if we are only using a single Player
 			if(media && this.player.length > 1) {
 
 				// See if a player already has it. NB: Zero is falsey, so strong comparison.
 				var prepared = this.which(media);
+				var alignStart = Math.max(0, this.content[index].start - 1); // 
 				if(prepared === false) {
 
 					// Get the next free player (Has flaws if more than 2, but still works. Just does not take full advantage of more than 2.)
@@ -235,11 +217,13 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 					if(this.player[this.nextPlayer]) {
 						this.player[this.nextPlayer].load(media);
+						this.player[this.nextPlayer].pause(alignStart);
 					}
 				} else {
-					// TODO move the video to the start time.
+					// Reset popcorn and move the video to the start time.
 					if(prepared !== this.activePlayer) {
 						this.player[prepared].initPopcorn();
+						this.player[this.nextPlayer].pause(alignStart);
 					}
 				}
 			}
@@ -276,9 +260,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				if(this.contentIndex < this.content.length) {
 
-					this.load(this.content[this.contentIndex].media);
+					this.load(this.contentIndex);
 					if(this.content[this.contentIndex+1]) {
-						this.prepare(this.content[this.contentIndex+1].media);
+						this.prepare(this.contentIndex+1);
 					}
 					// this.effect(this.content[this.contentIndex].effect);
 
@@ -870,9 +854,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(this.contentIndex < this.content.length) {
 						// this.paused = false;
 
-						this.load(this.content[this.contentIndex].media);
+						this.load(this.contentIndex);
 						if(this.content[this.contentIndex+1]) {
-							this.prepare(this.content[this.contentIndex+1].media);
+							this.prepare(this.contentIndex+1);
 						}
 						this.effect(this.content[this.contentIndex].effect);
 						this._play(this.content[this.contentIndex].start);
@@ -882,7 +866,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.paused = true;
 						this.isReadyToPlay = false; // ended so needs a reset to the start
 						this.contentIndex = 0; // Reset this since YouTube player (or its Popcorn wrapper) generates the timeupdate all the time.
-						this.prepare(this.content[this.contentIndex].media);
+						this.prepare(this.contentIndex);
 					}
 				}
 				if(this.options.gui) {
