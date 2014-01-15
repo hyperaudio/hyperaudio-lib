@@ -83,7 +83,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				// Add listeners to the video element
 				this.solution.html.addEventListener('progress', function(e) {
 					if(this.readyState > 0) {
-						this.commandsIgnored = false;
+						self.commandsIgnored = false;
 					}
 				}, false);
 
