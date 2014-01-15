@@ -106,6 +106,7 @@ var SideMenu = (function (document, hyperaudio) {
 		}
 
 		function onDrop (el) {
+			hyperaudio.removeClass(stage.target, 'dragdrop');
 			if ( !el ) {	// we dropped outside the stage
 				return;
 			}
