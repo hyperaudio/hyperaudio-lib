@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.10 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 14th January 2014 22:22:13 */
+/*! hyperaudio v0.3.11 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 15th January 2014 13:11:49 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4688,6 +4688,7 @@ var SideMenu = (function (document, hyperaudio) {
 		}
 
 		function onDrop (el) {
+			hyperaudio.removeClass(stage.target, 'dragdrop');
 			if ( !el ) {	// we dropped outside the stage
 				return;
 			}
