@@ -40,6 +40,7 @@ module.exports = function(grunt) {
 						'src/js/utility.api.js', // After xhr
 
 						// Modules that form the Hyperaudio Lib
+						'src/js/hyperaudio.music.js',
 						'src/js/hyperaudio.player.js',
 						'src/js/hyperaudio.player.gui.js',
 						'src/js/hyperaudio.transcript.js',
@@ -127,5 +128,5 @@ module.exports = function(grunt) {
 	grunt.registerTask('default', ['jshint:before', 'concat', 'uglify', 'jshint:after']);
 
 	grunt.registerTask('build', ['concat', 'uglify']);
-	grunt.registerTask('test', ['jshint']);
+	grunt.registerTask('test', ['jshint:before']);
 };

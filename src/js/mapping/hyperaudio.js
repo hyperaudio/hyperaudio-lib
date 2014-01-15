@@ -1,3 +1,4 @@
+hyperaudio.register('Music', Music);
 hyperaudio.register('Player', Player);
 hyperaudio.register('PlayerGUI', PlayerGUI);
 hyperaudio.register('Transcript', Transcript);
