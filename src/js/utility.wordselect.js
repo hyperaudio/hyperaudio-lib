@@ -15,7 +15,7 @@ var WordSelect = (function (window, document, hyperaudio) {
 			touch: true,
 			mouse: true,
 			threshold: 10,
-			timeout: 500
+			timeout: 0 // 500
 		};
 
 		for ( var i in options ) {
