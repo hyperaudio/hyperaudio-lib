@@ -99,7 +99,8 @@ var SideMenu = (function (document, hyperaudio) {
 	};
 
 	SideMenu.prototype.initMusic = function () {
-		var stage = this.options.stage;
+		var self = this,
+			stage = this.options.stage;
 
 		function onDragStart (e) {
 			hyperaudio.addClass(stage.target, 'dragdrop');
@@ -121,14 +122,18 @@ var SideMenu = (function (document, hyperaudio) {
 			// add drag and drop to BGM
 			var items = document.querySelectorAll('#panel-bgm li');
 			for (var i = items.length-1; i >= 0; i-- ) {
-				items[i]._dragInstance = new DragDrop({
-					handle: items[i],
-					dropArea: stage.target,
-					draggableClass: 'draggableEffect',
-					onDragStart: onDragStart,
-					onDrop: onDrop
-				});
+				if ( !this.isFolder(items[i]) ) {
+					items[i]._dragInstance = new DragDrop({
+						handle: items[i],
+						dropArea: stage.target,
+						draggableClass: 'draggableEffect',
+						onDragStart: onDragStart,
+						onDrop: onDrop
+					});
+				}
 			}
+			self.music._tap = new Tap({el: self.music});
+			self.music.addEventListener('tap', self.toggleFolder.bind(self), false);
 		}
 	};
 
@@ -176,24 +181,42 @@ var SideMenu = (function (document, hyperaudio) {
 	};
 
 	SideMenu.prototype.selectMedia = function (e) {
-		e.stopPropagation();	// just in case
+		e.stopPropagation();	// just in case [Not sure this does anything with a tap event.]
 
-		var starter = e.target;
+		var item = e.target;
 
-		if ( hyperaudio.hasClass(e.target.parentNode, 'folder') ) {
-			starter = e.target.parentNode;
-		}
-
-		if ( hyperaudio.hasClass(starter, 'folder') ) {
-			hyperaudio.toggleClass(starter, 'open');
+		if(this.toggleFolder(e)) {
 			return;
 		}
 
-		if ( !starter.getAttribute('data-id') || !this.mediaCallback ) {
+		if ( !item.getAttribute('data-id') || !this.mediaCallback ) {
 			return;
 		}
 
-		this.mediaCallback(starter);
+		this.mediaCallback(item);
+	};
+
+	SideMenu.prototype.isFolder = function (target) {
+		// Copes with clicks on Folder div text and the li
+
+		if ( hyperaudio.hasClass(target.parentNode, 'folder') ) {
+			target = target.parentNode;
+		}
+
+		if ( hyperaudio.hasClass(target, 'folder') ) {
+			return target;
+		}
+		return false;
+	};
+
+	SideMenu.prototype.toggleFolder = function (e) {
+
+		var folder = this.isFolder(e.target);
+		if(folder) {
+			hyperaudio.toggleClass(folder, 'open');
+			return true;
+		}
+		return false;
 	};
 
 	return SideMenu;
