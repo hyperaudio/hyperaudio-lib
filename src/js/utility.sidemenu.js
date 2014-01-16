@@ -112,8 +112,22 @@ var SideMenu = (function (document, hyperaudio) {
 				return;
 			}
 
+			console.log('handle(mp3): ' + this.handle.getAttribute('data-mp3'));
+
 			var title = el.innerHTML;
 			hyperaudio.addClass(el, 'effect');
+			el.setAttribute('data-effect', 'bgm');
+
+			var id = this.handle.getAttribute('data-id'),
+				mp3 = this.handle.getAttribute('data-mp3'),
+				mp4 = this.handle.getAttribute('data-mp4'),
+				ogg = this.handle.getAttribute('data-ogg');
+
+			if(id) el.setAttribute('data-id', id);
+			if(mp3) el.setAttribute('data-mp3', mp3);
+			if(mp4) el.setAttribute('data-mp4', mp4);
+			if(ogg) el.setAttribute('data-ogg', ogg);
+
 			el.innerHTML = '<form><div>' + title + '</div><label>Delay: <span class="value">1</span>s</label><input type="range" value="1" min="0.5" max="5" step="0.1" onchange="this.parentNode.querySelector(\'span\').innerHTML = this.value"></form>';
 			stage.dropped(el, title);
 		}
