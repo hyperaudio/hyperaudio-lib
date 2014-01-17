@@ -131,11 +131,11 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 					// Setup to work with mp3, mp4 and ogg property names. See options.
 					hyperaudio.each(this.options.media, function(format, url) {
 						// Only create known formats, so we can add other info to the media object.
-						if(self.options.mediaType[format]) {
+						if(self.options.mediaType[format] && url) {
 							var source = document.createElement('source');
 							source.setAttribute('type', self.options.mediaType[format]);
 							source.setAttribute('src', url);
-							self.solution.html.appendChild(source);
+							self.audioElem.appendChild(source);
 						}
 					});
 
@@ -232,6 +232,11 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 					this.pause();
 				}
 			}
+		},
+		bgmFX: function(options) {
+			hyperaudio.extend(this.options, options);
+			this.load();
+			this.play();
 		}
 	};
 

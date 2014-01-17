@@ -22,6 +22,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			timeAttr: 'data-m',
 
+			music: null, // For the BGM
+
 			gui: true, // True to add a gui.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -574,10 +576,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					// This bit should be refactored, maybe with IDs or classes to indicate the input elements.
 					var effectText = el.querySelector('input[type="text"]');
 					var effectRange = el.querySelector('input[type="range"]');
+					var effectMP3 = el.getAttribute('data-mp3');
 					section.effect = {
 						type: effectType,
 						text: effectText ? effectText.value : '',
-						duration: effectRange ? effectRange.value * 1 : 0 // Convert to number
+						duration: effectRange ? effectRange.value * 1 : 0, // Convert to number
+						mp3: effectMP3 ? effectMP3 : ''
 					};
 				} else {
 					section.effect = false;
@@ -586,6 +590,13 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				return section;
 			} else {
 				return false;
+			}
+		},
+
+		// Maybe this could be its own class?
+		bgmFX: function(options) {
+			if(this.options.music) {
+				this.options.music.bgmFX(options);
 			}
 		},
 
@@ -639,6 +650,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					case 'fadeIn':
 						content.effect.push(effect[i]);
 						break;
+					case 'bgm':
+						content.effect.push(effect[i]);
+						break;
 					case 'trim':
 						content.trim = effect[i].duration;
 						break;
@@ -689,6 +703,17 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 										el: '#fxHelper',
 										fadeIn: true,
 										time: effect[i].duration * 1000
+									});
+									effect[i].init = true;
+								}
+								break;
+							case 'bgm':
+								if(effect[i].duration) {
+									this.bgmFX({
+										media: {
+											mp3: effect[i].mp3
+										},
+										duration: effect[i].duration
 									});
 									effect[i].init = true;
 								}

@@ -121,6 +121,8 @@ span.code {
 
 </div>
 
+<div id="music-player"></div>
+
 <div id="signin-modal" class="modal">
 	<div class="modal-mask"></div>
 	<div class="modal-window">
@@ -156,6 +158,7 @@ span.code {
 <script type="text/javascript" src="../src/js/hyperaudio.transcript.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.stage.js"></script>
 <script type="text/javascript" src="../src/js/hyperaudio.projector.js"></script>
+<script type="text/javascript" src="../src/js/hyperaudio.music.js"></script>
 <script type="text/javascript" src="../src/js/utility.dragdrop.js"></script>
 <script type="text/javascript" src="../src/js/utility.wordselect.js"></script>
 <script type="text/javascript" src="../src/js/utility.xhr.js"></script>
@@ -172,6 +175,7 @@ span.code {
 	hyperaudio.register('Transcript', Transcript);
 	hyperaudio.register('Stage', Stage);
 	hyperaudio.register('Projector', Projector);
+	hyperaudio.register('Music', Music);
 
 	hyperaudio.utility('DragDrop', DragDrop);
 	hyperaudio.utility('WordSelect', WordSelect);
@@ -184,8 +188,13 @@ span.code {
 		gui: true
 	});
 
+	var music = hyperaudio.Music({
+		target: "#music-player"
+	});
+
 	var projector = hyperaudio.Projector({
-		target: "#target-video"
+		target: "#target-video",
+		music: music
 	});
 
 	var stage = hyperaudio.Stage({
