@@ -337,6 +337,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		pause: function() {
 			// Really need pause to do similar to play by using cue()
 			this._pause();
+			if(this.options.music) {
+				this.options.music.pause();
+			}
 		},
 		_play: function(time) {
 			this.paused = false;
