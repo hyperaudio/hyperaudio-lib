@@ -211,7 +211,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 						// Setup to work with mp4 and webm property names. See options.
 						hyperaudio.each(this.options.media, function(format, url) {
 							// Only create known formats, so we can add other info to the media object.
-							if(self.options.mediaType[format]) {
+							if(self.options.mediaType[format] && url) {
 								var source = document.createElement('source');
 								source.setAttribute('type', self.options.mediaType[format]);
 								source.setAttribute('src', url); // Could use 'this' but less easy to read.
