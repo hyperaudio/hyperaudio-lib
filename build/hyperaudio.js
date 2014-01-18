@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.13 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 18th January 2014 21:45:55 */
+/*! hyperaudio v0.3.14 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 18th January 2014 22:08:55 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7866,7 +7866,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 						switch(effect[i].type) {
 							case 'title':
-								if(effect[i].text && effect[i].duration) {
+								if(effect[i].title && effect[i].duration) {
 									titleFX({
 										el: '#titleFXHelper',
 										text: effect[i].title,
