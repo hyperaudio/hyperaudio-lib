@@ -726,7 +726,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 						switch(effect[i].type) {
 							case 'title':
-								if(effect[i].text && effect[i].duration) {
+								if(effect[i].title && effect[i].duration) {
 									titleFX({
 										el: '#titleFXHelper',
 										text: effect[i].title,
