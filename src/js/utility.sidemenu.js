@@ -128,7 +128,13 @@ var SideMenu = (function (document, hyperaudio) {
 			if(mp4) el.setAttribute('data-mp4', mp4);
 			if(ogg) el.setAttribute('data-ogg', ogg);
 
-			el.innerHTML = '<form><div>' + title + '</div><label>Delay: <span class="value">1</span>s</label><input type="range" value="1" min="0.5" max="5" step="0.1" onchange="this.parentNode.querySelector(\'span\').innerHTML = this.value"></form>';
+			var html = '<form><div>' + title + '</div>' +
+				'<label>Delay: <span class="value">0</span>s</label><input id="effect-delay" type="range" value="0" min="0" max="30" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Start At: <span class="value">0</span>s</label><input id="effect-start" type="range" value="0" min="0" max="30" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Duration: <span class="value">60</span>s</label><input id="effect-duration" type="range" value="60" min="0" max="120" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Volume: <span class="value">80</span>%</label><input id="effect-volume" type="range" value="80" min="10" max="100" step="5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'</form>';
+			el.innerHTML = html;
 			stage.dropped(el, title);
 		}
 
