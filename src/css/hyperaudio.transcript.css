@@ -317,6 +317,29 @@ p {
 	color: #a00;
 }
 
+.stage .effect {
+	background: #5FAF71;
+	border: 0;
+	color: #fff;
+}
+
+.stage .effect input {
+	display: block;
+	width: 100%;
+}
+
+.stage .effect input[type=text] {
+	padding: 4px;
+	margin: 6px 0;
+	background: #D6EFD6;
+	outline: 0!important;
+}
+
+.stage .effect input[type=text]:focus {
+	background: #fff;
+}
+
+
 .video-transition-servo {
 	position: absolute;
 	width: 100%;
