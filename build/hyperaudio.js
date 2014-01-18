@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.12 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 16th January 2014 16:34:31 */
+/*! hyperaudio v0.3.13 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 18th January 2014 21:45:55 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4681,7 +4681,8 @@ var SideMenu = (function (document, hyperaudio) {
 	};
 
 	SideMenu.prototype.initMusic = function () {
-		var stage = this.options.stage;
+		var self = this,
+			stage = this.options.stage;
 
 		function onDragStart (e) {
 			hyperaudio.addClass(stage.target, 'dragdrop');
@@ -4693,9 +4694,29 @@ var SideMenu = (function (document, hyperaudio) {
 				return;
 			}
 
+			console.log('handle(mp3): ' + this.handle.getAttribute('data-mp3'));
+
 			var title = el.innerHTML;
 			hyperaudio.addClass(el, 'effect');
-			el.innerHTML = '<form><div>' + title + '</div><label>Delay: <span class="value">1</span>s</label><input type="range" value="1" min="0.5" max="5" step="0.1" onchange="this.parentNode.querySelector(\'span\').innerHTML = this.value"></form>';
+			el.setAttribute('data-effect', 'bgm');
+
+			var id = this.handle.getAttribute('data-id'),
+				mp3 = this.handle.getAttribute('data-mp3'),
+				mp4 = this.handle.getAttribute('data-mp4'),
+				ogg = this.handle.getAttribute('data-ogg');
+
+			if(id) el.setAttribute('data-id', id);
+			if(mp3) el.setAttribute('data-mp3', mp3);
+			if(mp4) el.setAttribute('data-mp4', mp4);
+			if(ogg) el.setAttribute('data-ogg', ogg);
+
+			var html = '<form><div>' + title + '</div>' +
+				'<label>Delay: <span class="value">0</span>s</label><input id="effect-delay" type="range" value="0" min="0" max="30" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Start At: <span class="value">0</span>s</label><input id="effect-start" type="range" value="0" min="0" max="30" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Duration: <span class="value">60</span>s</label><input id="effect-duration" type="range" value="60" min="0" max="120" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Volume: <span class="value">80</span>%</label><input id="effect-volume" type="range" value="80" min="10" max="100" step="5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'</form>';
+			el.innerHTML = html;
 			stage.dropped(el, title);
 		}
 
@@ -4703,14 +4724,18 @@ var SideMenu = (function (document, hyperaudio) {
 			// add drag and drop to BGM
 			var items = document.querySelectorAll('#panel-bgm li');
 			for (var i = items.length-1; i >= 0; i-- ) {
-				items[i]._dragInstance = new DragDrop({
-					handle: items[i],
-					dropArea: stage.target,
-					draggableClass: 'draggableEffect',
-					onDragStart: onDragStart,
-					onDrop: onDrop
-				});
+				if ( !this.isFolder(items[i]) ) {
+					items[i]._dragInstance = new DragDrop({
+						handle: items[i],
+						dropArea: stage.target,
+						draggableClass: 'draggableEffect',
+						onDragStart: onDragStart,
+						onDrop: onDrop
+					});
+				}
 			}
+			self.music._tap = new Tap({el: self.music});
+			self.music.addEventListener('tap', self.toggleFolder.bind(self), false);
 		}
 	};
 
@@ -4758,24 +4783,42 @@ var SideMenu = (function (document, hyperaudio) {
 	};
 
 	SideMenu.prototype.selectMedia = function (e) {
-		e.stopPropagation();	// just in case
+		e.stopPropagation();	// just in case [Not sure this does anything with a tap event.]
 
-		var starter = e.target;
+		var item = e.target;
 
-		if ( hyperaudio.hasClass(e.target.parentNode, 'folder') ) {
-			starter = e.target.parentNode;
-		}
-
-		if ( hyperaudio.hasClass(starter, 'folder') ) {
-			hyperaudio.toggleClass(starter, 'open');
+		if(this.toggleFolder(e)) {
 			return;
 		}
 
-		if ( !starter.getAttribute('data-id') || !this.mediaCallback ) {
+		if ( !item.getAttribute('data-id') || !this.mediaCallback ) {
 			return;
 		}
 
-		this.mediaCallback(starter);
+		this.mediaCallback(item);
+	};
+
+	SideMenu.prototype.isFolder = function (target) {
+		// Copes with clicks on Folder div text and the li
+
+		if ( hyperaudio.hasClass(target.parentNode, 'folder') ) {
+			target = target.parentNode;
+		}
+
+		if ( hyperaudio.hasClass(target, 'folder') ) {
+			return target;
+		}
+		return false;
+	};
+
+	SideMenu.prototype.toggleFolder = function (e) {
+
+		var folder = this.isFolder(e.target);
+		if(folder) {
+			hyperaudio.toggleClass(folder, 'open');
+			return true;
+		}
+		return false;
 	};
 
 	return SideMenu;
@@ -5756,11 +5799,11 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 					// Setup to work with mp3, mp4 and ogg property names. See options.
 					hyperaudio.each(this.options.media, function(format, url) {
 						// Only create known formats, so we can add other info to the media object.
-						if(self.options.mediaType[format]) {
+						if(self.options.mediaType[format] && url) {
 							var source = document.createElement('source');
 							source.setAttribute('type', self.options.mediaType[format]);
 							source.setAttribute('src', url);
-							self.solution.html.appendChild(source);
+							self.audioElem.appendChild(source);
 						}
 					});
 
@@ -5857,6 +5900,12 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 					this.pause();
 				}
 			}
+		},
+		bgmFX: function(options) {
+			hyperaudio.extend(this.options, options);
+			this.load();
+			this.audioElem.volume = this.options.volume;
+			this.play(this.options.start);
 		}
 	};
 
@@ -6077,7 +6126,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 						// Setup to work with mp4 and webm property names. See options.
 						hyperaudio.each(this.options.media, function(format, url) {
 							// Only create known formats, so we can add other info to the media object.
-							if(self.options.mediaType[format]) {
+							if(self.options.mediaType[format] && url) {
 								var source = document.createElement('source');
 								source.setAttribute('type', self.options.mediaType[format]);
 								source.setAttribute('src', url); // Could use 'this' but less easy to read.
@@ -7113,6 +7162,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			timeAttr: 'data-m',
 
+			music: null, // For the BGM
+
 			gui: true, // True to add a gui.
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
@@ -7426,6 +7477,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		pause: function() {
 			// Really need pause to do similar to play by using cue()
 			this._pause();
+			if(this.options.music) {
+				this.options.music.pause();
+			}
 		},
 		_play: function(time) {
 			this.paused = false;
@@ -7658,25 +7712,69 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					section.end = words[words.length-1].getAttribute(this.options.timeAttr) * unit;
 					section.trim = this.options.trim;
 				}
-
+/*
 				// Get the effect details
 				var effectType = el.getAttribute('data-effect');
 				if(effectType) {
 					// This bit should be refactored, maybe with IDs or classes to indicate the input elements.
 					var effectText = el.querySelector('input[type="text"]');
 					var effectRange = el.querySelector('input[type="range"]');
+					var effectMP3 = el.getAttribute('data-mp3');
 					section.effect = {
 						type: effectType,
 						text: effectText ? effectText.value : '',
-						duration: effectRange ? effectRange.value * 1 : 0 // Convert to number
+						duration: effectRange ? effectRange.value * 1 : 0, // Convert to number
+						mp3: effectMP3 ? effectMP3 : ''
 					};
 				} else {
 					section.effect = false;
 				}
+*/
+				section.effect = this.getSectionEffect(el);
 
 				return section;
 			} else {
 				return false;
+			}
+		},
+
+		getSectionEffect: function(el) {
+			// Get the effect details
+			var type = el.getAttribute('data-effect'),
+				effect, media, elem;
+
+			if(type) {
+				elem = {
+					title: el.querySelector('#effect-title'),
+					delay: el.querySelector('#effect-delay'),
+					start: el.querySelector('#effect-start'),
+					duration: el.querySelector('#effect-duration'),
+					volume: el.querySelector('#effect-volume')
+				};
+				media = {
+					mp3: el.getAttribute('data-mp3'),
+					mp4: el.getAttribute('data-mp4'),
+					ogg: el.getAttribute('data-ogg')
+				};
+				effect = {
+					type: type,
+					title: elem.title ? elem.title.value : '',
+					delay: elem.delay ? elem.delay.value * 1 : 0, // Convert to number
+					start: elem.start ? elem.start.value * 1 : 0, // Convert to number
+					duration: elem.duration ? elem.duration.value * 1 : 0, // Convert to number
+					volume: elem.volume ? elem.volume.value / 100 : 0, // Convert to number and ratio from percent
+					media: media
+				};
+			} else {
+				effect = false;
+			}
+			return effect;
+		},
+
+		// Maybe this could be its own class?
+		bgmFX: function(options) {
+			if(this.options.music) {
+				this.options.music.bgmFX(options);
 			}
 		},
 
@@ -7730,6 +7828,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					case 'fadeIn':
 						content.effect.push(effect[i]);
 						break;
+					case 'bgm':
+						content.effect.push(effect[i]);
+						break;
 					case 'trim':
 						content.trim = effect[i].duration;
 						break;
@@ -7768,7 +7869,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 								if(effect[i].text && effect[i].duration) {
 									titleFX({
 										el: '#titleFXHelper',
-										text: effect[i].text,
+										text: effect[i].title,
 										duration: effect[i].duration * 1000
 									});
 									effect[i].init = true;
@@ -7780,6 +7881,22 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 										el: '#fxHelper',
 										fadeIn: true,
 										time: effect[i].duration * 1000
+									});
+									effect[i].init = true;
+								}
+								break;
+							case 'bgm':
+								if(effect[i].duration) {
+									this.bgmFX({
+										media: {
+											mp3: effect[i].media.mp3,
+											mp4: effect[i].media.mp4,
+											ogg: effect[i].media.ogg
+										},
+										delay: effect[i].delay,
+										start: effect[i].start,
+										duration: effect[i].duration,
+										volume: effect[i].volume
 									});
 									effect[i].init = true;
 								}

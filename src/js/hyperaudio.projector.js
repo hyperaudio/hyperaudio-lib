@@ -615,7 +615,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					mp3: el.getAttribute('data-mp3'),
 					mp4: el.getAttribute('data-mp4'),
 					ogg: el.getAttribute('data-ogg')
-				}
+				};
 				effect = {
 					type: type,
 					title: elem.title ? elem.title.value : '',
