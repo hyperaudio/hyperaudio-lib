@@ -572,7 +572,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					section.end = words[words.length-1].getAttribute(this.options.timeAttr) * unit;
 					section.trim = this.options.trim;
 				}
-
+/*
 				// Get the effect details
 				var effectType = el.getAttribute('data-effect');
 				if(effectType) {
@@ -589,11 +589,46 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				} else {
 					section.effect = false;
 				}
+*/
+				section.effect = this.getSectionEffect(el);
 
 				return section;
 			} else {
 				return false;
 			}
+		},
+
+		getSectionEffect: function(el) {
+			// Get the effect details
+			var type = el.getAttribute('data-effect'),
+				effect, media, elem;
+
+			if(type) {
+				elem = {
+					title: el.querySelector('#effect-title'),
+					delay: el.querySelector('#effect-delay'),
+					start: el.querySelector('#effect-start'),
+					duration: el.querySelector('#effect-duration'),
+					volume: el.querySelector('#effect-volume')
+				};
+				media = {
+					mp3: el.getAttribute('data-mp3'),
+					mp4: el.getAttribute('data-mp4'),
+					ogg: el.getAttribute('data-ogg')
+				}
+				effect = {
+					type: type,
+					title: elem.title ? elem.title.value : '',
+					delay: elem.delay ? elem.delay.value * 1 : 0, // Convert to number
+					start: elem.start ? elem.start.value * 1 : 0, // Convert to number
+					duration: elem.duration ? elem.duration.value * 1 : 0, // Convert to number
+					volume: elem.volume ? elem.volume.value / 100 : 0, // Convert to number and ratio from percent
+					media: media
+				};
+			} else {
+				effect = false;
+			}
+			return effect;
 		},
 
 		// Maybe this could be its own class?
@@ -694,7 +729,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 								if(effect[i].text && effect[i].duration) {
 									titleFX({
 										el: '#titleFXHelper',
-										text: effect[i].text,
+										text: effect[i].title,
 										duration: effect[i].duration * 1000
 									});
 									effect[i].init = true;
@@ -714,9 +749,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 								if(effect[i].duration) {
 									this.bgmFX({
 										media: {
-											mp3: effect[i].mp3
+											mp3: effect[i].media.mp3,
+											mp4: effect[i].media.mp4,
+											ogg: effect[i].media.ogg
 										},
-										duration: effect[i].duration
+										delay: effect[i].delay,
+										start: effect[i].start,
+										duration: effect[i].duration,
+										volume: effect[i].volume
 									});
 									effect[i].init = true;
 								}

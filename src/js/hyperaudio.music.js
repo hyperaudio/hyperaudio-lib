@@ -236,7 +236,8 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 		bgmFX: function(options) {
 			hyperaudio.extend(this.options, options);
 			this.load();
-			this.play();
+			this.audioElem.volume = this.options.volume;
+			this.play(this.options.start);
 		}
 	};
 
