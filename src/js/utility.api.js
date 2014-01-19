@@ -10,6 +10,7 @@ var api = (function(hyperaudio) {
 				api: 'http://api.hyperaud.io/v1/',
 				transcripts: 'transcripts/',
 				mixes: 'mixes/',
+				bgm: 'bgm/media/',
 				signin: 'login/',
 				whoami: 'whoami/'
 			}, options);
@@ -26,6 +27,7 @@ var api = (function(hyperaudio) {
 			this.transcript = null;
 			this.mixes = null;
 			this.mix = null;
+			this.bgm = null;
 		},
 		callback: function(callback, success) {
 			if(typeof callback === 'function') {
@@ -250,6 +252,27 @@ var api = (function(hyperaudio) {
 				setTimeout(function() {
 					self.callback(callback, false);
 				}, 0);
+			}
+		},
+		getBGM: function(callback, force) {
+			var self = this;
+			if(!force && this.bgm) {
+				setTimeout(function() {
+					self.callback(callback, true);
+				}, 0);
+			} else {
+				xhr({
+					url: this.options.api + this.options.bgm,
+					complete: function(event) {
+						var json = JSON.parse(this.responseText);
+						self.bgm = json;
+						self.callback(callback, true);
+					},
+					error: function(event) {
+						self.error = true;
+						self.callback(callback, false);
+					}
+				});
 			}
 		}
 	};
