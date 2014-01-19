@@ -251,6 +251,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this._pause();
 				this.contentIndex = jumpTo.contentIndex;
 
+				if(this.options.music) {
+					this.options.music.pause();
+				}
+
 				if(this.contentIndex < this.content.length) {
 
 					this.load(this.contentIndex);

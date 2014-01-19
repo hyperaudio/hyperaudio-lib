@@ -36,20 +36,20 @@ var SideMenu = (function (document, hyperaudio) {
 		this.initMusic();
 	}
 
+	SideMenu.prototype.makeMenuFolder = function(parent, title) {
+		var li = document.createElement('li'),
+			div = document.createElement('div'),
+			ul = document.createElement('ul');
+		hyperaudio.addClass(li, 'folder');
+		div.innerHTML = title;
+		li.appendChild(div);
+		li.appendChild(ul);
+		parent.appendChild(li);
+		return ul;
+	};
+
 	SideMenu.prototype.initTranscripts = function () {
 		var self = this;
-
-		var mkdir = function(parent, title) {
-			var li = document.createElement('li'),
-				div = document.createElement('div'),
-				ul = document.createElement('ul');
-			hyperaudio.addClass(li, 'folder');
-			div.innerHTML = title;
-			li.appendChild(div);
-			li.appendChild(ul);
-			parent.appendChild(li);
-			return ul;
-		};
 
 		hyperaudio.api.getUsername(function(success) {
 
@@ -66,14 +66,14 @@ var SideMenu = (function (document, hyperaudio) {
 					var yourTrans, otherTrans, userTrans, elem, trans;
 
 					if(username) {
-						yourTrans = mkdir(self.transcripts, 'Your Transcripts');
+						yourTrans = self.makeMenuFolder(self.transcripts, 'Your Transcripts');
 					}
-					otherTrans = mkdir(self.transcripts, 'Other Transcripts');
+					otherTrans = self.makeMenuFolder(self.transcripts, 'Other Transcripts');
 
 					// Nesting not supported ATM.
-					// userTrans = mkdir(self.transcripts, 'By User');
-					// mkdir(userTrans, 'Scooby');
-					// mkdir(userTrans, 'Mark');
+					// userTrans = self.makeMenuFolder(self.transcripts, 'By User');
+					// self.makeMenuFolder(userTrans, 'Scooby');
+					// self.makeMenuFolder(userTrans, 'Mark');
 
 					for(var i = 0, l = this.transcripts.length; i < l; i++) {
 						trans = this.transcripts[i];
@@ -140,6 +140,7 @@ var SideMenu = (function (document, hyperaudio) {
 
 		if(stage.target) {
 			// add drag and drop to BGM
+/*
 			var items = document.querySelectorAll('#panel-bgm li');
 			for (var i = items.length-1; i >= 0; i-- ) {
 				if ( !this.isFolder(items[i]) ) {
@@ -154,6 +155,36 @@ var SideMenu = (function (document, hyperaudio) {
 			}
 			self.music._tap = new Tap({el: self.music});
 			self.music.addEventListener('tap', self.toggleFolder.bind(self), false);
+*/
+
+			hyperaudio.api.getBGM(function(success) {
+				if(success) {
+					var elem, bgms;
+
+					for(var i = 0, l = this.bgm.length; i < l; i++) {
+						bgms = this.bgm[i];
+						if(bgms.type === 'audio') {
+							elem = document.createElement('li');
+							elem.setAttribute('data-id', bgms._id);
+							if(bgms.source.mp3) elem.setAttribute('data-mp3', bgms.source.mp3.url);
+							if(bgms.source.mp4) elem.setAttribute('data-mp4', bgms.source.mp4.url);
+							if(bgms.source.ogg) elem.setAttribute('data-ogg', bgms.source.ogg.url);
+							elem.innerHTML = bgms.label;
+							elem._dragInstance = new DragDrop({
+								handle: elem,
+								dropArea: stage.target,
+								draggableClass: 'draggableEffect',
+								onDragStart: onDragStart,
+								onDrop: onDrop
+							});
+							self.music.appendChild(elem);
+						}
+					}
+
+					self.music._tap = new Tap({el: self.music});
+					self.music.addEventListener('tap', self.toggleFolder.bind(self), false);
+				}
+			});
 		}
 	};
 

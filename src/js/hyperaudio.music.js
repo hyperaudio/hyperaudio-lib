@@ -12,27 +12,30 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 
 			target: '#music-player', // The selector of element where the audio is generated
 
-			start: 0,
-			duration: 6,
-			volume: 1,
-			fadeInDuration: 2,
-			fadeOutDuration: 2,
-
 			media: {
 				mp3: '', // The URL of the mp3 audio.
 				mp4: '', // The URL of the mp4 audio.
-				ogg:'' // The URL of the ogg audio.
+				ogg: '' // The URL of the ogg audio.
 			},
 
 			// Types valid in an audio element
 			mediaType: {
 				mp3: 'audio/mpeg', // The mp3 mime type.
 				mp4: 'audio/mp4', // The mp4 mime type.
-				ogg:'audio/ogg' // The ogg mime type.
+				ogg: 'audio/ogg' // The ogg mime type.
 			},
 
 			async: true // When true, some operations are delayed by a timeout.
 		}, options);
+
+		this.effect = {
+			start: 0,
+			duration: 6,
+			volume: 1,
+			fadeInDuration: 2,
+			fadeOutDuration: 2,
+			media: {}
+		};
 
 		// Properties
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
@@ -60,7 +63,7 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 
 				this.audioElem = document.createElement('audio');
 
-				this.audioElem.controls = true; // TMP during dev.
+				// this.audioElem.controls = true; // TMP during dev.
 
 				// Add listeners to the audio element
 				this.audioElem.addEventListener('progress', function(e) {
@@ -212,19 +215,19 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 
 			if(!this.paused) {
 
-				var end = this.options.start + this.options.duration;
+				var end = this.effect.start + this.effect.duration;
 
 				// The fade in/out code is WIP
 
 				// Fade In TimeZone
 				var fadeIn = {
-					start: this.options.start,
-					end: this.options.start + this.options.fadeInDuration
+					start: this.effect.start,
+					end: this.effect.start + this.effect.fadeInDuration
 				};
 
 				// Fade Out TimeZone
 				var fadeOut = {
-					start: end - this.options.fadeOutDuration,
+					start: end - this.effect.fadeOutDuration,
 					end: end
 				};
 
@@ -233,11 +236,11 @@ var Music = (function(window, document, hyperaudio, Popcorn) {
 				}
 			}
 		},
-		bgmFX: function(options) {
-			hyperaudio.extend(this.options, options);
-			this.load();
-			this.audioElem.volume = this.options.volume;
-			this.play(this.options.start);
+		bgmFX: function(effect) {
+			hyperaudio.extend(this.effect, effect);
+			this.load(this.effect.media);
+			this.audioElem.volume = this.effect.volume;
+			this.play(this.effect.start);
 		}
 	};
 
