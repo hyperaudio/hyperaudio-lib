@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.15 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 19th January 2014 21:41:51 */
+/*! hyperaudio v0.3.16 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 19th January 2014 21:53:04 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4711,10 +4711,10 @@ var SideMenu = (function (document, hyperaudio) {
 			if(ogg) el.setAttribute('data-ogg', ogg);
 
 			var html = '<form><div>' + title + '</div>' +
-				'<label>Delay: <span class="value">0</span>s</label><input id="effect-delay" type="range" value="0" min="0" max="30" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
-				'<label>Start At: <span class="value">0</span>s</label><input id="effect-start" type="range" value="0" min="0" max="30" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
-				'<label>Duration: <span class="value">60</span>s</label><input id="effect-duration" type="range" value="60" min="0" max="120" step="0.5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
-				'<label>Volume: <span class="value">80</span>%</label><input id="effect-volume" type="range" value="80" min="10" max="100" step="5" onchange="this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Delay: <span class="value">0</span>s</label><input id="effect-delay" type="range" value="0" min="0" max="30" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Start At: <span class="value">0</span>s</label><input id="effect-start" type="range" value="0" min="0" max="30" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Duration: <span class="value">60</span>s</label><input id="effect-duration" type="range" value="60" min="0" max="120" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
+				'<label>Volume: <span class="value">80</span>%</label><input id="effect-volume" type="range" value="80" min="10" max="100" step="5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
 				'</form>';
 			el.innerHTML = html;
 			stage.dropped(el, title);
