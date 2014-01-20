@@ -98,8 +98,9 @@ var WordSelect = (function (window, document, hyperaudio) {
 
 		this.currentWord = target;
 
-		hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
-		hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
+		// WIP - Commented out, since operation conflicts with zero grab time
+		// hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
+		// hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
 
 		if ( this.words[this.startPosition] === target ) {
 			tmp = this.startPosition;
@@ -192,8 +193,9 @@ var WordSelect = (function (window, document, hyperaudio) {
 		var start = Math.min(this.startPosition, this.endPosition),
 			end = Math.max(this.startPosition, this.endPosition);
 
-		hyperaudio.addClass(this.words[start], 'first');
-		hyperaudio.addClass(this.words[end], 'last');
+		// WIP - Commented out, since operation conflicts with zero grab time
+		// hyperaudio.addClass(this.words[start], 'first');
+		// hyperaudio.addClass(this.words[end], 'last');
 	};
 
 	WordSelect.prototype.clearSelection = function () {
@@ -201,8 +203,9 @@ var WordSelect = (function (window, document, hyperaudio) {
 		this.startPosition = null;
 		this.endPosition = null;
 
-		hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
-		hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
+		// WIP - Commented out, since operation conflicts with zero grab time
+		// hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
+		// hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
 
 		if ( this.options.touch ) {
 			this.element.removeEventListener('touchmove', this, false);
