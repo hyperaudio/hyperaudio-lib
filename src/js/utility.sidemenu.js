@@ -128,7 +128,7 @@ var SideMenu = (function (document, hyperaudio) {
 			if(mp4) el.setAttribute('data-mp4', mp4);
 			if(ogg) el.setAttribute('data-ogg', ogg);
 
-			var html = '<form><div>' + title + '</div>' +
+			var html = '<form><div><span class="icon-music">' + title + '</span></div>' +
 				'<label>Delay: <span class="value">0</span>s</label><input id="effect-delay" type="range" value="0" min="0" max="30" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
 				'<label>Start At: <span class="value">0</span>s</label><input id="effect-start" type="range" value="0" min="0" max="30" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
 				'<label>Duration: <span class="value">60</span>s</label><input id="effect-duration" type="range" value="60" min="0" max="120" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
