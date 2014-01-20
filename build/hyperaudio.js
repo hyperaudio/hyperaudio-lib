@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.16 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 19th January 2014 21:53:04 */
+/*! hyperaudio v0.3.17 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th January 2014 21:30:12 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4015,7 +4015,9 @@ var hyperaudio = (function() {
 
 		// http://stackoverflow.com/questions/1403888/get-url-parameter-with-javascript-or-jquery
 		getURLParameter: function(name) {
-			return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+			// return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+			// Now looks at top window (frame).
+			return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(window.top.location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
 		},
 
 		hasClass: function(e, c) {
@@ -4648,9 +4650,9 @@ var SideMenu = (function (document, hyperaudio) {
 					var yourTrans, otherTrans, userTrans, elem, trans;
 
 					if(username) {
-						yourTrans = self.makeMenuFolder(self.transcripts, 'Your Transcripts');
+						yourTrans = self.makeMenuFolder(self.transcripts, 'Your Media');
 					}
-					otherTrans = self.makeMenuFolder(self.transcripts, 'Other Transcripts');
+					otherTrans = self.makeMenuFolder(self.transcripts, 'Media');
 
 					// Nesting not supported ATM.
 					// userTrans = self.makeMenuFolder(self.transcripts, 'By User');
@@ -4710,7 +4712,7 @@ var SideMenu = (function (document, hyperaudio) {
 			if(mp4) el.setAttribute('data-mp4', mp4);
 			if(ogg) el.setAttribute('data-ogg', ogg);
 
-			var html = '<form><div>' + title + '</div>' +
+			var html = '<form><div><span class="icon-music">' + title + '</span></div>' +
 				'<label>Delay: <span class="value">0</span>s</label><input id="effect-delay" type="range" value="0" min="0" max="30" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
 				'<label>Start At: <span class="value">0</span>s</label><input id="effect-start" type="range" value="0" min="0" max="30" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
 				'<label>Duration: <span class="value">60</span>s</label><input id="effect-duration" type="range" value="60" min="0" max="120" step="0.5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
@@ -5197,8 +5199,9 @@ var WordSelect = (function (window, document, hyperaudio) {
 
 		this.currentWord = target;
 
-		hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
-		hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
+		// WIP - Commented out, since operation conflicts with zero grab time
+		// hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
+		// hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
 
 		if ( this.words[this.startPosition] === target ) {
 			tmp = this.startPosition;
@@ -5291,8 +5294,9 @@ var WordSelect = (function (window, document, hyperaudio) {
 		var start = Math.min(this.startPosition, this.endPosition),
 			end = Math.max(this.startPosition, this.endPosition);
 
-		hyperaudio.addClass(this.words[start], 'first');
-		hyperaudio.addClass(this.words[end], 'last');
+		// WIP - Commented out, since operation conflicts with zero grab time
+		// hyperaudio.addClass(this.words[start], 'first');
+		// hyperaudio.addClass(this.words[end], 'last');
 	};
 
 	WordSelect.prototype.clearSelection = function () {
@@ -5300,8 +5304,9 @@ var WordSelect = (function (window, document, hyperaudio) {
 		this.startPosition = null;
 		this.endPosition = null;
 
-		hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
-		hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
+		// WIP - Commented out, since operation conflicts with zero grab time
+		// hyperaudio.removeClass(this.element.querySelector('.first'), 'first');
+		// hyperaudio.removeClass(this.element.querySelector('.last'), 'last');
 
 		if ( this.options.touch ) {
 			this.element.removeEventListener('touchmove', this, false);
@@ -7900,12 +7905,26 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		},
 
-		resetEffects: function() {
+		resetEffects: function(jumpTo) {
 			var i, iLen, e, eLen, effect;
 			for(i = 0, iLen = this.content.length; i < iLen; i++) {
 				effect = this.content[i].effect;
 				for(e=0, eLen=effect.length; e < eLen; e++) {
-					effect[e].init = false;
+
+					if(i < jumpTo.contentIndex) {
+						effect[e].init = true;
+					} else if(i > jumpTo.contentIndex) {
+						effect[e].init = false;
+					} else if(effect[e].type === 'fadeOut') { // Need an isEndEffect() method
+						effect[e].init = false;
+					} else {
+						// i === jumpTo.contentIndex
+						if(this.content[i].start + effect[e].delay < jumpTo.start) {
+							effect[e].init = true;
+						} else {
+							effect[e].init = false;
+						}
+					}
 				}
 			}
 			// force a fadeIn - as in remove any fadeOuts!
@@ -7916,14 +7935,19 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			});
 		},
 
+		// Believe that the varous effect start and ends could be refactored into the single method.
+
 		// Effecting the start of the content
-		effect: function(effect) {
+		effect: function(effect, time) {
+
+			// time : This is the relative time of the content.
+			time = typeof time === 'number' ? time : 0;
 
 			if(effect && effect.length) {
 
 				for(var i=0, l=effect.length; i < l; i++) {
 
-					if(!effect[i].init) {
+					if(!effect[i].init && effect[i].delay <= time) {
 
 						switch(effect[i].type) {
 							case 'title':
@@ -7954,7 +7978,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 											mp4: effect[i].media.mp4,
 											ogg: effect[i].media.ogg
 										},
-										delay: effect[i].delay,
+										delay: effect[i].delay, // The delay is handled outside the bgmFX
 										start: effect[i].start,
 										duration: effect[i].duration,
 										volume: effect[i].volume
@@ -8068,8 +8092,21 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				var totalCurrentTime = this.getTotalCurrentTime(videoElem.currentTime, this.contentIndex);
 
+				var relTime = videoElem.currentTime - this.content[this.contentIndex].start;
+/*
+				// Paronoid and cleaning up the relTime
+				var relEnd = endTime - this.content[this.contentIndex].start;
+				if(isNaN(relTime) || relTime < 0) {
+					relTime = 0;
+				} else if(relTime > relEnd) {
+					relTime = relEnd; // Maybe this should be infinity... Since delay greater than the content, and would otherwise never occur.
+				}
+*/
 				if(videoElem.currentTime > endTime) {
 					// Goto the next piece of content
+
+					// Flush out any remaining effects. ie., Otherwise delay > duration never happens.
+					this.effect(this.content[this.contentIndex].effect, Infinity);
 
 					this._pause(); // Need to stop, otherwise if we switch player, the hidden one keeps playing.
 
@@ -8082,7 +8119,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						if(this.content[this.contentIndex+1]) {
 							this.prepare(this.contentIndex+1);
 						}
-						this.effect(this.content[this.contentIndex].effect);
+						this.effect(this.content[this.contentIndex].effect, 0);
 						this._play(this.content[this.contentIndex].start);
 
 					} else {
@@ -8091,8 +8128,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.isReadyToPlay = false; // ended so needs a reset to the start
 						this.contentIndex = 0; // Reset this since YouTube player (or its Popcorn wrapper) generates the timeupdate all the time.
 						this.prepare(this.contentIndex);
+						if(this.options.music) {
+							this.options.music.pause();
+						}
 					}
+				} else {
+					// Doing this every time now.
+					this.effect(this.content[this.contentIndex].effect, relTime);
 				}
+
 				if(this.options.gui) {
 					this.GUI.setStatus({
 						paused: this.paused,
