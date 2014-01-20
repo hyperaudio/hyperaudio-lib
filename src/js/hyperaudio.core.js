@@ -240,7 +240,9 @@ var hyperaudio = (function() {
 
 		// http://stackoverflow.com/questions/1403888/get-url-parameter-with-javascript-or-jquery
 		getURLParameter: function(name) {
-			return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+			// return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+			// Now looks at top window (frame).
+			return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(window.top.location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
 		},
 
 		hasClass: function(e, c) {
