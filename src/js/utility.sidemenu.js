@@ -66,9 +66,9 @@ var SideMenu = (function (document, hyperaudio) {
 					var yourTrans, otherTrans, userTrans, elem, trans;
 
 					if(username) {
-						yourTrans = self.makeMenuFolder(self.transcripts, 'Your Transcripts');
+						yourTrans = self.makeMenuFolder(self.transcripts, 'Your Media');
 					}
-					otherTrans = self.makeMenuFolder(self.transcripts, 'Other Transcripts');
+					otherTrans = self.makeMenuFolder(self.transcripts, 'Media');
 
 					// Nesting not supported ATM.
 					// userTrans = self.makeMenuFolder(self.transcripts, 'By User');
