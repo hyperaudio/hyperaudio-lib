@@ -58,7 +58,7 @@ var Stage = (function(document, hyperaudio) {
 		// this.target.addEventListener('tap', function(event) {
 		this.target.addEventListener('click', function(event) {
 			var section, word, search;
-			event.preventDefault();
+			// event.preventDefault(); // Removed since it breaks checkbox clicks in effects.
 			if(event.target.nodeName.toLowerCase() === self.options.word) {
 				word = event.target;
 				search = word;
