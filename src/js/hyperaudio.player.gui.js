@@ -96,8 +96,11 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 
 		// Adjust sizes according to options
 		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
-		this.currentTimeElem.style.width = 100 - buttonCount*10 + '%';
-		this.durationElem.style.width = 100 - buttonCount*10 + '%';
+
+		// No longer required since fixing fullscreen using: .hyperaudio-player-bar { position: relative; }
+		// Now these are set to 100% width in the CSS.
+		// this.currentTimeElem.style.width = 100 - buttonCount*10 + '%';
+		// this.durationElem.style.width = 100 - buttonCount*10 + '%';
 
 		// Add the GUI
 		hyperaudio.addClass(this.player.target, cssClass);

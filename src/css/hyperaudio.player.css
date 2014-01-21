@@ -152,6 +152,7 @@
 }
 
 .hyperaudio-player-bar {
+	position: relative;
 	width: 60%;
 	background-color: rgba(0,0,0,0.5);
 	cursor:ew-resize;
@@ -169,6 +170,7 @@
 	position:absolute;
 	top:0;
 	height:48px;
+	width:100%;
 	font-size:16px;
 	line-height:48px;
 	font-weight:normal;
