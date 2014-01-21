@@ -139,7 +139,7 @@
 .hyperaudio-player-fullscreen {
 	color: #eee;
 	width: 10%;
-	background: #469659;
+	background: #808080;
 	text-shadow: 0 1px 0 rgba(0,0,0,0.5);
 	cursor: pointer;
 }
@@ -160,7 +160,7 @@
 .hyperaudio-player-progress {
 	height: 100%;
 	width: 1%;
-	background: #387847;
+	background: #2c3e50;
 	border-right: 1px solid #000;
 }
 
