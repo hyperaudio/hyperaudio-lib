@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.17 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 20th January 2014 21:30:12 */
+/*! hyperaudio v0.3.18 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 21st January 2014 18:49:42 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6436,8 +6436,11 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 
 		// Adjust sizes according to options
 		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
-		this.currentTimeElem.style.width = 100 - buttonCount*10 + '%';
-		this.durationElem.style.width = 100 - buttonCount*10 + '%';
+
+		// No longer required since fixing fullscreen using: .hyperaudio-player-bar { position: relative; }
+		// Now these are set to 100% width in the CSS.
+		// this.currentTimeElem.style.width = 100 - buttonCount*10 + '%';
+		// this.durationElem.style.width = 100 - buttonCount*10 + '%';
 
 		// Add the GUI
 		hyperaudio.addClass(this.player.target, cssClass);
