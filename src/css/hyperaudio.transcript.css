@@ -352,6 +352,14 @@ p {
 	top: 0;
 	left: 0;
 }
+.video-transition-servo div {
+	position: absolute;
+	left: 50%;
+	margin-left:-40%;
+	top:45%;
+	width: 80%;
+	text-align: center;
+}
 
 .title-effect-servo {
 	position: absolute;

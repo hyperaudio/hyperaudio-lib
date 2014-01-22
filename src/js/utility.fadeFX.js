@@ -32,7 +32,9 @@ var fadeFX = (function (window, document) {
 		// if ( !fxInstance ) {
 			var opt = {
 				time: 2000,
-				color: '#000000',
+				background: '#000000', // fade
+				color: '#ffffff', // title
+				text: '',
 				fadeOut: false,
 				fadeIn: false,
 				outFirst: true // not implemented
@@ -53,9 +55,13 @@ var fadeFX = (function (window, document) {
 
 		this.servo = document.getElementById('fxHelper');
 
+		this.servo.querySelector('div').innerHTML = this.options.text ? this.options.text : '';
+
 		this.servo.style[transition] = 'opacity 0ms';
 		this.servo.style.left = '0px';
-		this.servo.style.backgroundColor = this.options.color;
+		this.servo.style.backgroundColor = this.options.background;
+		this.servo.style.color = this.options.color;
+
 
 		if ( this.options.fadeOut ) {
 			this.servo.style.opacity = '0';

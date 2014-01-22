@@ -126,6 +126,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var fxHelper = document.createElement('div');
 			fxHelper.id = 'fxHelper';
 			fxHelper.className = 'video-transition-servo';
+			fxHelper.appendChild(document.createElement('div'));
 
 			var titleFXHelper = document.createElement('div');
 			titleFXHelper.id = 'titleFXHelper';
@@ -829,6 +830,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 									fadeFX({
 										el: '#fxHelper',
 										fadeOut: true,
+										text: effect[i].title,
 										time: effect[i].duration * 1000
 									});
 									effect[i].init = true;
