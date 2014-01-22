@@ -135,7 +135,7 @@ var SideMenu = (function (document, hyperaudio) {
 				'<label>Volume: <span class="value">80</span>%</label><input id="effect-volume" type="range" value="80" min="10" max="100" step="5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
 				'</form>';
 			el.innerHTML = html;
-			stage.dropped(el, title);
+			stage.dropped(el, '<span class="icon-music">' + title + '</span>');
 		}
 
 		if(stage.target) {
