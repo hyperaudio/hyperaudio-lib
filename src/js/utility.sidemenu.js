@@ -112,8 +112,6 @@ var SideMenu = (function (document, hyperaudio) {
 				return;
 			}
 
-			console.log('handle(mp3): ' + this.handle.getAttribute('data-mp3'));
-
 			var title = el.innerHTML;
 			hyperaudio.addClass(el, 'effect');
 			el.setAttribute('data-effect', 'bgm');
