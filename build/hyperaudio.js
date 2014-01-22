@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.19 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 22nd January 2014 00:17:06 */
+/*! hyperaudio v0.3.20 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 22nd January 2014 03:27:05 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4462,7 +4462,9 @@ var fadeFX = (function (window, document) {
 		// if ( !fxInstance ) {
 			var opt = {
 				time: 2000,
-				color: '#000000',
+				background: '#000000', // fade
+				color: '#ffffff', // title
+				text: '',
 				fadeOut: false,
 				fadeIn: false,
 				outFirst: true // not implemented
@@ -4483,9 +4485,13 @@ var fadeFX = (function (window, document) {
 
 		this.servo = document.getElementById('fxHelper');
 
+		this.servo.querySelector('div').innerHTML = this.options.text ? this.options.text : '';
+
 		this.servo.style[transition] = 'opacity 0ms';
 		this.servo.style.left = '0px';
-		this.servo.style.backgroundColor = this.options.color;
+		this.servo.style.backgroundColor = this.options.background;
+		this.servo.style.color = this.options.color;
+
 
 		if ( this.options.fadeOut ) {
 			this.servo.style.opacity = '0';
@@ -7331,6 +7337,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var fxHelper = document.createElement('div');
 			fxHelper.id = 'fxHelper';
 			fxHelper.className = 'video-transition-servo';
+			fxHelper.appendChild(document.createElement('div'));
 
 			var titleFXHelper = document.createElement('div');
 			titleFXHelper.id = 'titleFXHelper';
@@ -7723,7 +7730,32 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 							// Effect for the next section, so store it for later.
 							effect.push(fadeInEffect);
 
-						// The rest afect the next content
+						} else if(section.effect.type === 'title' && section.effect.fullscreen) {
+							// Similar to the Fade effect. The FadeFX does the fullscreen title effect
+
+							// Make 2 copies of the fade effect. Out and In.
+							var fadeOutEffectTitle = hyperaudio.extend({}, section.effect, {
+								type: "fadeOut",
+								duration: 1
+							});
+							var fadeInEffectTitle = hyperaudio.extend({}, section.effect, {
+								type: "fadeIn",
+								duration: 1,
+								delay: section.effect.duration
+							});
+
+							// Have we got a previous section to affect?
+							if(this.content.length) {
+								this.effectContent(this.content[this.content.length-1], fadeOutEffectTitle);
+							} else {
+								// Effect is on the first section, so store it for later.
+								fadeOutEffectTitle.type = "fadeNow";
+								effect.push(fadeOutEffectTitle);
+							}
+							// Effect for the next section, so store it for later.
+							effect.push(fadeInEffectTitle);
+
+						// The rest affect the next content
 						} else {
 							// Effect for the next section, so store it for later.
 							effect.push(section.effect);
@@ -7781,24 +7813,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					section.end = words[words.length-1].getAttribute(this.options.timeAttr) * unit;
 					section.trim = this.options.trim;
 				}
-/*
+
 				// Get the effect details
-				var effectType = el.getAttribute('data-effect');
-				if(effectType) {
-					// This bit should be refactored, maybe with IDs or classes to indicate the input elements.
-					var effectText = el.querySelector('input[type="text"]');
-					var effectRange = el.querySelector('input[type="range"]');
-					var effectMP3 = el.getAttribute('data-mp3');
-					section.effect = {
-						type: effectType,
-						text: effectText ? effectText.value : '',
-						duration: effectRange ? effectRange.value * 1 : 0, // Convert to number
-						mp3: effectMP3 ? effectMP3 : ''
-					};
-				} else {
-					section.effect = false;
-				}
-*/
 				section.effect = this.getSectionEffect(el);
 
 				return section;
@@ -7815,6 +7831,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(type) {
 				elem = {
 					title: el.querySelector('#effect-title'),
+					fullscreen: el.querySelector('#effect-fullscreen'),
 					delay: el.querySelector('#effect-delay'),
 					start: el.querySelector('#effect-start'),
 					duration: el.querySelector('#effect-duration'),
@@ -7828,6 +7845,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				effect = {
 					type: type,
 					title: elem.title ? elem.title.value : '',
+					fullscreen: elem.fullscreen ? elem.fullscreen.checked : false,
 					delay: elem.delay ? elem.delay.value * 1 : 0, // Convert to number
 					start: elem.start ? elem.start.value * 1 : 0, // Convert to number
 					duration: elem.duration ? elem.duration.value * 1 : 0, // Convert to number
@@ -7895,6 +7913,9 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						content.effect.push(effect[i]);
 						break;
 					case 'fadeIn':
+						content.effect.push(effect[i]);
+						break;
+					case 'fadeNow':
 						content.effect.push(effect[i]);
 						break;
 					case 'bgm':
@@ -7968,10 +7989,20 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 									fadeFX({
 										el: '#fxHelper',
 										fadeIn: true,
+										text: effect[i].title,
 										time: effect[i].duration * 1000
 									});
 									effect[i].init = true;
 								}
+								break;
+							case 'fadeNow':
+								fadeFX({
+									el: '#fxHelper',
+									fadeOut: true,
+									text: effect[i].title,
+									time: 0
+								});
+								effect[i].init = true;
 								break;
 							case 'bgm':
 								if(effect[i].duration) {
@@ -8010,6 +8041,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 									fadeFX({
 										el: '#fxHelper',
 										fadeOut: true,
+										text: effect[i].title,
 										time: effect[i].duration * 1000
 									});
 									effect[i].init = true;
