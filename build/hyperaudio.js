@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.21 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 22nd January 2014 20:45:16 */
+/*! hyperaudio v0.3.22 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 22nd January 2014 21:00:09 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4759,7 +4759,7 @@ var SideMenu = (function (document, hyperaudio) {
 							if(bgms.source.mp3) elem.setAttribute('data-mp3', bgms.source.mp3.url);
 							if(bgms.source.mp4) elem.setAttribute('data-mp4', bgms.source.mp4.url);
 							if(bgms.source.ogg) elem.setAttribute('data-ogg', bgms.source.ogg.url);
-							elem.innerHTML = bgms.label;
+							elem.innerHTML = '<span class="icon-music">' + bgms.label + '</span>';
 							elem._dragInstance = new DragDrop({
 								handle: elem,
 								dropArea: stage.target,
