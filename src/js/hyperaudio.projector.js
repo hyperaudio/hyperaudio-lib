@@ -523,11 +523,11 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 							// Similar to the Fade effect. The FadeFX does the fullscreen title effect
 
 							// Make 2 copies of the fade effect. Out and In.
-							var fadeOutEffect = hyperaudio.extend({}, section.effect, {
+							var fadeOutEffectTitle = hyperaudio.extend({}, section.effect, {
 								type: "fadeOut",
 								duration: 1
 							});
-							var fadeInEffect = hyperaudio.extend({}, section.effect, {
+							var fadeInEffectTitle = hyperaudio.extend({}, section.effect, {
 								type: "fadeIn",
 								duration: 1,
 								delay: section.effect.duration
@@ -535,14 +535,14 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 							// Have we got a previous section to affect?
 							if(this.content.length) {
-								this.effectContent(this.content[this.content.length-1], fadeOutEffect);
+								this.effectContent(this.content[this.content.length-1], fadeOutEffectTitle);
 							} else {
 								// Effect is on the first section, so store it for later.
-								fadeOutEffect.type = "fadeNow";
-								effect.push(fadeOutEffect);
+								fadeOutEffectTitle.type = "fadeNow";
+								effect.push(fadeOutEffectTitle);
 							}
 							// Effect for the next section, so store it for later.
-							effect.push(fadeInEffect);
+							effect.push(fadeInEffectTitle);
 
 						// The rest affect the next content
 						} else {
