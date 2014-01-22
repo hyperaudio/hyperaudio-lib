@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.24 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 22nd January 2014 21:12:19 */
+/*! hyperaudio v0.3.25 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 22nd January 2014 22:31:48 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
