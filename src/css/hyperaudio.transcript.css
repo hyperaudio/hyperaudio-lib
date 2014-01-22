@@ -323,7 +323,8 @@ p {
 	color: #fff;
 }
 
-.stage .effect input {
+.stage .effect input[type=text],
+.stage .effect input[type=range] {
 	display: block;
 	width: 100%;
 }
@@ -337,6 +338,10 @@ p {
 
 .stage .effect input[type=text]:focus {
 	background: #fff;
+}
+
+.stage .effect .effect-checkboxes {
+	float:right;
 }
 
 
