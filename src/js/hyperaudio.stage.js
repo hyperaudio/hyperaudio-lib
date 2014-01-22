@@ -204,12 +204,41 @@ var Stage = (function(document, hyperaudio) {
 
 		initDragDrop: function() {
 			var self = this,
-				i, l, sections;
+				i, l, sections, effectType, bgmTitle, dragHtml;
+
+			var capitaliseFirstLetter = function(string) {
+				return string.charAt(0).toUpperCase() + string.slice(1);
+			};
+
 			if(this.target) {
 				sections = this.target.getElementsByTagName('section');
 				l = sections.length;
 				for(i=0; i < l; i++) {
-					self.dropped(sections[i]);
+
+					dragHtml = '';
+
+					// This code is to setup the drag-and-drop with a nice label. Otherwise the effects look bad after loading back in and dragged
+					effectType = sections[i].getAttribute('data-effect');
+					if(typeof effectType === 'string') {
+						switch(effectType) {
+							case 'fade':
+							case 'trim':
+							case 'title':
+								dragHtml = capitaliseFirstLetter(effectType);
+								break;
+							case 'bgm':
+								bgmTitleElem = sections[i].querySelector('.icon-music');
+								if(bgmTitleElem) {
+									dragHtml = bgmTitleElem.parentNode.innerHTML;
+								} else {
+									dragHtml = '<span class="icon-music">BGM</span>';
+								}
+								break;
+						}
+					}
+
+					// And we finally setup the DragDrop
+					self.dropped(sections[i], dragHtml);
 				}
 			}
 		},
