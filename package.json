@@ -1,6 +1,6 @@
 {
   "name": "hyperaudio",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "description": "The Hyperaudio Library.",
   "homepage": "http://hyperaud.io", 
   "repository": {
@@ -17,7 +17,7 @@
     "Mark Panaghiston <markp@happyworm.com> (http://happyworm.com)",
     "Matteo Spinelli <matteo@cubiq.org> (http://cubiq.org)"
   ],
-  "license": "MIT",
+  "license": "http://hyperaud.io/licensing/",
   "bugs": {
     "url": "https://github.com/hyperaudio-dev/hyperaudio/issues"
   },
