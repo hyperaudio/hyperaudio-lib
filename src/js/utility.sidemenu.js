@@ -169,7 +169,7 @@ var SideMenu = (function (document, hyperaudio) {
 							if(bgms.source.mp3) elem.setAttribute('data-mp3', bgms.source.mp3.url);
 							if(bgms.source.mp4) elem.setAttribute('data-mp4', bgms.source.mp4.url);
 							if(bgms.source.ogg) elem.setAttribute('data-ogg', bgms.source.ogg.url);
-							elem.innerHTML = bgms.label;
+							elem.innerHTML = '<span class="icon-music">' + bgms.label + '</span>';
 							elem._dragInstance = new DragDrop({
 								handle: elem,
 								dropArea: stage.target,
