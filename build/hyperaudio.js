@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.20 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 22nd January 2014 03:27:05 */
+/*! hyperaudio v0.3.21 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 22nd January 2014 20:45:16 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4725,7 +4725,7 @@ var SideMenu = (function (document, hyperaudio) {
 				'<label>Volume: <span class="value">80</span>%</label><input id="effect-volume" type="range" value="80" min="10" max="100" step="5" onchange="this.setAttribute(\'value\', this.value); this.previousSibling.querySelector(\'span\').innerHTML = this.value">' +
 				'</form>';
 			el.innerHTML = html;
-			stage.dropped(el, title);
+			stage.dropped(el, '<span class="icon-music">' + title + '</span>');
 		}
 
 		if(stage.target) {
@@ -7136,12 +7136,41 @@ var Stage = (function(document, hyperaudio) {
 
 		initDragDrop: function() {
 			var self = this,
-				i, l, sections;
+				i, l, sections, effectType, bgmTitle, dragHtml;
+
+			var capitaliseFirstLetter = function(string) {
+				return string.charAt(0).toUpperCase() + string.slice(1);
+			};
+
 			if(this.target) {
 				sections = this.target.getElementsByTagName('section');
 				l = sections.length;
 				for(i=0; i < l; i++) {
-					self.dropped(sections[i]);
+
+					dragHtml = '';
+
+					// This code is to setup the drag-and-drop with a nice label. Otherwise the effects look bad after loading back in and dragged
+					effectType = sections[i].getAttribute('data-effect');
+					if(typeof effectType === 'string') {
+						switch(effectType) {
+							case 'fade':
+							case 'trim':
+							case 'title':
+								dragHtml = capitaliseFirstLetter(effectType);
+								break;
+							case 'bgm':
+								bgmTitleElem = sections[i].querySelector('.icon-music');
+								if(bgmTitleElem) {
+									dragHtml = bgmTitleElem.parentNode.innerHTML;
+								} else {
+									dragHtml = '<span class="icon-music">BGM</span>';
+								}
+								break;
+						}
+					}
+
+					// And we finally setup the DragDrop
+					self.dropped(sections[i], dragHtml);
 				}
 			}
 		},
