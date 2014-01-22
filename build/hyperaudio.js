@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.18 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 21st January 2014 18:49:42 */
+/*! hyperaudio v0.3.19 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) ~ Built: 22nd January 2014 00:17:06 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6984,7 +6984,7 @@ var Stage = (function(document, hyperaudio) {
 		// this.target.addEventListener('tap', function(event) {
 		this.target.addEventListener('click', function(event) {
 			var section, word, search;
-			event.preventDefault();
+			// event.preventDefault(); // Removed since it breaks checkbox clicks in effects.
 			if(event.target.nodeName.toLowerCase() === self.options.word) {
 				word = event.target;
 				search = word;
