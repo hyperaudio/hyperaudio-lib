@@ -196,7 +196,7 @@ var hyperaudio = (function() {
 		},
 		_commonMethods: {
 			options: {
-				DEBUG: true,
+				DEBUG: false,
 				entity: 'core'
 			},
 			_trigger: function(eventType, eventData) {
