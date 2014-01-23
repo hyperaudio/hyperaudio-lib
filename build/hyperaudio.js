@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.27 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 23rd January 2014 21:54:39 */
+/*! hyperaudio v0.3.28 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 23rd January 2014 22:05:43 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -3971,7 +3971,7 @@ var hyperaudio = (function() {
 		},
 		_commonMethods: {
 			options: {
-				DEBUG: true,
+				DEBUG: false,
 				entity: 'core'
 			},
 			_trigger: function(eventType, eventData) {
@@ -7224,7 +7224,7 @@ var Stage = (function(document, hyperaudio) {
 			if(this.options.projector) {
 				this.options.projector.requestUpdate(reset);
 			}
-			// this._trigger(hyperaudio.event.change, {msg: 'The mix has changed'});
+			this._trigger(hyperaudio.event.change, {msg: 'The mix has changed'});
 		},
 
 		enable: function() {
@@ -7706,8 +7706,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					//Unset this flag so that any initial effects get played - when play begins.
 					this.isReadyToPlay = false;
 				}
-
-				this.stage._trigger(hyperaudio.event.change, {msg: 'The mix has changed'});
 			}
 		},
 
