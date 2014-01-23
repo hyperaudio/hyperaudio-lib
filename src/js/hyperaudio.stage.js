@@ -141,7 +141,6 @@ var Stage = (function(document, hyperaudio) {
 					}
 				});
 			}
-			// Would then need to init the dragdrop ability on each item
 		},
 
 		save: function(callback) {
