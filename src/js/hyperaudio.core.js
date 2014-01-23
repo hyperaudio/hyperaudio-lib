@@ -189,6 +189,8 @@ var hyperaudio = (function() {
 			ready: 'ha:ready',
 			load: 'ha:load',
 			save: 'ha:save',
+			change: 'ha:change',
+			// login: 'ha:login', // No DOM element relating to a login. It is handled by the api.signin when the stage fails to authenticate.
 			unauthenticated: 'ha:unauthenticated',
 			error: 'ha:error'
 		},

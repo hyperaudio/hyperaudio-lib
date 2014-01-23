@@ -292,6 +292,7 @@ var Stage = (function(document, hyperaudio) {
 			if(this.options.projector) {
 				this.options.projector.requestUpdate(reset);
 			}
+			this._trigger(hyperaudio.event.change, {msg: 'The mix has changed'});
 		},
 
 		enable: function() {
