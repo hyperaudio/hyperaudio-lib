@@ -1,4 +1,4 @@
-/*! hyperaudio v0.3.26 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 23rd January 2014 19:56:45 */
+/*! hyperaudio v0.3.27 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 23rd January 2014 21:54:39 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7074,7 +7074,6 @@ var Stage = (function(document, hyperaudio) {
 					}
 				});
 			}
-			// Would then need to init the dragdrop ability on each item
 		},
 
 		save: function(callback) {
@@ -7225,7 +7224,7 @@ var Stage = (function(document, hyperaudio) {
 			if(this.options.projector) {
 				this.options.projector.requestUpdate(reset);
 			}
-			this._trigger(hyperaudio.event.change, {msg: 'The mix has changed'});
+			// this._trigger(hyperaudio.event.change, {msg: 'The mix has changed'});
 		},
 
 		enable: function() {
@@ -7707,6 +7706,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					//Unset this flag so that any initial effects get played - when play begins.
 					this.isReadyToPlay = false;
 				}
+
+				this.stage._trigger(hyperaudio.event.change, {msg: 'The mix has changed'});
 			}
 		},
 
