@@ -465,8 +465,6 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					//Unset this flag so that any initial effects get played - when play begins.
 					this.isReadyToPlay = false;
 				}
-
-				this.stage._trigger(hyperaudio.event.change, {msg: 'The mix has changed'});
 			}
 		},
 
