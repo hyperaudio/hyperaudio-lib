@@ -202,11 +202,20 @@ var SideMenu = (function (document, hyperaudio) {
 	};
 
 	SideMenu.prototype.toggleMenu = function () {
+		var state;
+
 		if ( this.opened ) {
 			this.close();
+			state = 'Closed';
 		} else {
 			this.open();
+			state = 'Opened';
 		}
+
+		hyperaudio.gaEvent({
+			type: 'SIDEMENU',
+			action: 'togglemenu: ' + state
+		});
 	};
 
 	SideMenu.prototype.open = function () {
@@ -216,11 +225,6 @@ var SideMenu = (function (document, hyperaudio) {
 
 		hyperaudio.addClass(this.el, 'opened');
 		this.opened = true;
-
-		hyperaudio.gaEvent({
-			type: 'SIDEMENU',
-			action: 'togglemenu: Opened'
-		});
 	};
 
 	SideMenu.prototype.close = function () {
@@ -230,11 +234,6 @@ var SideMenu = (function (document, hyperaudio) {
 
 		hyperaudio.removeClass(this.el, 'opened');
 		this.opened = false;
-
-		hyperaudio.gaEvent({
-			type: 'SIDEMENU',
-			action: 'togglemenu: Closed'
-		});
 	};
 
 	SideMenu.prototype.selectPanel = function (e) {
