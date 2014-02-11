@@ -290,6 +290,10 @@ span.code {
 		signin.style.display = 'block';
 	});
 
+	document.addEventListener('ga', function (e) {
+		console.log('origin:"' + e.detail.origin + '" | type:"' + e.detail.type + '" | action:"' + e.detail.action + '"');
+	}, false);
+
 </script>
 </body>
 </html>
