@@ -268,7 +268,7 @@ var Transcript = (function(document, hyperaudio) {
 					}
 				});
 				this.ready = true;
-				this._trigger(hyperaudio.event.ready);
+				this._trigger(hyperaudio.event.ready, {msg: 'Transcript is ready.'});
 			}
 		},
 
