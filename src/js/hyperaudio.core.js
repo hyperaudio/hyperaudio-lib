@@ -211,8 +211,8 @@ var hyperaudio = (function() {
 						cancelable: true
 					});
 				hyperaudio.gaEvent({
-					type: this.options.entity + ' : ' + eventType,
-					action: eventObject.msg ? eventObject.msg : ''
+					type: this.options.entity,
+					action: eventType + ' event: ' + (eventObject.msg ? eventObject.msg : '')
 				});
 				this.target.dispatchEvent(event);
 			},
