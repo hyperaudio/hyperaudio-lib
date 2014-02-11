@@ -211,7 +211,6 @@ var hyperaudio = (function() {
 						cancelable: true
 					});
 				hyperaudio.gaEvent({
-					origin: 'Hyperaudio Lib',
 					type: this.options.entity + ' : ' + eventType,
 					action: eventObject.msg ? eventObject.msg : ''
 				});
@@ -258,6 +257,22 @@ var hyperaudio = (function() {
 
 		gaEvent: function(detail) {
 			// detail: {origin, type, action}
+
+			if(typeof detail !== 'object') {
+				if(typeof detail === 'string') {
+					detail = {
+						type: 'message',
+						action: detail
+					};
+				} else {
+					detail = {};
+				}
+			}
+
+			detail.origin = detail.origin ? detail.origin : 'Hyperaudio Lib';
+			detail.type = detail.type ? detail.type : 'no type';
+			detail.action = detail.action ? detail.action : 'no action';
+
 			var event = new CustomEvent("ga", {
 				detail: detail,
 				bubbles: true,
