@@ -104,6 +104,11 @@ var SideMenu = (function (document, hyperaudio) {
 
 		function onDragStart (e) {
 			hyperaudio.addClass(stage.target, 'dragdrop');
+
+			hyperaudio.gaEvent({
+				type: 'SIDEMENU',
+				action: 'bgmstartdrag: Began dragging BGM effect'
+			});
 		}
 
 		function onDrop (el) {
@@ -134,6 +139,11 @@ var SideMenu = (function (document, hyperaudio) {
 				'</form>';
 			el.innerHTML = html;
 			stage.dropped(el, '<span class="icon-music">' + title + '</span>');
+
+			hyperaudio.gaEvent({
+				type: 'SIDEMENU',
+				action: 'bgmdrop: Dropped BGM effect on to stage'
+			});
 		}
 
 		if(stage.target) {
@@ -206,6 +216,11 @@ var SideMenu = (function (document, hyperaudio) {
 
 		hyperaudio.addClass(this.el, 'opened');
 		this.opened = true;
+
+		hyperaudio.gaEvent({
+			type: 'SIDEMENU',
+			action: 'togglemenu: Opened'
+		});
 	};
 
 	SideMenu.prototype.close = function () {
@@ -215,6 +230,11 @@ var SideMenu = (function (document, hyperaudio) {
 
 		hyperaudio.removeClass(this.el, 'opened');
 		this.opened = false;
+
+		hyperaudio.gaEvent({
+			type: 'SIDEMENU',
+			action: 'togglemenu: Closed'
+		});
 	};
 
 	SideMenu.prototype.selectPanel = function (e) {
@@ -228,6 +248,12 @@ var SideMenu = (function (document, hyperaudio) {
 		hyperaudio.removeClass(current, 'selected');
 		incoming = document.querySelector('#' + panelID);
 		hyperaudio.addClass(incoming, 'selected');
+
+		var name = e.currentTarget.querySelector('span').innerHTML;
+		hyperaudio.gaEvent({
+			type: 'SIDEMENU',
+			action: 'selectpanel: Switched tab -> ' + name
+		});
 	};
 
 	SideMenu.prototype.selectMedia = function (e) {
@@ -264,6 +290,13 @@ var SideMenu = (function (document, hyperaudio) {
 		var folder = this.isFolder(e.target);
 		if(folder) {
 			hyperaudio.toggleClass(folder, 'open');
+
+			var name = folder.querySelector('div').innerHTML;
+			hyperaudio.gaEvent({
+				type: 'SIDEMENU',
+				action: 'togglefolder: ' + (hyperaudio.hasClass(folder, 'open') ? 'Opened' : 'Closed') + ' -> ' + name
+			});
+
 			return true;
 		}
 		return false;
