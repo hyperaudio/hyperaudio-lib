@@ -192,6 +192,10 @@ var hyperaudio = (function() {
 			change: 'ha:change',
 			// login: 'ha:login', // No DOM element relating to a login. It is handled by the api.signin when the stage fails to authenticate.
 			unauthenticated: 'ha:unauthenticated',
+			userplay: 'ha:userplay',
+			userpause: 'ha:userpause',
+			usercurrenttime: 'ha:usercurrenttime',
+			userplayword: 'ha:userplayword',
 			error: 'ha:error'
 		},
 		_commonMethods: {

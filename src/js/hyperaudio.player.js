@@ -247,6 +247,18 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				el.removeChild(el.firstChild);
 			}
 		},
+		gui_play: function(time) {
+			this._trigger(hyperaudio.event.userplay, {msg: 'User clicked play'});
+			this.play(time);
+		},
+		gui_pause: function(time) {
+			this._trigger(hyperaudio.event.userpause, {msg: 'User clicked pause'});
+			this.pause(time);
+		},
+		gui_currentTime: function(time, play) {
+			this._trigger(hyperaudio.event.usercurrenttime, {msg: 'User clicked the progress bar'});
+			this.currentTime(time, play);
+		},
 		play: function(time) {
 			if(this.youtube) {
 				this.popcorn.play(time);

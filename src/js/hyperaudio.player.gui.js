@@ -124,12 +124,12 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 			// if ( !this.player.videoElem.paused ) {
 			if ( !this.status.paused ) {
 				hyperaudio.removeClass(this.wrapperElem, 'playing');
-				this.player.pause();
+				this.player.gui_pause();
 				return;
 			}
 
 			hyperaudio.addClass(this.wrapperElem, 'playing');
-			this.player.play();
+			this.player.gui_play();
 		},
 
 		timeUpdate: function () {
@@ -213,7 +213,7 @@ var PlayerGUI = (function (window, document, hyperaudio) {
 
 			// var current = Math.round(this.status.duration / width * x);
 			var current = Math.round(100 * this.status.duration * x / width) / 100;
-			this.player.currentTime(current);
+			this.player.gui_currentTime(current);
 		}
 	};
 

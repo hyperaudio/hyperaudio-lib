@@ -298,6 +298,19 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			}
 		},
 
+		gui_play: function(time) {
+			this._trigger(hyperaudio.event.userplay, {msg: 'User clicked play'});
+			this.play(time);
+		},
+		gui_pause: function(time) {
+			this._trigger(hyperaudio.event.userpause, {msg: 'User clicked pause'});
+			this.pause(time);
+		},
+		gui_currentTime: function(time, play) {
+			this._trigger(hyperaudio.event.usercurrenttime, {msg: 'User clicked the progress bar'});
+			this.currentTime(time, play);
+		},
+
 		play: function() {
 
 			var resume = false,
@@ -383,6 +396,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(this.content[i].element === sectionElem) {
 						jumpTo.contentIndex = i;
 						jumpTo.start = wordElem.getAttribute(this.options.timeAttr) * this.content[i].unit;
+						this._trigger(hyperaudio.event.userplayword, {msg: 'User clicked on a word to play from'});
 						this.play(jumpTo);
 						break;
 					}
