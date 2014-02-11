@@ -269,7 +269,7 @@ span.code {
 
 	signin.querySelector('#signin-form').addEventListener('submit', function(e) {
 		e.preventDefault();
-		console.log('submitted login');
+		// console.log('submitted login');
 		signin.style.display = 'none';
 		hyperaudio.api.signin({
 			username: signin.querySelector('#username').value,
@@ -291,7 +291,7 @@ span.code {
 	});
 
 	document.addEventListener('ga', function (e) {
-		console.log('origin:"' + e.detail.origin + '" | type:"' + e.detail.type + '" | action:"' + e.detail.action + '"');
+		console.log('[GA] origin:"' + e.detail.origin + '" | type:"' + e.detail.type + '" | action:"' + e.detail.action + '"');
 	}, false);
 
 </script>
