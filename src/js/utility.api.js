@@ -46,6 +46,12 @@ var api = (function(hyperaudio) {
 					self.guest = !json.user;
 					if(!self.guest) {
 						self.username = json.user;
+
+						hyperaudio.gaEvent({
+							type: 'API',
+							action: 'login: User signed in'
+						});
+
 						self.callback(callback, true);
 					} else {
 						self.username = '';
