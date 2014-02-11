@@ -206,6 +206,11 @@ var hyperaudio = (function() {
 						bubbles: true,
 						cancelable: true
 					});
+				hyperaudio.gaEvent({
+					origin: 'Hyperaudio Lib',
+					type: this.options.entity + ' : ' + eventType,
+					action: eventObject.msg ? eventObject.msg : ''
+				});
 				this.target.dispatchEvent(event);
 			},
 			_error: function(msg) {
@@ -245,6 +250,16 @@ var hyperaudio = (function() {
 			// return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
 			// Now looks at top window (frame).
 			return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(window.top.location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+		},
+
+		gaEvent: function(detail) {
+			// detail: {origin, type, action}
+			var event = new CustomEvent("ga", {
+				detail: detail,
+				bubbles: true,
+				cancelable: true
+			});
+			document.dispatchEvent(event);
 		},
 
 		hasClass: function(e, c) {
