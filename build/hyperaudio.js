@@ -1,4 +1,4 @@
-/*! hyperaudio v0.4.1 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 11th February 2014 15:28:45 */
+/*! hyperaudio v0.4.1 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 11th February 2014 16:22:57 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4387,6 +4387,11 @@ var EditBlock = (function (document) {
 			return;
 		}
 
+		hyperaudio.gaEvent({
+			type: 'EDITBLOCK',
+			action: 'canceledit: Cancelled editing.'
+		});
+
 		this.destroy();
 	};
 
@@ -4443,6 +4448,11 @@ var EditBlock = (function (document) {
 		this.el.handleHTML = this.el.innerHTML;
 
 		this.stage.dropped(newBlock);
+
+		hyperaudio.gaEvent({
+			type: 'EDITBLOCK',
+			action: 'edit: Editted section.'
+		});
 
 		this.destroy();
 	};
