@@ -38,6 +38,11 @@ var EditBlock = (function (document) {
 			return;
 		}
 
+		hyperaudio.gaEvent({
+			type: 'EDITBLOCK',
+			action: 'canceledit: Cancelled editing.'
+		});
+
 		this.destroy();
 	};
 
@@ -94,6 +99,11 @@ var EditBlock = (function (document) {
 		this.el.handleHTML = this.el.innerHTML;
 
 		this.stage.dropped(newBlock);
+
+		hyperaudio.gaEvent({
+			type: 'EDITBLOCK',
+			action: 'edit: Editted section.'
+		});
 
 		this.destroy();
 	};
