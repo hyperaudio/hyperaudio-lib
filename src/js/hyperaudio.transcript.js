@@ -207,6 +207,7 @@ var Transcript = (function(document, hyperaudio) {
 						} else {
 							opts.player.currentTime(time);
 						}
+						self._trigger(hyperaudio.event.userplayword, {msg: 'User clicked on a word to play from'});
 					}
 				}, false);
 			}
