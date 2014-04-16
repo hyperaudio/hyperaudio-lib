@@ -12,6 +12,7 @@
 <div id="wrapper">
 	<div id="target-video" class="stage-video"></div>
 	<div id="target-stage" class="stage"></div>
+	<div id="music-player"></div>
 </div>
 
 <script type="text/javascript" src="../../build/hyperaudio.js"></script>
@@ -30,7 +31,7 @@
 			this.stage = HA.Stage({
 				target: "#target-stage",
 				mix: {
-					url: "mix/example.htm",
+					url: "mix/example-mix.htm",
 					title: "An Example Mix",
 					desc: "To demonstrate the use of fixed mix urls with the Stage.",
 					type: "html",
