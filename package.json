@@ -21,9 +21,7 @@
   "bugs": {
     "url": "https://github.com/hyperaudio/hyperaudio/issues"
   },
-  "dependencies": {
-    // "transcripts": "git://github.com/hyperaudio-dev/transcripts.git#master"
-  },
+  "dependencies": {},
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-concat": "~0.3.0",
