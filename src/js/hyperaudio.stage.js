@@ -303,8 +303,10 @@ var Stage = (function(document, hyperaudio) {
 				// add edit action if needed
 				if ( !(/(^|\s)effect($|\s)/.test(el.className)) ) {
 					actions = el.querySelector('.actions');
-					actions._tap = new Tap({el: actions});
-					actions.addEventListener('tap', editBlock, false);
+					if(actions) {
+						actions._tap = new Tap({el: actions});
+						actions.addEventListener('tap', editBlock, false);
+					}
 				} else {
 					draggableClass = 'draggableEffect';
 				}
