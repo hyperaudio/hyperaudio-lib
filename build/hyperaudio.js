@@ -1,4 +1,4 @@
-/*! hyperaudio v0.4.2 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 16th April 2014 23:19:16 */
+/*! hyperaudio v0.4.3 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 17th April 2014 00:21:29 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7044,7 +7044,7 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 			mix: {
-				// url, title, desc, type
+				// url, title, desc, type, editable
 			},
 
 			title: 'Title not set',
@@ -7197,11 +7197,20 @@ var Stage = (function(document, hyperaudio) {
 						}
 					});
 				} else if(this.options.mix.url) {
+					this.mixDetails({
+						title: this.options.mix.title,
+						desc: this.options.mix.desc,
+						type: this.options.mix.type
+					});
 					hyperaudio.xhr({
 						url: this.options.mix.url,
 						complete: function(event) {
 							self.updateStage(this.responseText);
-							self.initDragDrop();
+							if(self.options.mix.editable) {
+								self.initDragDrop();
+							} else {
+								self.changed();
+							}
 							self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.mix.url + '"'});
 						},
 						error: function(event) {
@@ -7331,8 +7340,10 @@ var Stage = (function(document, hyperaudio) {
 				// add edit action if needed
 				if ( !(/(^|\s)effect($|\s)/.test(el.className)) ) {
 					actions = el.querySelector('.actions');
-					actions._tap = new Tap({el: actions});
-					actions.addEventListener('tap', editBlock, false);
+					if(actions) {
+						actions._tap = new Tap({el: actions});
+						actions.addEventListener('tap', editBlock, false);
+					}
 				} else {
 					draggableClass = 'draggableEffect';
 				}

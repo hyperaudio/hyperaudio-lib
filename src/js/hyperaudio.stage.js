@@ -16,7 +16,7 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 			mix: {
-				// url, title, desc, type
+				// url, title, desc, type, editable
 			},
 
 			title: 'Title not set',
@@ -169,11 +169,20 @@ var Stage = (function(document, hyperaudio) {
 						}
 					});
 				} else if(this.options.mix.url) {
+					this.mixDetails({
+						title: this.options.mix.title,
+						desc: this.options.mix.desc,
+						type: this.options.mix.type
+					});
 					hyperaudio.xhr({
 						url: this.options.mix.url,
 						complete: function(event) {
 							self.updateStage(this.responseText);
-							self.initDragDrop();
+							if(self.options.mix.editable) {
+								self.initDragDrop();
+							} else {
+								self.changed();
+							}
 							self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.mix.url + '"'});
 						},
 						error: function(event) {
