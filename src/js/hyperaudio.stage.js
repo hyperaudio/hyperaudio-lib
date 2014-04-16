@@ -17,7 +17,7 @@ var Stage = (function(document, hyperaudio) {
 			id: '', // The ID of the saved mix.
 			mix: {
 				// url, title, desc, type
-			}
+			},
 
 			title: 'Title not set',
 			desc: 'Description not set',
@@ -114,7 +114,7 @@ var Stage = (function(document, hyperaudio) {
 			for(var i=0, l=attr.length; i < l; i++ ) {
 				this.article.setAttribute(attr[i].name, attr[i].value);
 			}
-		}
+		},
 		load: function(id) {
 			var self = this;
 
