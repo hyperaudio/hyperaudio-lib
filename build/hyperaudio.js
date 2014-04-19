@@ -1,4 +1,4 @@
-/*! hyperaudio v0.4.3 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 17th April 2014 00:21:29 */
+/*! hyperaudio v0.4.4 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 19th April 2014 19:10:55 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7044,7 +7044,9 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 			mix: {
-				// url, title, desc, type, editable
+				//title, desc, type, editable
+				// url: [!content] The url of the mix
+				// content: [!url] The actual mix HTML
 			},
 
 			title: 'Title not set',
@@ -7117,7 +7119,7 @@ var Stage = (function(document, hyperaudio) {
 			this.options.projector.setStage(this);
 		}
 
-		if(this.options.id || this.options.mix.url) {
+		if(this.options.id || this.options.mix.url || this.options.mix.content) {
 			this.load();
 		}
 	}
@@ -7171,22 +7173,6 @@ var Stage = (function(document, hyperaudio) {
 								desc: self.mix.desc,
 								type: self.mix.type
 							});
-/*
-							// Need to maintain the existing article in the stage - Important for dragdrop.
-							var tmp = document.createElement('div'); // Temporary DOM element
-							tmp.innerHTML = self.mix.content; // Add the content to the DOM element
-							var articleElem = tmp.querySelector('article'); // Find the article in the content.
-							// Can now insert the contents of the returned mix article into the maintained article.
-							self.article.innerHTML = articleElem.innerHTML;
-
-							// TODO: Should also clear any existing attributes on the article.
-
-							// Now copy over any attributes
-							var attr = articleElem.attributes;
-							for(var i=0, l=attr.length; i < l; i++ ) {
-								self.article.setAttribute(attr[i].name, attr[i].value);
-							}
-*/
 							self.updateStage(self.mix.content);
 
 							// Setup the dragdrop on the loaded mix sections.
@@ -7196,28 +7182,41 @@ var Stage = (function(document, hyperaudio) {
 							self._error(this.status + ' ' + this.statusText + ' : "' + id + '"');
 						}
 					});
-				} else if(this.options.mix.url) {
+				} else {
 					this.mixDetails({
 						title: this.options.mix.title,
 						desc: this.options.mix.desc,
 						type: this.options.mix.type
 					});
-					hyperaudio.xhr({
-						url: this.options.mix.url,
-						complete: function(event) {
-							self.updateStage(this.responseText);
-							if(self.options.mix.editable) {
-								self.initDragDrop();
-							} else {
-								self.changed();
+					if(this.options.mix.url) {
+						hyperaudio.xhr({
+							url: this.options.mix.url,
+							complete: function(event) {
+								self.updateStage(this.responseText);
+								if(self.options.mix.editable) {
+									self.initDragDrop();
+								} else {
+									self.changed();
+								}
+								self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.mix.url + '"'});
+							},
+							error: function(event) {
+								self.target.innerHTML = 'Problem with mix URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
+								self._error(this.status + ' ' + this.statusText + ' : "' + self.options.mix.url + '"');
 							}
-							self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.mix.url + '"'});
-						},
-						error: function(event) {
-							self.target.innerHTML = 'Problem with mix URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
-							self._error(this.status + ' ' + this.statusText + ' : "' + self.options.mix.url + '"');
+						});
+					} else if(this.options.mix.content) {
+						this.updateStage(this.options.mix.content);
+						if(this.options.mix.editable) {
+							this.initDragDrop();
+						} else {
+							this.changed();
 						}
-					});
+						this._trigger(hyperaudio.event.load, {msg: 'Loaded given content'});
+					} else {
+						this.target.innerHTML = 'Problem with mix.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
+						this._error('Stage : No ID, URL or Content');
+					}
 				}
 			}
 		},
