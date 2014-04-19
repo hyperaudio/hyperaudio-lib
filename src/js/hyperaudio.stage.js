@@ -16,7 +16,9 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 			mix: {
-				// url, title, desc, type, editable
+				//title, desc, type, editable
+				// url: [!content] The url of the mix
+				// content: [!url] The actual mix HTML
 			},
 
 			title: 'Title not set',
@@ -143,22 +145,6 @@ var Stage = (function(document, hyperaudio) {
 								desc: self.mix.desc,
 								type: self.mix.type
 							});
-/*
-							// Need to maintain the existing article in the stage - Important for dragdrop.
-							var tmp = document.createElement('div'); // Temporary DOM element
-							tmp.innerHTML = self.mix.content; // Add the content to the DOM element
-							var articleElem = tmp.querySelector('article'); // Find the article in the content.
-							// Can now insert the contents of the returned mix article into the maintained article.
-							self.article.innerHTML = articleElem.innerHTML;
-
-							// TODO: Should also clear any existing attributes on the article.
-
-							// Now copy over any attributes
-							var attr = articleElem.attributes;
-							for(var i=0, l=attr.length; i < l; i++ ) {
-								self.article.setAttribute(attr[i].name, attr[i].value);
-							}
-*/
 							self.updateStage(self.mix.content);
 
 							// Setup the dragdrop on the loaded mix sections.
@@ -174,22 +160,32 @@ var Stage = (function(document, hyperaudio) {
 						desc: this.options.mix.desc,
 						type: this.options.mix.type
 					});
-					hyperaudio.xhr({
-						url: this.options.mix.url,
-						complete: function(event) {
-							self.updateStage(this.responseText);
-							if(self.options.mix.editable) {
-								self.initDragDrop();
-							} else {
-								self.changed();
+					if(this.options.mix.url) {
+						hyperaudio.xhr({
+							url: this.options.mix.url,
+							complete: function(event) {
+								self.updateStage(this.responseText);
+								if(self.options.mix.editable) {
+									self.initDragDrop();
+								} else {
+									self.changed();
+								}
+								self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.mix.url + '"'});
+							},
+							error: function(event) {
+								self.target.innerHTML = 'Problem with mix URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
+								self._error(this.status + ' ' + this.statusText + ' : "' + self.options.mix.url + '"');
 							}
-							self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.mix.url + '"'});
-						},
-						error: function(event) {
-							self.target.innerHTML = 'Problem with mix URL.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
-							self._error(this.status + ' ' + this.statusText + ' : "' + self.options.mix.url + '"');
+						});
+					} else {
+						this.updateStage(this.options.mix.content);
+						if(this.options.mix.editable) {
+							this.initDragDrop();
+						} else {
+							this.changed();
 						}
-					});
+						this._trigger(hyperaudio.event.load, {msg: 'Loaded given content'});
+					}
 				}
 			}
 		},
