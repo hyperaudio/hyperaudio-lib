@@ -91,7 +91,7 @@ var Stage = (function(document, hyperaudio) {
 			this.options.projector.setStage(this);
 		}
 
-		if(this.options.id || this.options.mix.url) {
+		if(this.options.id || this.options.mix.url || this.options.mix.content) {
 			this.load();
 		}
 	}
