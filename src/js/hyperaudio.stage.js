@@ -154,7 +154,7 @@ var Stage = (function(document, hyperaudio) {
 							self._error(this.status + ' ' + this.statusText + ' : "' + id + '"');
 						}
 					});
-				} else if(this.options.mix.url) {
+				} else {
 					this.mixDetails({
 						title: this.options.mix.title,
 						desc: this.options.mix.desc,
@@ -177,7 +177,7 @@ var Stage = (function(document, hyperaudio) {
 								self._error(this.status + ' ' + this.statusText + ' : "' + self.options.mix.url + '"');
 							}
 						});
-					} else {
+					} else if(this.options.mix.content) {
 						this.updateStage(this.options.mix.content);
 						if(this.options.mix.editable) {
 							this.initDragDrop();
@@ -185,6 +185,9 @@ var Stage = (function(document, hyperaudio) {
 							this.changed();
 						}
 						this._trigger(hyperaudio.event.load, {msg: 'Loaded given content'});
+					} else {
+						this.target.innerHTML = 'Problem with mix.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
+						this._error('Stage : No ID, URL or Content');
 					}
 				}
 			}
