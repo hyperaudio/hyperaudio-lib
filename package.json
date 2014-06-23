@@ -5,7 +5,7 @@
   "homepage": "http://hyperaud.io", 
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyperaudio/hyperaudio.git"
+    "url": "https://github.com/hyperaudio/hyperaudio.js.git"
   },
   "keywords": [
     "audio",
@@ -19,7 +19,7 @@
   ],
   "license": "http://hyperaud.io/licensing/",
   "bugs": {
-    "url": "https://github.com/hyperaudio/hyperaudio/issues"
+    "url": "https://github.com/hyperaudio/hyperaudio.js/issues"
   },
   "dependencies": {},
   "devDependencies": {
