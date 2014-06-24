@@ -7,13 +7,22 @@ var api = (function(hyperaudio) {
 	return {
 		init: function(options) {
 			this.options = hyperaudio.extend({
-				api: 'http://api.hyperaud.io/v1/',
+				protocol: 'http://',
+				org: '', // The organisations namespace / sub-domain. EG. 'chattanooga.'
+				api: 'api.hyperaud.io/v1/',
+				// Command syntax
 				transcripts: 'transcripts/',
 				mixes: 'mixes/',
-				bgm: 'bgm/media/',
+				channels: 'channels/',
 				signin: 'login/',
-				whoami: 'whoami/'
+				whoami: 'whoami/',
+				// Specific user (bgm) for music
+				bgm: 'bgm/media/'
 			}, options);
+
+			// The base url of the API
+			this.url = null;
+			this._updateInternals();
 
 			// API State
 			this.error = false;
@@ -29,6 +38,23 @@ var api = (function(hyperaudio) {
 			this.mix = null;
 			this.bgm = null;
 		},
+		option: function(options, value) {
+			if(typeof options === 'string') { // Enable option to be set/get by name.
+				if(typeof value !== 'undefined') {
+					this.options[options] = value;
+				} else {
+					return this.options[options];
+				}
+			} else if(typeof options === 'object') { // Enable options to be set/get by object.
+				hyperaudio.extend(this.options, options);
+			} else {
+				return hyperaudio.extend({}, this.options); // Return a copy of the options object.
+			}
+			this._updateInternals();
+		},
+		_updateInternals: function() {
+			this.url = this.options.protocol + this.options.org + this.options.api;
+		},
 		callback: function(callback, success) {
 			if(typeof callback === 'function') {
 				callback.call(this, success);
@@ -38,7 +64,7 @@ var api = (function(hyperaudio) {
 			var self = this;
 			// auth = {username,password}
 			xhr({
-				url: this.options.api + this.options.signin,
+				url: this.url + this.options.signin,
 				type: 'POST',
 				data: JSON.stringify(auth),
 				complete: function(event) {
@@ -75,7 +101,7 @@ var api = (function(hyperaudio) {
 				}, 0);
 			} else {
 				xhr({
-					url: this.options.api + this.options.whoami,
+					url: this.url + this.options.whoami,
 					complete: function(event) {
 						var json = JSON.parse(this.responseText);
 						self.guest = !json.user;
@@ -102,8 +128,8 @@ var api = (function(hyperaudio) {
 			} else {
 				xhr({
 					// In future may want a version that returns only your own transcripts.
-					// url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.transcripts,
-					url: this.options.api + this.options.transcripts,
+					// url: self.url + (self.guest ? '' : self.username + '/') + self.options.transcripts,
+					url: this.url + this.options.transcripts,
 					complete: function(event) {
 						var json = JSON.parse(this.responseText);
 						self.transcripts = json;
@@ -127,8 +153,8 @@ var api = (function(hyperaudio) {
 				this.getUsername(function(success) {
 					if(success && id) {
 						xhr({
-							// url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.transcripts + id,
-							url: self.options.api + self.options.transcripts + id,
+							// url: self.url + (self.guest ? '' : self.username + '/') + self.options.transcripts + id,
+							url: self.url + self.options.transcripts + id,
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.transcript = json;
@@ -157,7 +183,7 @@ var api = (function(hyperaudio) {
 				this.getUsername(function(success) {
 					if(success) {
 						xhr({
-							url: self.options.api + (self.guest ? '' : self.username + '/') + self.options.mixes,
+							url: self.url + (self.guest ? '' : self.username + '/') + self.options.mixes,
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.mixes = json;
@@ -186,7 +212,7 @@ var api = (function(hyperaudio) {
 				this.getUsername(function(success) {
 					if(success && id) {
 						xhr({
-							url: this.options.api + (this.guest ? '' : this.username + '/') + this.options.mixes + id,
+							url: this.url + (this.guest ? '' : this.username + '/') + this.options.mixes + id,
 							complete: function(event) {
 								var json = JSON.parse(this.responseText);
 								self.mix = json;
@@ -230,7 +256,7 @@ var api = (function(hyperaudio) {
 						}
 
 						xhr({
-							url: self.options.api + self.username + '/' + self.options.mixes + id,
+							url: self.url + self.username + '/' + self.options.mixes + id,
 							type: type,
 							data: JSON.stringify(mix),
 							complete: function(event) {
@@ -268,7 +294,7 @@ var api = (function(hyperaudio) {
 				}, 0);
 			} else {
 				xhr({
-					url: this.options.api + this.options.bgm,
+					url: this.url + this.options.bgm,
 					complete: function(event) {
 						var json = JSON.parse(this.responseText);
 						self.bgm = json;
