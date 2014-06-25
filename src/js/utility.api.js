@@ -37,6 +37,8 @@ var api = (function(hyperaudio) {
 			this.mixes = null;
 			this.mix = null;
 			this.bgm = null;
+
+			this.channels = null;
 		},
 		option: function(options, value) {
 			if(typeof options === 'string') { // Enable option to be set/get by name.
@@ -118,6 +120,58 @@ var api = (function(hyperaudio) {
 					}
 				});
 			}
+		},
+		getTranscripts_WIP: function(options) {
+			var self = this,
+				url, getUsername, setUrl, getTranscripts;
+
+			options = hyperaudio.extend({
+				user: false, // When true, the api returns the current user's transcripts.
+				channel: '', // The channel name. Empty string disables feature. See 'nochannel' for media without any channel.
+				callback: null
+			}, options);
+
+			getUsername = function() {
+				self.getUsername(function(success) {
+					if(success && !self.guest) {
+						getTranscripts();
+					} else {
+						self.callback(options.callback, false);
+					}
+				});
+			};
+
+			setUrl = function() {
+				url = this.url;
+				if(options.user) {
+					url += self.username;
+				}
+				if(options.user) {
+					url += self.username;
+				}
+			};
+
+			getTranscripts = function() {
+				xhr({
+					// In future may want a version that returns only your own transcripts.
+					// url: self.url + (self.guest ? '' : self.username + '/') + self.options.transcripts,
+					url: url + self.options.transcripts,
+					complete: function(event) {
+						var json = JSON.parse(this.responseText);
+						// self.transcripts = json;
+						self.callback(options.callback, json);
+					},
+					error: function(event) {
+						self.error = true;
+						self.callback(options.callback, false);
+					}
+				});
+			};
+
+
+
+
+
 		},
 		getTranscripts: function(callback, force) {
 			var self = this;
