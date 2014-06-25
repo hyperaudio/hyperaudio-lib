@@ -48,6 +48,13 @@ var SideMenu = (function (document, hyperaudio) {
 		return ul;
 	};
 
+	SideMenu.prototype.makeMenuItem = function(title, id) {
+		var li = document.createElement('li');
+		li.setAttribute('data-id', id);
+		li.innerHTML = title;
+		return li;
+	};
+
 	SideMenu.prototype.initTranscripts = function () {
 		var self = this;
 
@@ -63,17 +70,85 @@ var SideMenu = (function (document, hyperaudio) {
 
 			hyperaudio.api.getTranscripts(function(success) {
 				if(success) {
-					var yourTrans, otherTrans, userTrans, elem, trans;
+					var yourTrans, otherTrans, elem, trans;
 
 					if(username) {
 						yourTrans = self.makeMenuFolder(self.transcripts, 'Your Media');
 					}
 					otherTrans = self.makeMenuFolder(self.transcripts, 'Media');
 
-					// Nesting not supported ATM.
-					// userTrans = self.makeMenuFolder(self.transcripts, 'By User');
-					// self.makeMenuFolder(userTrans, 'Scooby');
-					// self.makeMenuFolder(userTrans, 'Mark');
+					// *****************
+					// START - TEST CODE
+					// *****************
+
+					var testFolder =[], testChild = [];
+
+					// Make a folder
+					testFolder.push(self.makeMenuFolder(self.transcripts, 'Test Folder 1'));
+					testChild.push([]);
+
+					// Add some child items to the folder
+					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> A', '1A'));
+					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> B', '1B'));
+					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> C', '1C'));
+
+					// Add some child folders to the folder
+					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 1'));
+					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 2'));
+					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 3'));
+
+					// Add some child items to the child folders
+					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> A', '11A'));
+					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> B', '11B'));
+					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> C', '11C'));
+
+					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> A', '12A'));
+					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> B', '12B'));
+					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> C', '12C'));
+
+					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> A', '13A'));
+					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> B', '13B'));
+					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> C', '13C'));
+
+
+					// Add a child folders to the child folder (3rd level)
+					var testThird = self.makeMenuFolder(testChild[testChild.length - 1][1], 'CF 1>2>1');
+					// Add some child items to the child folders (3rd level)
+					testThird.appendChild(self.makeMenuItem('C 1>2>1>A', '121A'));
+					testThird.appendChild(self.makeMenuItem('C 1>2>1>B', '121B'));
+					testThird.appendChild(self.makeMenuItem('C 1>2>1>C', '121C'));
+
+
+					// Make another folder
+					testFolder.push(self.makeMenuFolder(self.transcripts, 'Test Folder 2'));
+					testChild.push([]);
+
+					// Add some child items to the folder
+					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> A', '2A'));
+					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> B', '2B'));
+					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> C', '2C'));
+
+					// Add some child folders to the folder
+					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 1'));
+					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 2'));
+					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 3'));
+
+					// Add some child items to the child folders
+					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> A', '21A'));
+					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> B', '21B'));
+					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> C', '21C'));
+
+					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> A', '22A'));
+					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> B', '22B'));
+					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> C', '22C'));
+
+					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> A', '23A'));
+					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> B', '23B'));
+					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> C', '23C'));
+
+					// ***************
+					// END - TEST CODE
+					// ***************
 
 					for(var i = 0, l = this.transcripts.length; i < l; i++) {
 						trans = this.transcripts[i];

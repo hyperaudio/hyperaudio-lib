@@ -475,11 +475,11 @@ p {
 	color: #aaa;
 }
 
-#sidemenu .folder.open div:before {
+#sidemenu .folder.open > div:before {
 	content: '1';
 }
 
-#sidemenu .folder.open ul {
+#sidemenu .folder.open > ul {
 	height: auto;
 }
 
