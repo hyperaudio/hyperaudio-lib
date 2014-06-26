@@ -121,9 +121,57 @@ var api = (function(hyperaudio) {
 				});
 			}
 		},
-		getTranscripts_WIP: function(options) {
+		getChannels: function(options) {
 			var self = this,
-				url, getUsername, setUrl, getTranscripts;
+				getUsername, getUrl, getChannels;
+
+			options = hyperaudio.extend({
+				user: false, // When true, the api returns the current user's transcripts.
+				callback: null
+			}, options);
+
+			getUsername = function() {
+				self.getUsername(function(success) {
+					if(success && !self.guest) {
+						getChannels();
+					} else {
+						self.callback(options.callback, false);
+					}
+				});
+			};
+
+			getUrl = function() {
+				var url = self.url;
+				if(options.user) {
+					url += self.username + '/';
+				}
+				url += self.options.transcripts + self.options.channels;
+				return url;
+			};
+
+			getChannels = function() {
+				xhr({
+					url: getUrl(),
+					complete: function(event) {
+						var json = JSON.parse(this.responseText);
+						self.callback(options.callback, json);
+					},
+					error: function(event) {
+						self.error = true;
+						self.callback(options.callback, false);
+					}
+				});
+			};
+
+			if(options.user) {
+				getUsername();
+			} else {
+				getChannels();
+			}
+		},
+		getTranscripts: function(options) {
+			var self = this,
+				getUsername, getUrl, getTranscripts;
 
 			options = hyperaudio.extend({
 				user: false, // When true, the api returns the current user's transcripts.
@@ -141,24 +189,23 @@ var api = (function(hyperaudio) {
 				});
 			};
 
-			setUrl = function() {
-				url = this.url;
+			getUrl = function() {
+				var url = self.url;
 				if(options.user) {
-					url += self.username;
+					url += self.username + '/';
 				}
-				if(options.user) {
-					url += self.username;
+				url += self.options.transcripts;
+				if(options.channel) {
+					url += self.options.channels + options.channel;
 				}
+				return url;
 			};
 
 			getTranscripts = function() {
 				xhr({
-					// In future may want a version that returns only your own transcripts.
-					// url: self.url + (self.guest ? '' : self.username + '/') + self.options.transcripts,
-					url: url + self.options.transcripts,
+					url: getUrl(),
 					complete: function(event) {
 						var json = JSON.parse(this.responseText);
-						// self.transcripts = json;
 						self.callback(options.callback, json);
 					},
 					error: function(event) {
@@ -168,12 +215,13 @@ var api = (function(hyperaudio) {
 				});
 			};
 
-
-
-
-
+			if(options.user) {
+				getUsername();
+			} else {
+				getTranscripts();
+			}
 		},
-		getTranscripts: function(callback, force) {
+		getTranscriptsOLD: function(callback, force) {
 			var self = this;
 			if(!force && this.transcripts) {
 				setTimeout(function() {
