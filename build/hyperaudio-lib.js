@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.5 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 25th June 2014 16:36:15 */
+/*! hyperaudio-lib v0.4.6 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 26th June 2014 20:28:30 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4636,6 +4636,8 @@ var fadeFX = (function (window, document) {
 
 var SideMenu = (function (document, hyperaudio) {
 
+	var CLASS_ON_DEMAND = 'on-demand';
+
 	function SideMenu (options) {
 		this.options = {
 			el: '#sidemenu',
@@ -4672,11 +4674,18 @@ var SideMenu = (function (document, hyperaudio) {
 		this.initMusic();
 	}
 
-	SideMenu.prototype.makeMenuFolder = function(parent, title) {
+	SideMenu.prototype.makeMenuFolder = function(parent, title, channel, user) {
 		var li = document.createElement('li'),
 			div = document.createElement('div'),
 			ul = document.createElement('ul');
 		hyperaudio.addClass(li, 'folder');
+		if(channel) {
+			hyperaudio.addClass(li, CLASS_ON_DEMAND);
+			li.setAttribute('data-channel', channel);
+			if(user) {
+				li.setAttribute('data-user', '1');
+			}
+		}
 		div.innerHTML = title;
 		li.appendChild(div);
 		li.appendChild(ul);
@@ -4692,121 +4701,248 @@ var SideMenu = (function (document, hyperaudio) {
 	};
 
 	SideMenu.prototype.initTranscripts = function () {
+/*
 		var self = this;
+
+		addTestFolders();
 
 		hyperaudio.api.getUsername(function(success) {
 
 			var username = '';
-			var filter = false;
 
 			if(success) {
 				username = this.username;
-				filter = !this.guest;
 			}
 
-			hyperaudio.api.getTranscripts(function(success) {
-				if(success) {
-					var yourTrans, otherTrans, elem, trans;
+			// hyperaudio.api.getTranscripts(function(success) {
 
-					if(username) {
-						yourTrans = self.makeMenuFolder(self.transcripts, 'Your Media');
-					}
-					otherTrans = self.makeMenuFolder(self.transcripts, 'Media');
+			hyperaudio.api.getTranscripts({
+				user: true,
+				channel: 'US Politics',
+				callback: function(json) {
 
-					// *****************
-					// START - TEST CODE
-					// *****************
+					if(json) {
+						var yourTrans, otherTrans, elem, trans;
 
-					var testFolder =[], testChild = [];
+						if(username) {
+							yourTrans = self.makeMenuFolder(self.transcripts, 'Your Media');
+						}
+						otherTrans = self.makeMenuFolder(self.transcripts, 'Media');
 
-					// Make a folder
-					testFolder.push(self.makeMenuFolder(self.transcripts, 'Test Folder 1'));
-					testChild.push([]);
+						// addTestFolders();
 
-					// Add some child items to the folder
-					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> A', '1A'));
-					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> B', '1B'));
-					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> C', '1C'));
+						for(var i = 0, l = json.length; i < l; i++) {
+							trans = json[i];
+							if(trans.type === 'html') {
+								elem = document.createElement('li');
+								elem.setAttribute('data-id', trans._id);
+								elem.innerHTML = trans.label;
 
-					// Add some child folders to the folder
-					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 1'));
-					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 2'));
-					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 3'));
-
-					// Add some child items to the child folders
-					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> A', '11A'));
-					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> B', '11B'));
-					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> C', '11C'));
-
-					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> A', '12A'));
-					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> B', '12B'));
-					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> C', '12C'));
-
-					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> A', '13A'));
-					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> B', '13B'));
-					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> C', '13C'));
-
-
-					// Add a child folders to the child folder (3rd level)
-					var testThird = self.makeMenuFolder(testChild[testChild.length - 1][1], 'CF 1>2>1');
-					// Add some child items to the child folders (3rd level)
-					testThird.appendChild(self.makeMenuItem('C 1>2>1>A', '121A'));
-					testThird.appendChild(self.makeMenuItem('C 1>2>1>B', '121B'));
-					testThird.appendChild(self.makeMenuItem('C 1>2>1>C', '121C'));
-
-
-					// Make another folder
-					testFolder.push(self.makeMenuFolder(self.transcripts, 'Test Folder 2'));
-					testChild.push([]);
-
-					// Add some child items to the folder
-					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> A', '2A'));
-					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> B', '2B'));
-					testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> C', '2C'));
-
-					// Add some child folders to the folder
-					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 1'));
-					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 2'));
-					testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 3'));
-
-					// Add some child items to the child folders
-					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> A', '21A'));
-					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> B', '21B'));
-					testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> C', '21C'));
-
-					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> A', '22A'));
-					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> B', '22B'));
-					testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> C', '22C'));
-
-					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> A', '23A'));
-					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> B', '23B'));
-					testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> C', '23C'));
-
-					// ***************
-					// END - TEST CODE
-					// ***************
-
-					for(var i = 0, l = this.transcripts.length; i < l; i++) {
-						trans = this.transcripts[i];
-						if(trans.type === 'html') {
-							elem = document.createElement('li');
-							elem.setAttribute('data-id', trans._id);
-							elem.innerHTML = trans.label;
-							// self.transcripts.appendChild(elem);
-
-							if(trans.owner === username) {
-								yourTrans.appendChild(elem);
-							} else {
-								otherTrans.appendChild(elem);
+								if(trans.owner === username) {
+									yourTrans.appendChild(elem);
+								} else {
+									otherTrans.appendChild(elem);
+								}
 							}
 						}
-					}
 
-					self.transcripts._tap = new Tap({el: self.transcripts});
-					self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
+						self.transcripts._tap = new Tap({el: self.transcripts});
+						self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
+					}
 				}
 			});
 		});
+*/
+
+
+
+
+
+		var self = this,
+			username = '',
+			getUsername,
+			getChannels, getUserChannels,
+			prepareChannels, prepareUserChannels,
+			selectMedia,
+			getTranscripts;
+
+		getUsername = function() {
+			hyperaudio.api.getUsername(function(success) {
+				if(success) {
+					username = this.username;
+					if(username) {
+						getUserChannels();
+					} else {
+						getChannels();
+					}
+				}
+			});
+		};
+
+		getUserChannels = function() {
+			hyperaudio.api.getChannels({
+				user: true,
+				callback: function(success) {
+					if(success) {
+						prepareUserChannels(success);
+					}
+				}
+			});
+		};
+
+		getChannels = function() {
+			hyperaudio.api.getChannels({
+				callback: function(success) {
+					if(success) {
+						prepareChannels(success);
+					}
+				}
+			});
+		};
+
+		prepareUserChannels = function(channels) {
+			if(channels && channels.length) {
+				var owner = self.makeMenuFolder(self.transcripts, 'Your Media');
+				for(var i = 0, l = channels.length; i < l; i++) {
+					self.makeMenuFolder(owner, channels[i], channels[i], true);
+				}
+			}
+			getChannels();
+		};
+
+		prepareChannels = function(channels) {
+			if(channels && channels.length) {
+				var owner = self.makeMenuFolder(self.transcripts, 'Media');
+				for(var i = 0, l = channels.length; i < l; i++) {
+					self.makeMenuFolder(owner, channels[i], channels[i], false);
+				}
+			}
+			self.transcripts._tap = new Tap({el: self.transcripts});
+			// self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
+			self.transcripts.addEventListener('tap', selectMedia, false);
+		};
+
+		selectMedia = function (event) {
+			event.stopPropagation();	// just in case [Not sure this does anything with a tap event.]
+
+			var item = event.target;
+			var folder = self.toggleFolder(event);
+
+			if(folder) {
+				if(self.isOnDemand(folder)) {
+					// capture class now! Otherwise, multi clicks cause multi xhr.
+					hyperaudio.removeClass(folder, CLASS_ON_DEMAND);
+					getTranscripts(folder);
+				}
+				return;
+			}
+
+			if ( !item.getAttribute('data-id') || !self.mediaCallback ) {
+				return;
+			}
+
+			self.mediaCallback(item);
+		};
+
+		getTranscripts = function(folder) {
+			var channel = folder.getAttribute('data-channel');
+			var user = !!folder.getAttribute('data-user');
+			folder = folder.querySelector('ul');
+			hyperaudio.api.getTranscripts({
+				user: user,
+				channel: channel,
+				callback: function(transcripts) {
+					var trans;
+					if(transcripts) {
+						for(var i = 0, l = transcripts.length; i < l; i++) {
+							trans = transcripts[i];
+							if(trans.type === 'html') {
+								folder.appendChild(self.makeMenuItem(trans.label, trans._id));
+							}
+						}
+					} else {
+						// failed, so put the class back on to enable retry
+						hyperaudio.addClass(folder, CLASS_ON_DEMAND);
+					}
+				}
+			});
+		};
+
+		getUsername();
+
+		// *****************
+		// START - TEST CODE
+		// *****************
+		var addTestFolders = function() {
+
+			var testFolder =[], testChild = [];
+
+			// Make a folder
+			testFolder.push(self.makeMenuFolder(self.transcripts, 'Test Folder 1'));
+			testChild.push([]);
+
+			// Add some child items to the folder
+			testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> A', '1A'));
+			testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> B', '1B'));
+			testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 1 -> C', '1C'));
+
+			// Add some child folders to the folder
+			testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 1'));
+			testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 2'));
+			testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 1 -> 3'));
+
+			// Add some child items to the child folders
+			testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> A', '11A'));
+			testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> B', '11B'));
+			testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 1 -> 1 -> C', '11C'));
+
+			testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> A', '12A'));
+			testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> B', '12B'));
+			testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 1 -> 2 -> C', '12C'));
+
+			testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> A', '13A'));
+			testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> B', '13B'));
+			testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 1 -> 3 -> C', '13C'));
+
+
+			// Add a child folders to the child folder (3rd level)
+			var testThird = self.makeMenuFolder(testChild[testChild.length - 1][1], 'CF 1>2>1');
+			// Add some child items to the child folders (3rd level)
+			testThird.appendChild(self.makeMenuItem('C 1>2>1>A', '121A'));
+			testThird.appendChild(self.makeMenuItem('C 1>2>1>B', '121B'));
+			testThird.appendChild(self.makeMenuItem('C 1>2>1>C', '121C'));
+
+
+			// Make another folder
+			testFolder.push(self.makeMenuFolder(self.transcripts, 'Test Folder 2'));
+			testChild.push([]);
+
+			// Add some child items to the folder
+			testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> A', '2A'));
+			testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> B', '2B'));
+			testFolder[testFolder.length - 1].appendChild(self.makeMenuItem('Child 2 -> C', '2C'));
+
+			// Add some child folders to the folder
+			testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 1'));
+			testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 2'));
+			testChild[testChild.length - 1].push(self.makeMenuFolder(testFolder[testFolder.length - 1], 'Child Folder 2 -> 3'));
+
+			// Add some child items to the child folders
+			testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> A', '21A'));
+			testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> B', '21B'));
+			testChild[testChild.length - 1][0].appendChild(self.makeMenuItem('Child 2 -> 1 -> C', '21C'));
+
+			testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> A', '22A'));
+			testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> B', '22B'));
+			testChild[testChild.length - 1][1].appendChild(self.makeMenuItem('Child 2 -> 2 -> C', '22C'));
+
+			testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> A', '23A'));
+			testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> B', '23B'));
+			testChild[testChild.length - 1][2].appendChild(self.makeMenuItem('Child 2 -> 3 -> C', '23C'));
+		};
+		// ***************
+		// END - TEST CODE
+		// ***************
 	};
 
 	SideMenu.prototype.initMusic = function () {
@@ -4966,12 +5102,16 @@ var SideMenu = (function (document, hyperaudio) {
 		});
 	};
 
+	// OBSOLETE METHOD
 	SideMenu.prototype.selectMedia = function (e) {
 		e.stopPropagation();	// just in case [Not sure this does anything with a tap event.]
 
 		var item = e.target;
 
 		if(this.toggleFolder(e)) {
+			if(this.isOnDemand(e)) {
+				// capture class now!
+			}
 			return;
 		}
 
@@ -4980,6 +5120,19 @@ var SideMenu = (function (document, hyperaudio) {
 		}
 
 		this.mediaCallback(item);
+	};
+
+	SideMenu.prototype.isOnDemand = function (target) {
+		// Copes with clicks on Folder div text and the li
+
+		if ( hyperaudio.hasClass(target.parentNode, CLASS_ON_DEMAND) ) {
+			target = target.parentNode;
+		}
+
+		if ( hyperaudio.hasClass(target, CLASS_ON_DEMAND) ) {
+			return target;
+		}
+		return false;
 	};
 
 	SideMenu.prototype.isFolder = function (target) {
@@ -5007,7 +5160,7 @@ var SideMenu = (function (document, hyperaudio) {
 				action: 'togglefolder: ' + (hyperaudio.hasClass(folder, 'open') ? 'Opened' : 'Closed') + ' -> ' + name
 			});
 
-			return true;
+			return folder;
 		}
 		return false;
 	};
@@ -5724,9 +5877,57 @@ var api = (function(hyperaudio) {
 				});
 			}
 		},
-		getTranscripts_WIP: function(options) {
+		getChannels: function(options) {
 			var self = this,
-				url, getUsername, setUrl, getTranscripts;
+				getUsername, getUrl, getChannels;
+
+			options = hyperaudio.extend({
+				user: false, // When true, the api returns the current user's transcripts.
+				callback: null
+			}, options);
+
+			getUsername = function() {
+				self.getUsername(function(success) {
+					if(success && !self.guest) {
+						getChannels();
+					} else {
+						self.callback(options.callback, false);
+					}
+				});
+			};
+
+			getUrl = function() {
+				var url = self.url;
+				if(options.user) {
+					url += self.username + '/';
+				}
+				url += self.options.transcripts + self.options.channels;
+				return url;
+			};
+
+			getChannels = function() {
+				xhr({
+					url: getUrl(),
+					complete: function(event) {
+						var json = JSON.parse(this.responseText);
+						self.callback(options.callback, json);
+					},
+					error: function(event) {
+						self.error = true;
+						self.callback(options.callback, false);
+					}
+				});
+			};
+
+			if(options.user) {
+				getUsername();
+			} else {
+				getChannels();
+			}
+		},
+		getTranscripts: function(options) {
+			var self = this,
+				getUsername, getUrl, getTranscripts;
 
 			options = hyperaudio.extend({
 				user: false, // When true, the api returns the current user's transcripts.
@@ -5744,24 +5945,23 @@ var api = (function(hyperaudio) {
 				});
 			};
 
-			setUrl = function() {
-				url = this.url;
+			getUrl = function() {
+				var url = self.url;
 				if(options.user) {
-					url += self.username;
+					url += self.username + '/';
 				}
-				if(options.user) {
-					url += self.username;
+				url += self.options.transcripts;
+				if(options.channel) {
+					url += self.options.channels + options.channel;
 				}
+				return url;
 			};
 
 			getTranscripts = function() {
 				xhr({
-					// In future may want a version that returns only your own transcripts.
-					// url: self.url + (self.guest ? '' : self.username + '/') + self.options.transcripts,
-					url: url + self.options.transcripts,
+					url: getUrl(),
 					complete: function(event) {
 						var json = JSON.parse(this.responseText);
-						// self.transcripts = json;
 						self.callback(options.callback, json);
 					},
 					error: function(event) {
@@ -5771,12 +5971,13 @@ var api = (function(hyperaudio) {
 				});
 			};
 
-
-
-
-
+			if(options.user) {
+				getUsername();
+			} else {
+				getTranscripts();
+			}
 		},
-		getTranscripts: function(callback, force) {
+		getTranscriptsOLD: function(callback, force) {
 			var self = this;
 			if(!force && this.transcripts) {
 				setTimeout(function() {
