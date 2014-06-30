@@ -483,6 +483,10 @@ p {
 	height: auto;
 }
 
+#sidemenu .owned-by-user {
+	background-color: rgba(64,64,255,0.2);
+}
+
 #sidemenu .panel.selected {
 	display: block;
 }

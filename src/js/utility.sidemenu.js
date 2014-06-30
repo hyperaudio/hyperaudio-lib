@@ -1,6 +1,7 @@
 var SideMenu = (function (document, hyperaudio) {
 
 	var CLASS_ON_DEMAND = 'on-demand';
+	var CLASS_YOUR_ITEMS = 'owned-by-user';
 
 	var CHANNEL_OTHER_TITLE = 'Other...';
 	var CHANNEL_OTHER_API = 'nochannel';
@@ -226,12 +227,16 @@ var SideMenu = (function (document, hyperaudio) {
 				user: user,
 				channel: channel,
 				callback: function(transcripts) {
-					var trans;
+					var trans, item;
 					if(transcripts) {
 						if(transcripts.length) {
 							for(var i = 0, l = transcripts.length; i < l; i++) {
 								trans = transcripts[i];
-								folder.appendChild(self.makeMenuItem(trans.label, trans._id));
+								item = self.makeMenuItem(trans.label, trans._id);
+								if(username && trans.owner === username) {
+									hyperaudio.addClass(item, CLASS_YOUR_ITEMS);
+								}
+								folder.appendChild(item);
 							}
 						} else {
 							folder.appendChild(self.makeMenuItem(CHANNEL_EMPTY_TEXT));
