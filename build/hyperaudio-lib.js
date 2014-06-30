@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.6 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 26th June 2014 20:28:30 */
+/*! hyperaudio-lib v0.4.7 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 30th June 2014 21:45:58 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4637,6 +4637,12 @@ var fadeFX = (function (window, document) {
 var SideMenu = (function (document, hyperaudio) {
 
 	var CLASS_ON_DEMAND = 'on-demand';
+	var CLASS_YOUR_ITEMS = 'owned-by-user';
+
+	var CHANNEL_OTHER_TITLE = 'Other...';
+	var CHANNEL_OTHER_API = 'nochannel';
+
+	var CHANNEL_EMPTY_TEXT = 'empty';
 
 	function SideMenu (options) {
 		this.options = {
@@ -4695,7 +4701,9 @@ var SideMenu = (function (document, hyperaudio) {
 
 	SideMenu.prototype.makeMenuItem = function(title, id) {
 		var li = document.createElement('li');
-		li.setAttribute('data-id', id);
+		if(id) {
+			li.setAttribute('data-id', id);
+		}
 		li.innerHTML = title;
 		return li;
 	};
@@ -4801,22 +4809,25 @@ var SideMenu = (function (document, hyperaudio) {
 		};
 
 		prepareUserChannels = function(channels) {
+			var owner = self.makeMenuFolder(self.transcripts, 'Your Media');
 			if(channels && channels.length) {
-				var owner = self.makeMenuFolder(self.transcripts, 'Your Media');
 				for(var i = 0, l = channels.length; i < l; i++) {
 					self.makeMenuFolder(owner, channels[i], channels[i], true);
 				}
 			}
+			self.makeMenuFolder(owner, CHANNEL_OTHER_TITLE, CHANNEL_OTHER_API, true);
 			getChannels();
 		};
 
 		prepareChannels = function(channels) {
+			var owner = self.makeMenuFolder(self.transcripts, 'Media');
 			if(channels && channels.length) {
-				var owner = self.makeMenuFolder(self.transcripts, 'Media');
 				for(var i = 0, l = channels.length; i < l; i++) {
 					self.makeMenuFolder(owner, channels[i], channels[i], false);
 				}
 			}
+			self.makeMenuFolder(owner, CHANNEL_OTHER_TITLE, CHANNEL_OTHER_API, false);
+
 			self.transcripts._tap = new Tap({el: self.transcripts});
 			// self.transcripts.addEventListener('tap', self.selectMedia.bind(self), false);
 			self.transcripts.addEventListener('tap', selectMedia, false);
@@ -4852,13 +4863,19 @@ var SideMenu = (function (document, hyperaudio) {
 				user: user,
 				channel: channel,
 				callback: function(transcripts) {
-					var trans;
+					var trans, item;
 					if(transcripts) {
-						for(var i = 0, l = transcripts.length; i < l; i++) {
-							trans = transcripts[i];
-							if(trans.type === 'html') {
-								folder.appendChild(self.makeMenuItem(trans.label, trans._id));
+						if(transcripts.length) {
+							for(var i = 0, l = transcripts.length; i < l; i++) {
+								trans = transcripts[i];
+								item = self.makeMenuItem(trans.label, trans._id);
+								if(username && trans.owner === username) {
+									hyperaudio.addClass(item, CLASS_YOUR_ITEMS);
+								}
+								folder.appendChild(item);
 							}
+						} else {
+							folder.appendChild(self.makeMenuItem(CHANNEL_EMPTY_TEXT));
 						}
 					} else {
 						// failed, so put the class back on to enable retry
@@ -5768,6 +5785,7 @@ var api = (function(hyperaudio) {
 				api: 'api.hyperaud.io/v1/',
 				// Command syntax
 				transcripts: 'transcripts/',
+				transcripts_filter: '?type=html',
 				mixes: 'mixes/',
 				channels: 'channels/',
 				signin: 'login/',
@@ -5954,6 +5972,7 @@ var api = (function(hyperaudio) {
 				if(options.channel) {
 					url += self.options.channels + options.channel;
 				}
+				url += self.options.transcripts_filter;
 				return url;
 			};
 
