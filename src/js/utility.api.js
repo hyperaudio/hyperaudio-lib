@@ -12,6 +12,7 @@ var api = (function(hyperaudio) {
 				api: 'api.hyperaud.io/v1/',
 				// Command syntax
 				transcripts: 'transcripts/',
+				transcripts_filter: '?type=html',
 				mixes: 'mixes/',
 				channels: 'channels/',
 				signin: 'login/',
@@ -198,6 +199,7 @@ var api = (function(hyperaudio) {
 				if(options.channel) {
 					url += self.options.channels + options.channel;
 				}
+				url += self.options.transcripts_filter;
 				return url;
 			};
 
