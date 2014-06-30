@@ -450,7 +450,8 @@ p {
 #sidemenu .folder ul {
 	height: 0px;
 	overflow: hidden;
-/*	-webkit-transform: translate(0, 0) translateZ(0);
+/*
+	-webkit-transform: translate(0, 0) translateZ(0);
 	-moz-transform: translate(0, 0) translateZ(0);
 	-ms-transform: translate(0, 0) translateZ(0);
 	-o-transform: translate(0, 0) translateZ(0);
@@ -460,7 +461,8 @@ p {
 	-moz-transition: height 500ms;
 	-ms-transition: height 500ms;
 	-o-transition: height 500ms;
-	transition: height 500ms;*/
+	transition: height 500ms;
+*/
 }
 
 #sidemenu .folder.open div {
