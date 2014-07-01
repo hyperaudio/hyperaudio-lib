@@ -25,6 +25,7 @@ var Clipboard = (function(hyperaudio) {
 			if(this.target) {
 				this.container = document.createElement('div');
 				this.container.setAttribute('id', this.options.id_container);
+				this.container.style.display = 'none';
 				this.target.appendChild(this.container);
 			}
 
@@ -46,6 +47,33 @@ var Clipboard = (function(hyperaudio) {
 			if(!this.value || !(event.ctrlKey || event.metaKey)) {
 				return;
 			}
+
+			// Used the activeElement code from jPlayer.
+
+			var pageFocus = document.activeElement;
+			var keyIgnoreElementNames = "A INPUT TEXTAREA SELECT BUTTON";
+			var ignoreKey = false;
+
+			if(typeof pageFocus !== 'undefined') {
+				if(pageFocus !== null && pageFocus.nodeName.toUpperCase() !== "BODY") {
+					ignoreKey = true;
+				}
+			} else {
+				// Fallback for no document.activeElement support.
+				hyperaudio.each( keyIgnoreElementNames.split(/\s+/g), function(i, name) {
+					// The strings should already be uppercase.
+					if(event.target.nodeName.toUpperCase() === name.toUpperCase()) {
+						ignoreKey = true;
+						return false; // exit each.
+					}
+				});
+			}
+
+			if(ignoreKey) {
+				return;
+			}
+
+			// If we get this far, prepare the textarea ready for the copy.
 
 			hyperaudio.empty(this.container);
 			this.container.style.display = 'block';

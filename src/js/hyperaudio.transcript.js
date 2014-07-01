@@ -266,6 +266,17 @@ var Transcript = (function(document, hyperaudio) {
 							var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
 							dragdrop.init(html, e);
 						}
+					},
+					onSelection: function(e) {
+						// Update the copy and paste.
+						if(hyperaudio.Clipboard) {
+							hyperaudio.Clipboard.copy(self.getSelection().text);
+						}
+					},
+					onClear: function(e) {
+						if(hyperaudio.Clipboard) {
+							hyperaudio.Clipboard.clear();
+						}
 					}
 				});
 				this.ready = true;

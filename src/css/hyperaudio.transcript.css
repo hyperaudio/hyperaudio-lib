@@ -628,3 +628,19 @@ p {
 	font-weight:normal;
 	cursor:pointer;
 }
+
+/* CSS for the clipboard stuff */
+#clipboard-container {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 0px;
+	height: 0px;
+	z-index: 100;
+	opacity: 0;
+}
+#clipboard {
+	width: 1px;
+	height: 1px;       
+	padding: 0px;
+}

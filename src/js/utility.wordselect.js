@@ -196,6 +196,11 @@ var WordSelect = (function (window, document, hyperaudio) {
 		// WIP - Commented out, since operation conflicts with zero grab time
 		// hyperaudio.addClass(this.words[start], 'first');
 		// hyperaudio.addClass(this.words[end], 'last');
+
+
+		if ( this.options.onSelection ) {
+			this.options.onSelection.call(this);
+		}
 	};
 
 	WordSelect.prototype.clearSelection = function () {
@@ -220,6 +225,10 @@ var WordSelect = (function (window, document, hyperaudio) {
 		var selected = this.element.querySelectorAll('.selected');
 		for ( var i = 0, l = selected.length; i < l; i++ ) {
 			hyperaudio.removeClass(selected[i], 'selected');
+		}
+
+		if ( this.options.onClear ) {
+			this.options.onClear.call(this);
 		}
 	};
 
