@@ -28,11 +28,11 @@ var Clipboard = (function(hyperaudio) {
 				this.target.appendChild(this.container);
 			}
 
-			document.documentElement.addEventListener('keydown', function(event) {
+			window.top.document.documentElement.addEventListener('keydown', function(event) {
 				self.onKeyDown(event);
 			}, false);
 
-			document.documentElement.addEventListener('keyup', function(event) {
+			window.top.document.documentElement.addEventListener('keyup', function(event) {
 				self.onKeyUp(event);
 			}, false);
 		},
