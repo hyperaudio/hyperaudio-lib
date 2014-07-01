@@ -54,7 +54,7 @@ var Clipboard = (function(hyperaudio) {
 			var ignoreKey = false;
 
 			if(typeof pageFocus !== 'undefined') {
-				if(pageFocus !== null && pageFocus.nodeName.toUpperCase() !== "BODY") {
+				if(pageFocus !== null && pageFocus.nodeName.toUpperCase() !== "BODY" && pageFocus.nodeName.toUpperCase() !== "IFRAME") {
 					ignoreKey = true;
 				}
 			} else {

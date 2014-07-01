@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.10 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 1st July 2014 20:55:56 */
+/*! hyperaudio-lib v0.4.11 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 1st July 2014 21:49:43 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6264,7 +6264,7 @@ var Clipboard = (function(hyperaudio) {
 			var ignoreKey = false;
 
 			if(typeof pageFocus !== 'undefined') {
-				if(pageFocus !== null && pageFocus.nodeName.toUpperCase() !== "BODY") {
+				if(pageFocus !== null && pageFocus.nodeName.toUpperCase() !== "BODY" && pageFocus.nodeName.toUpperCase() !== "IFRAME") {
 					ignoreKey = true;
 				}
 			} else {
