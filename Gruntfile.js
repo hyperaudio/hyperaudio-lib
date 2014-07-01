@@ -38,6 +38,7 @@ module.exports = function(grunt) {
 						'src/js/utility.wordselect.js',
 						'src/js/utility.xhr.js',
 						'src/js/utility.api.js', // After xhr
+						'src/js/utility.clipboard.js',
 
 						// Modules that form the Hyperaudio Lib
 						'src/js/hyperaudio.music.js',

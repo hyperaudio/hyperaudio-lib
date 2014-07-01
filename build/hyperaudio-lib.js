@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.8 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 30th June 2014 23:24:14 */
+/*! hyperaudio-lib v0.4.9 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 1st July 2014 20:44:52 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -4083,6 +4083,12 @@ var hyperaudio = (function() {
 			} else {
 				this.addClass(e, c);
 			}
+		},
+		empty: function(el) {
+			// Empties the element... Possibly better than el.innerHTML = '';
+			while(el && el.firstChild) {
+				el.removeChild(el.firstChild);
+			}
 		}
 
 	});
@@ -5629,6 +5635,11 @@ var WordSelect = (function (window, document, hyperaudio) {
 		// WIP - Commented out, since operation conflicts with zero grab time
 		// hyperaudio.addClass(this.words[start], 'first');
 		// hyperaudio.addClass(this.words[end], 'last');
+
+
+		if ( this.options.onSelection ) {
+			this.options.onSelection.call(this);
+		}
 	};
 
 	WordSelect.prototype.clearSelection = function () {
@@ -5653,6 +5664,10 @@ var WordSelect = (function (window, document, hyperaudio) {
 		var selected = this.element.querySelectorAll('.selected');
 		for ( var i = 0, l = selected.length; i < l; i++ ) {
 			hyperaudio.removeClass(selected[i], 'selected');
+		}
+
+		if ( this.options.onClear ) {
+			this.options.onClear.call(this);
 		}
 	};
 
@@ -6186,6 +6201,103 @@ var api = (function(hyperaudio) {
 						self.callback(callback, false);
 					}
 				});
+			}
+		}
+	};
+
+}(hyperaudio));
+
+
+/* Clipboard
+ *
+ */
+
+var Clipboard = (function(hyperaudio) {
+
+	// Following the method used by Trello
+	// http://stackoverflow.com/questions/17527870/how-does-trello-access-the-users-clipboard
+
+	return {
+		init: function(options) {
+			var self = this;
+
+			this.options = hyperaudio.extend({
+				target: 'body',
+				id_container: 'clipboard-container',
+				id_clipboard: 'clipboard'
+			}, options);
+
+			// Properties
+			this.value = '';
+			this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
+
+			if(this.target) {
+				this.container = document.createElement('div');
+				this.container.setAttribute('id', this.options.id_container);
+				this.container.style.display = 'none';
+				this.target.appendChild(this.container);
+			}
+
+			document.documentElement.addEventListener('keydown', function(event) {
+				self.onKeyDown(event);
+			}, false);
+
+			document.documentElement.addEventListener('keyup', function(event) {
+				self.onKeyUp(event);
+			}, false);
+		},
+		copy: function(value) {
+			this.value = value;
+		},
+		clear: function() {
+			this.value = '';
+		},
+		onKeyDown: function(event) {
+			if(!this.value || !(event.ctrlKey || event.metaKey)) {
+				return;
+			}
+
+			// Used the activeElement code from jPlayer.
+
+			var pageFocus = document.activeElement;
+			var keyIgnoreElementNames = "A INPUT TEXTAREA SELECT BUTTON";
+			var ignoreKey = false;
+
+			if(typeof pageFocus !== 'undefined') {
+				if(pageFocus !== null && pageFocus.nodeName.toUpperCase() !== "BODY") {
+					ignoreKey = true;
+				}
+			} else {
+				// Fallback for no document.activeElement support.
+				hyperaudio.each( keyIgnoreElementNames.split(/\s+/g), function(i, name) {
+					// The strings should already be uppercase.
+					if(event.target.nodeName.toUpperCase() === name.toUpperCase()) {
+						ignoreKey = true;
+						return false; // exit each.
+					}
+				});
+			}
+
+			if(ignoreKey) {
+				return;
+			}
+
+			// If we get this far, prepare the textarea ready for the copy.
+
+			hyperaudio.empty(this.container);
+			this.container.style.display = 'block';
+
+			this.clipboard = document.createElement('textarea');
+			this.clipboard.setAttribute('id', this.options.id_clipboard);
+			this.clipboard.value = this.value;
+			this.container.appendChild(this.clipboard);
+			this.clipboard.focus();
+			this.clipboard.select();
+		},
+		onKeyUp: function(event) {
+			if(event.target === this.clipboard) {
+				hyperaudio.empty(this.container);
+				this.container.style.display = 'none';
 			}
 		}
 	};
@@ -7353,6 +7465,17 @@ var Transcript = (function(document, hyperaudio) {
 
 							var html = this.getSelection().replace(/ class="[\d\w\s\-]*\s?"/gi, '') + '<div class="actions"></div>';
 							dragdrop.init(html, e);
+						}
+					},
+					onSelection: function(e) {
+						// Update the copy and paste.
+						if(hyperaudio.Clipboard) {
+							hyperaudio.Clipboard.copy(self.getSelection().text);
+						}
+					},
+					onClear: function(e) {
+						if(hyperaudio.Clipboard) {
+							hyperaudio.Clipboard.clear();
 						}
 					}
 				});
@@ -8771,6 +8894,7 @@ hyperaudio.register('Projector', Projector);
 
 
 hyperaudio.utility('api', api); // obj
+hyperaudio.utility('Clipboard', Clipboard); // obj
 hyperaudio.utility('DragDrop', DragDrop); // Class
 hyperaudio.utility('EditBlock', EditBlock); // Class
 hyperaudio.utility('fadeFX', fadeFX); // Class

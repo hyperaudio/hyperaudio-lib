@@ -1,4 +1,5 @@
 hyperaudio.utility('api', api); // obj
+hyperaudio.utility('Clipboard', Clipboard); // obj
 hyperaudio.utility('DragDrop', DragDrop); // Class
 hyperaudio.utility('EditBlock', EditBlock); // Class
 hyperaudio.utility('fadeFX', fadeFX); // Class

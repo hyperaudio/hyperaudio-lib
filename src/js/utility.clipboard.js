@@ -14,8 +14,7 @@ var Clipboard = (function(hyperaudio) {
 			this.options = hyperaudio.extend({
 				target: 'body',
 				id_container: 'clipboard-container',
-				id_clipboard: 'clipboard',
-				target: 'body',
+				id_clipboard: 'clipboard'
 			}, options);
 
 			// Properties
