@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.9 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 1st July 2014 20:44:52 */
+/*! hyperaudio-lib v0.4.10 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 1st July 2014 20:55:56 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6238,11 +6238,11 @@ var Clipboard = (function(hyperaudio) {
 				this.target.appendChild(this.container);
 			}
 
-			document.documentElement.addEventListener('keydown', function(event) {
+			window.top.document.documentElement.addEventListener('keydown', function(event) {
 				self.onKeyDown(event);
 			}, false);
 
-			document.documentElement.addEventListener('keyup', function(event) {
+			window.top.document.documentElement.addEventListener('keyup', function(event) {
 				self.onKeyUp(event);
 			}, false);
 		},
