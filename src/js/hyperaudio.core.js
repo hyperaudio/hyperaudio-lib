@@ -308,6 +308,12 @@ var hyperaudio = (function() {
 			} else {
 				this.addClass(e, c);
 			}
+		},
+		empty: function(el) {
+			// Empties the element... Possibly better than el.innerHTML = '';
+			while(el && el.firstChild) {
+				el.removeChild(el.firstChild);
+			}
 		}
 
 	});
