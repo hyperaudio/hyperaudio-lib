@@ -215,6 +215,12 @@ var Stage = (function(document, hyperaudio) {
 					if(success) {
 						if(success.saved) {
 							self.mix = hyperaudio.extend({}, this.mix);
+							if(!window.top.document.location.href.match(/[?&]m=/)) {
+								window.top.history.pushState({
+									mix: self.mix._id
+								}, 'HAP: ' + self.mix.label, '?m=' + self.mix._id);
+								// console.log('[stage|save] pushed to history')
+							}
 							self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
 						} else if(success.needLogin) {
 							// We need to login
@@ -242,6 +248,7 @@ var Stage = (function(document, hyperaudio) {
 			this.mix = {};
 			this.options.id = '';
 			this.changed(true);
+			window.top.history.pushState({}, 'HAP', '?');
 		},
 
 		parse: function() {
