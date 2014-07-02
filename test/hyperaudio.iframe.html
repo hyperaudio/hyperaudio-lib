@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Hyperaudio Pad</title>
+	<style type="text/css">
+	body {
+		margin:0px;
+		padding:0px;
+		overflow:scroll-y;
+	}
+
+	.main {
+		overflow:hidden;
+		height: 100%;
+		height: calc(100% - 54px);
+		width:100%;
+		position:absolute;
+		top:54px;
+		left:0px;
+		right:0px;
+		bottom:0px;
+	}
+	</style>
+	<script type="text/javascript">
+		function notify(type) {
+			var header = document.getElementById("header").contentWindow;
+			if(typeof header.notify === 'function') {
+				header.notify(type);
+			}
+		}
+	</script>
+</head>
+<body>
+	<iframe id="header" src="/commons/tools/header.html" height="100px" width="100%" frameborder="0" seamless scrolling="no"></iframe>
+	<iframe class="main" src="hyperaudio.transcript.html" height="100%" width="100%" frameborder="0" allowfullscreen seamless></iframe>
+</body>
+</html>
