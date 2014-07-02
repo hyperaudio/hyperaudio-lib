@@ -296,7 +296,7 @@ var Transcript = (function(document, hyperaudio) {
 				var opts = this.options,
 					html = this.textSelect.getSelection(),
 					el = document.createElement('div'),
-					words, start, end;
+					words, start, end, text;
 
 				el.innerHTML = html;
 				words = el.querySelectorAll(opts.word);
@@ -306,9 +306,14 @@ var Transcript = (function(document, hyperaudio) {
 					end = words[words.length - 1].getAttribute(opts.timeAttr);
 				}
 
+				text = el.textContent;
+				if(text.trim) {
+					text = text.trim();
+				}
+
 				// The end time is the start of the last word, so needs padding.
 				return {
-					text: el.textContent,
+					text: text,
 					start: start,
 					end: end
 				};

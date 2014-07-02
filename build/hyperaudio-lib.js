@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.12 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 2nd July 2014 12:36:55 */
+/*! hyperaudio-lib v0.4.13 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 2nd July 2014 13:01:02 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7516,7 +7516,7 @@ var Transcript = (function(document, hyperaudio) {
 				var opts = this.options,
 					html = this.textSelect.getSelection(),
 					el = document.createElement('div'),
-					words, start, end;
+					words, start, end, text;
 
 				el.innerHTML = html;
 				words = el.querySelectorAll(opts.word);
@@ -7526,9 +7526,14 @@ var Transcript = (function(document, hyperaudio) {
 					end = words[words.length - 1].getAttribute(opts.timeAttr);
 				}
 
+				text = el.textContent;
+				if(text.trim) {
+					text = text.trim();
+				}
+
 				// The end time is the start of the last word, so needs padding.
 				return {
-					text: el.textContent,
+					text: text,
 					start: start,
 					end: end
 				};
