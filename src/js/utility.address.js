@@ -24,7 +24,7 @@ var Address = (function(hyperaudio) {
 				iframe: false,
 				remote: false,
 				support: false
-			}
+			};
 
 			// See if security allowed via same domain policy.
 			try {

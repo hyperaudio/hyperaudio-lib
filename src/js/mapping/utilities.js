@@ -1,3 +1,4 @@
+hyperaudio.utility('Address', Address); // obj
 hyperaudio.utility('api', api); // obj
 hyperaudio.utility('Clipboard', Clipboard); // obj
 hyperaudio.utility('DragDrop', DragDrop); // Class
