@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.15 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 3rd July 2014 19:36:18 */
+/*! hyperaudio-lib v0.4.16 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 3rd July 2014 19:41:38 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7926,24 +7926,11 @@ var Stage = (function(document, hyperaudio) {
 
 			if(this.target) {
 
-				// Fudge the user system since getUsername nay works.
-				// hyperaudio.api.guest = false;
-				// hyperaudio.api.username = 'tester';
-
 				hyperaudio.api.putMix(this.mix, function(success) {
 					if(success) {
 						if(success.saved) {
 							self.mix = hyperaudio.extend({}, this.mix);
-
 							hyperaudio.Address.setParam('m', self.mix._id);
-/*
-							if(!window.top.document.location.href.match(/[?&]m=/)) {
-								window.top.history.pushState({
-									mix: self.mix._id
-								}, 'HAP: ' + self.mix.label, '?m=' + self.mix._id);
-								// console.log('[stage|save] pushed to history')
-							}
-*/
 							self._trigger(hyperaudio.event.save, {msg: 'Saved mix'});
 						} else if(success.needLogin) {
 							// We need to login
@@ -7972,7 +7959,6 @@ var Stage = (function(document, hyperaudio) {
 			this.options.id = '';
 			this.changed(true);
 			hyperaudio.Address.setParam('m');
-			// window.top.history.pushState({}, 'HAP', '?');
 		},
 
 		parse: function() {
