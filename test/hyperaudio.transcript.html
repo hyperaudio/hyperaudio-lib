@@ -169,6 +169,7 @@ span.code {
 <script type="text/javascript" src="../src/js/utility.titleFX.js"></script>
 <script type="text/javascript" src="../src/js/utility.fadeFX.js"></script>
 <script type="text/javascript" src="../src/js/utility.clipboard.js"></script>
+<script type="text/javascript" src="../src/js/utility.address.js"></script>
 <script type="text/javascript">
 
 	hyperaudio.register('Player', Player);
@@ -183,6 +184,7 @@ span.code {
 	hyperaudio.utility('api', api);
 	hyperaudio.utility('SideMenu', SideMenu);
 	hyperaudio.utility('Clipboard', Clipboard);
+	hyperaudio.utility('Address', Address);
 
 	var player = hyperaudio.Player({
 		target: "#source-video",
@@ -215,6 +217,9 @@ span.code {
 
 	// Init the Clipboard utility
 	hyperaudio.Clipboard.init(); // using default options
+
+	// Init the Address utility
+	hyperaudio.Address.init(); // using default options
 
 	function mediaSelect (el) {
 		var id = el.getAttribute('data-id');
