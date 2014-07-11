@@ -8,7 +8,7 @@ var api = (function(hyperaudio) {
 		init: function(options) {
 			this.options = hyperaudio.extend({
 				protocol: 'http://',
-				org: '', // The organisations namespace / sub-domain. EG. 'chattanooga.'
+				org: '', // The organisations namespace / sub-domain. EG. 'chattanooga'
 				api: 'api.hyperaud.io/v1/',
 				// Command syntax
 				transcripts: 'transcripts/',
@@ -56,7 +56,8 @@ var api = (function(hyperaudio) {
 			this._updateInternals();
 		},
 		_updateInternals: function() {
-			this.url = this.options.protocol + this.options.org + this.options.api;
+			var namespace = this.options.org ? this.options.org + '.' : '';
+			this.url = this.options.protocol + namespace + this.options.api;
 		},
 		callback: function(callback, success) {
 			if(typeof callback === 'function') {
