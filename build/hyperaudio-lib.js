@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.16 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 3rd July 2014 19:41:38 */
+/*! hyperaudio-lib v0.4.16 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 11th July 2014 09:10:03 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -5802,6 +5802,7 @@ var api = (function(hyperaudio) {
 				protocol: 'http://',
 				org: '', // The organisations namespace / sub-domain. EG. 'chattanooga.'
 				api: 'api.hyperaud.io/v1/',
+				namespace: null,
 				// Command syntax
 				transcripts: 'transcripts/',
 				transcripts_filter: '?type=html',
@@ -6149,6 +6150,11 @@ var api = (function(hyperaudio) {
 							// Check some stuff?
 						} else {
 							// Check some stuff?
+						}
+						
+						// Namespaced?
+						if (self.namespace) {
+							mix.namespace = self.namespace;
 						}
 
 						xhr({
