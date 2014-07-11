@@ -10,6 +10,7 @@ var api = (function(hyperaudio) {
 				protocol: 'http://',
 				org: '', // The organisations namespace / sub-domain. EG. 'chattanooga.'
 				api: 'api.hyperaud.io/v1/',
+				namespace: null,
 				// Command syntax
 				transcripts: 'transcripts/',
 				transcripts_filter: '?type=html',
@@ -357,6 +358,11 @@ var api = (function(hyperaudio) {
 							// Check some stuff?
 						} else {
 							// Check some stuff?
+						}
+						
+						// Namespaced?
+						if (self.namespace) {
+							mix.namespace = self.namespace;
 						}
 
 						xhr({
