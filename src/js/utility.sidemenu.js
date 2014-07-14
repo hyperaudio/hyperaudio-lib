@@ -216,9 +216,13 @@ var SideMenu = (function (document, hyperaudio) {
 				return;
 			}
 
-			if ( !item.getAttribute('data-id') || !self.mediaCallback ) {
+			var id = item.getAttribute('data-id');
+
+			if ( !id || !self.mediaCallback ) {
 				return;
 			}
+
+			hyperaudio.Address.setParam('t', id);
 
 			self.mediaCallback(item);
 		};
