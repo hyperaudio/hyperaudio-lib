@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.21 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 15th July 2014 14:30:16 */
+/*! hyperaudio-lib v0.4.22 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 15th July 2014 14:48:57 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6965,7 +6965,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 							if(self.options.mediaType[format] && url) {
 
 								if(!self.options.cache) {
-									url = url + ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime();
+									url = url + ((/\?/).test(url) ? "&" : "?") + Math.floor(1e12 * Math.random());
 								}
 
 								var source = document.createElement('source');
