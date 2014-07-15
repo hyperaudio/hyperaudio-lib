@@ -219,7 +219,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 							if(self.options.mediaType[format] && url) {
 
 								if(!self.options.cache) {
-									url = url + ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime();
+									url = url + ((/\?/).test(url) ? "&" : "?") + Math.floor(1e12 * Math.random());
 								}
 
 								var source = document.createElement('source');
