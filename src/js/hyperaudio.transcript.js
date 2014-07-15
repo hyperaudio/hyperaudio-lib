@@ -253,6 +253,8 @@ var Transcript = (function(document, hyperaudio) {
 									}
 									if(opts.media.mp4) {
 										el.setAttribute(opts.stage.options.mp4Attr, opts.media.mp4); // Pass the transcript mp4 url
+									}
+									if(opts.media.webm) {
 										el.setAttribute(opts.stage.options.webmAttr, opts.media.webm); // Pass the transcript webm url
 									}
 									if(opts.media.youtube) {
