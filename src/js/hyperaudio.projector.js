@@ -578,7 +578,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		getSection: function(index) {
 
-			var stageOptions = this.stage ? this.stage.options : {};
+			var stageOptions = this.stage ? this.stage.options : {},
 				section = {
 					index: index
 				};
