@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.20 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 15th July 2014 12:37:47 */
+/*! hyperaudio-lib v0.4.21 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 15th July 2014 14:30:16 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -6758,6 +6758,11 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 
 			target: '#transcript-video', // The selector of element where the video is generated
 
+			// Caching can cause problem in Chrome due to the bug:
+			//   Issue 31014: Byte range cache is locked when attempting to open the same video twice
+			//   https://code.google.com/p/chromium/issues/detail?id=31014
+			cache: false,
+
 			media: {
 				youtube: '', // The URL of the Youtube video.
 				mp4: '', // The URL of the mp4 video.
@@ -6958,6 +6963,11 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 						hyperaudio.each(this.options.media, function(format, url) {
 							// Only create known formats, so we can add other info to the media object.
 							if(self.options.mediaType[format] && url) {
+
+								if(!self.options.cache) {
+									url = url + ((/\?/).test(url) ? "&" : "?") + (new Date()).getTime();
+								}
+
 								var source = document.createElement('source');
 								source.setAttribute('type', self.options.mediaType[format]);
 								source.setAttribute('src', url); // Could use 'this' but less easy to read.
