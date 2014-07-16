@@ -4,6 +4,8 @@
 
 var Projector = (function(window, document, hyperaudio, Popcorn) {
 
+	var DEBUG = true;
+
 	function Projector(options) {
 
 		this.options = hyperaudio.extend({}, this.options, {
@@ -181,6 +183,8 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				hyperaudio.removeClass(this.player[i].target, 'active');
 			}
 			hyperaudio.addClass(this.player[this.activePlayer].target, 'active');
+
+			if(DEBUG) console.log('[Projector|load] contentIndex: %d | activePlayer: %d', this.contentIndex, this.activePlayer);
 		},
 		prepare: function(index) {
 			// Used when more than 1 player to prepare the next piece of media.
@@ -212,12 +216,16 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					if(this.player[this.nextPlayer]) {
 						this.player[this.nextPlayer].load(media);
 						this.player[this.nextPlayer].pause(alignStart);
+
+						if(DEBUG) console.log('[Projector|prepare] prepared=false | nextPlayer: %d | alignStart: %d', this.nextPlayer, alignStart);
 					}
 				} else {
 					// Reset popcorn and move the video to the start time.
 					if(prepared !== this.activePlayer) {
 						this.player[prepared].initPopcorn();
-						this.player[this.nextPlayer].pause(alignStart);
+						this.player[prepared].pause(alignStart);
+
+						if(DEBUG) console.log('[Projector|prepare] prepared=' + prepared + ' | nextPlayer: %d | alignStart: %d', this.nextPlayer, alignStart);
 					}
 				}
 			}
@@ -233,6 +241,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					}
 				}
 			}
+			if(DEBUG) console.log('[Projector|which] media: %o | index: ' + index, media); // %d no good since index can be boolean.
 			return index;
 		},
 
