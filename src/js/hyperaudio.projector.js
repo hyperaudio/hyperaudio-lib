@@ -4,7 +4,7 @@
 
 var Projector = (function(window, document, hyperaudio, Popcorn) {
 
-	var DEBUG = true;
+	var DEBUG = false;
 
 	function Projector(options) {
 
