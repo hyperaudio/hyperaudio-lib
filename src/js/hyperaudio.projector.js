@@ -4,7 +4,7 @@
 
 var Projector = (function(window, document, hyperaudio, Popcorn) {
 
-	var DEBUG = false;
+	var DEBUG = true;
 
 	function Projector(options) {
 
@@ -148,6 +148,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				// Reset the popcorn... Maybe want to only do this if necessary, ie., if any transcript plugins added.
 				this.player[player].initPopcorn();
+				if(DEBUG) console.log('[Projector|initPopcorn] player[%d].initPopcorn()', player);
 
 				elems = this.content[index].element.getElementsByTagName('a');
 				// Setup the Popcorn Transcript Plugin
@@ -175,6 +176,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.activePlayer = activePlayer;
 			} else {
 				this.player[this.activePlayer].load(media);
+				if(DEBUG) console.log('[Projector|load] player[%d].load() | initPopcorn()', this.activePlayer);
 			}
 
 			this.initPopcorn(index, this.activePlayer);
@@ -217,6 +219,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.player[this.nextPlayer].load(media);
 						this.player[this.nextPlayer].pause(alignStart);
 
+						if(DEBUG) console.log('[Projector|prepare] player[%d].load() | initPopcorn()', this.nextPlayer);
 						if(DEBUG) console.log('[Projector|prepare] prepared=false | nextPlayer: %d | alignStart: %d', this.nextPlayer, alignStart);
 					}
 				} else {
@@ -225,6 +228,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.player[prepared].initPopcorn();
 						this.player[prepared].pause(alignStart);
 
+						if(DEBUG) console.log('[Projector|prepare] player[%d].initPopcorn()', prepared);
 						if(DEBUG) console.log('[Projector|prepare] prepared=' + prepared + ' | nextPlayer: %d | alignStart: %d', this.nextPlayer, alignStart);
 					}
 				}
