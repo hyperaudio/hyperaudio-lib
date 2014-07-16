@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.24 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 16th July 2014 16:52:23 */
+/*! hyperaudio-lib v0.4.25 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 16th July 2014 19:35:51 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -8242,6 +8242,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 				// Reset the popcorn... Maybe want to only do this if necessary, ie., if any transcript plugins added.
 				this.player[player].initPopcorn();
+				if(DEBUG) console.log('[Projector|initPopcorn] player[%d].initPopcorn()', player);
 
 				elems = this.content[index].element.getElementsByTagName('a');
 				// Setup the Popcorn Transcript Plugin
@@ -8269,6 +8270,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				this.activePlayer = activePlayer;
 			} else {
 				this.player[this.activePlayer].load(media);
+				if(DEBUG) console.log('[Projector|load] player[%d].load() | initPopcorn()', this.activePlayer);
 			}
 
 			this.initPopcorn(index, this.activePlayer);
@@ -8311,6 +8313,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.player[this.nextPlayer].load(media);
 						this.player[this.nextPlayer].pause(alignStart);
 
+						if(DEBUG) console.log('[Projector|prepare] player[%d].load() | initPopcorn()', this.nextPlayer);
 						if(DEBUG) console.log('[Projector|prepare] prepared=false | nextPlayer: %d | alignStart: %d', this.nextPlayer, alignStart);
 					}
 				} else {
@@ -8319,6 +8322,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						this.player[prepared].initPopcorn();
 						this.player[prepared].pause(alignStart);
 
+						if(DEBUG) console.log('[Projector|prepare] player[%d].initPopcorn()', prepared);
 						if(DEBUG) console.log('[Projector|prepare] prepared=' + prepared + ' | nextPlayer: %d | alignStart: %d', this.nextPlayer, alignStart);
 					}
 				}
@@ -8391,6 +8395,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 					// Believe this is a good place to set this flag
 					this.isReadyToPlay = true;
+					if(DEBUG) console.log('[Projector|cue] isReadyToPlay = ' + this.isReadyToPlay);
 
 					if(play) {
 						this._play(jumpTo.start);
@@ -8419,13 +8424,16 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var resume = false,
 				jumpTo;
 
-			if(arguments.length) {
+			if(arguments.length && typeof arguments[0] !== 'undefined') {
 				if(typeof arguments[0] === 'object') {
 					jumpTo = arguments[0];
+					if(DEBUG) console.log('[Projector|play] jumpTo =  %o', jumpTo);
 				}
 			} else if(this.isReadyToPlay) {
 				resume = true;
 			}
+
+			if(DEBUG) console.log('[Projector|play] resume = ' + resume + ' | content.length = %d | arguments = %o', this.content.length, arguments);
 
 			if(this.content.length) {
 
@@ -8539,6 +8547,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 			// Believe this is a good place to unset this flag
 			this.isReadyToPlay = false;
+			if(DEBUG) console.log('[Projector|updateContent#1] isReadyToPlay = ' + this.isReadyToPlay);
 
 			if(this.stage && this.stage.target) {
 				// Get the staged contents wrapper elem
@@ -8581,6 +8590,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 					});
 					//Unset this flag so that any initial effects get played - when play begins.
 					this.isReadyToPlay = false;
+					if(DEBUG) console.log('[Projector|updateContent#2] isReadyToPlay = ' + this.isReadyToPlay);
 				}
 			}
 		},
@@ -9067,6 +9077,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 						// Nothing to play
 						this.paused = true;
 						this.isReadyToPlay = false; // ended so needs a reset to the start
+						if(DEBUG) console.log('[Projector|manager] isReadyToPlay = ' + this.isReadyToPlay);
 						this.contentIndex = 0; // Reset this since YouTube player (or its Popcorn wrapper) generates the timeupdate all the time.
 						this.prepare(this.contentIndex);
 						if(this.options.music) {
