@@ -102,6 +102,10 @@ p {
 	user-select: none;
 }
 
+.transcript article {
+	padding-bottom:100px;
+}
+
 .transcript-grey {
 	color:#999;
 }
@@ -195,6 +199,10 @@ p {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+}
+
+.stage article {
+	padding-bottom:100px;
 }
 
 .stage section {
