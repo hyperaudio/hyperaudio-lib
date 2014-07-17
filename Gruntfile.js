@@ -23,6 +23,9 @@ module.exports = function(grunt) {
 						'lib/popcorn.HTMLYouTubeVideoElement.js',
 						'src/js/popcorn.transcript.js',
 
+						// other lib and plugins
+						'lib/iscroll.js',
+
 						// Top closure wrapper
 						'src/js/wrapper/top.js',
 						// The Hyperaudio Lib Core
