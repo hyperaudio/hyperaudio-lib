@@ -51,6 +51,7 @@ var Transcript = (function(document, hyperaudio) {
 			click: true
 		};
 		this.iScrollSpeed = 800; // ms
+		this.iScrollOffsetY = -20; // pixels
 		this.iScroll = new IScroll(this.target, this.iScrollOptions);
 
 		// Setup Debug
@@ -200,7 +201,7 @@ var Transcript = (function(document, hyperaudio) {
 					i, l = wordList.length;
 
 				var onNewPara = function(parent) {
-					self.iScroll.scrollToElement(parent, self.iScrollSpeed);
+					self.iScroll.scrollToElement(parent, self.iScrollSpeed, null, self.iScrollOffsetY);
 				};
 
 				for(i = 0; i < l; i++) {

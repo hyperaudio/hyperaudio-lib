@@ -63,6 +63,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			click: true
 		};
 		this.iScrollSpeed = 800; // ms
+		this.iScrollOffsetY = -20; // pixels
 		this.iScroll = null;
 
 		if(this.options.DEBUG) {
@@ -150,7 +151,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			var self = this;
 			var elems, e, eLen;
 			var onNewPara = function(parent) {
-				self.iScroll.scrollToElement(parent, self.iScrollSpeed);
+				self.iScroll.scrollToElement(parent, self.iScrollSpeed, null, self.iScrollOffsetY);
 			};
 
 			if(index < this.content.length && player < this.player.length) {
