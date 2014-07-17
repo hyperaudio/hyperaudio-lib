@@ -45,6 +45,14 @@ var Transcript = (function(document, hyperaudio) {
 		this.target = typeof this.options.target === 'string' ? document.querySelector(this.options.target) : this.options.target;
 		this.textSelect = null;
 
+		// this.iScroll = new IScroll(this.target, { mouseWheel: true, click: true });
+		this.iScrollOptions = {
+			mouseWheel: true,
+			click: true
+		};
+		this.iScrollSpeed = 800; // ms
+		this.iScroll = new IScroll(this.target, this.iScrollOptions);
+
 		// Setup Debug
 		if(this.options.DEBUG) {
 			this._debug();
@@ -84,9 +92,16 @@ var Transcript = (function(document, hyperaudio) {
 				} else {
 					self.setVideo();
 				}
+				setTimeout(function() {
+					// Create a new instance, since the contents completely changed... That 1st child is not covered by .refresh()
+					self.iScroll = new IScroll(self.target, self.iScrollOptions);
+				}, 0);
 			};
 
 			if(this.target) {
+				// Destroy iscroll, since is is useless after the contents of the wraper changes, changing that 1st child element.
+				self.iScroll.destroy();
+
 				this.target.innerHTML = '';
 
 				if(this.options.id) {
@@ -185,7 +200,7 @@ var Transcript = (function(document, hyperaudio) {
 					i, l = wordList.length;
 
 				var onNewPara = function(parent) {
-					// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+					self.iScroll.scrollToElement(parent, self.iScrollSpeed);
 				};
 
 				for(i = 0; i < l; i++) {
