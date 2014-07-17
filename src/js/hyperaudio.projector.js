@@ -58,6 +58,13 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		this.time = {};
 
+		this.iScrollOptions = {
+			mouseWheel: true,
+			click: true
+		};
+		this.iScrollSpeed = 800; // ms
+		this.iScroll = null;
+
 		if(this.options.DEBUG) {
 			this._debug();
 		}
@@ -70,6 +77,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 	Projector.prototype = {
 		setStage: function(stage) {
 			this.stage = stage;
+			this.iScroll = new IScroll(this.stage.target, this.iScrollOptions);
 		},
 		create: function() {
 			var self = this;
@@ -139,9 +147,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		},
 		initPopcorn: function(index, player) {
+			var self = this;
 			var elems, e, eLen;
 			var onNewPara = function(parent) {
-				// $("#transcript-content").stop().scrollTo($(parent), 800, {axis:'y',margin:true,offset:{top:0}});
+				self.iScroll.scrollToElement(parent, self.iScrollSpeed);
 			};
 
 			if(index < this.content.length && player < this.player.length) {
@@ -456,6 +465,10 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 			if(DEBUG) console.log('[Projector|updateContent#1] isReadyToPlay = ' + this.isReadyToPlay);
 
 			if(this.stage && this.stage.target) {
+
+				// Refresh the iscroller since mix changed.
+				this.iScroll.refresh();
+
 				// Get the staged contents wrapper elem
 				this.stageArticle = this.stage.target.getElementsByTagName('article')[0];
 
