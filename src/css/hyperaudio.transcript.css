@@ -84,7 +84,7 @@ p {
 	line-height: 1.8em;
 	font-size: 1.2em;
 	width: 438px;
-	overflow: auto;
+	overflow: hidden;
 	color: #444;
 	border-right: 2px solid #ccc;
 
@@ -188,7 +188,7 @@ p {
 	padding: 10px;
 	font-size: 1.2em;
 	width: 458px;
-	overflow: auto;
+	overflow: hidden;
 	border-left: 2px solid #ccc;
 
 	border-top: 1px solid #eee;

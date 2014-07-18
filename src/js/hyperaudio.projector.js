@@ -59,6 +59,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.time = {};
 
 		this.iScrollOptions = {
+			scrollbars: true,
 			mouseWheel: true,
 			click: true
 		};
