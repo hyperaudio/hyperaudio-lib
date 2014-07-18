@@ -60,8 +60,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 
 		this.iScrollOptions = {
 			scrollbars: true,
-			mouseWheel: true,
-			click: true
+			mouseWheel: true
 		};
 		this.iScrollSpeed = 800; // ms
 		this.iScrollOffsetY = -20; // pixels
