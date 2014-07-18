@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.28 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 18th July 2014 16:07:58 */
+/*! hyperaudio-lib v0.4.29 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 18th July 2014 17:27:40 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -9552,6 +9552,7 @@ var Transcript = (function(document, hyperaudio) {
 
 		// this.iScroll = new IScroll(this.target, { mouseWheel: true, click: true });
 		this.iScrollOptions = {
+			scrollbars: true,
 			mouseWheel: true,
 			click: true
 		};
@@ -10275,6 +10276,7 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.time = {};
 
 		this.iScrollOptions = {
+			scrollbars: true,
 			mouseWheel: true,
 			click: true
 		};
