@@ -48,7 +48,8 @@ var Transcript = (function(document, hyperaudio) {
 		// this.iScroll = new IScroll(this.target, { mouseWheel: true, click: true });
 		this.iScrollOptions = {
 			scrollbars: true,
-			mouseWheel: true
+			mouseWheel: true,
+			interactiveScrollbars: true
 		};
 		this.iScrollSpeed = 800; // ms
 		this.iScrollOffsetY = -20; // pixels
