@@ -199,16 +199,18 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					// console.log('media: %o', this.options.media);
 
 					if(this.options.media.youtube) {
+
 						// The YT element needs to be recreated while bugs in wrapper.
-						this.empty(this.wrapper.youtube);
-						this.solution.youtube = Popcorn.HTMLYouTubeVideoElement(this.wrapper.youtube);
+						// this.empty(this.wrapper.youtube);
+						// this.solution.youtube = Popcorn.HTMLYouTubeVideoElement(this.wrapper.youtube);
+
 						this.solution.youtube.src = this.options.media.youtube + '&html5=1';
 						this.videoElem = this.solution.youtube;
 						this.youtube = true;
 						this.updateSolution();
 
 						// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
-						this._ytFixListeners();
+						// this._ytFixListeners();
 					} else {
 
 						this.empty(this.solution.html);
@@ -371,6 +373,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				}
 			}
 		},
+		// OBSOLETE Function due to Popcorn and YT Wrapper being fixed. ie., No more destroy and create... It persists!
 		_ytFixListeners: function() {
 			// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
 			for(var i=0, l=this.ytFix.length; i<l; i++) {
