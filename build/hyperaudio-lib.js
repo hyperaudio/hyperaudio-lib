@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.4.27 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 17th July 2014 21:14:35 */
+/*! hyperaudio-lib v0.4.28 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 18th July 2014 16:07:58 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -78,9 +78,11 @@
     put: function( dictionary ) {
       // For each own property of src, let key be the property key
       // and desc be the property descriptor of the property.
-      Object.getOwnPropertyNames( dictionary ).forEach(function( key ) {
-        this[ key ] = dictionary[ key ];
-      }, this);
+      for ( var key in dictionary ) {
+        if ( dictionary.hasOwnProperty( key ) ) {
+          this[ key ] = dictionary[ key ];
+        }
+      }
     }
   },
 
@@ -251,6 +253,50 @@
           end: videoDurationPlus
         });
 
+        if ( !self.isDestroyed ) {
+          self.data.durationChange = function() {
+            var newDuration = self.media.duration,
+                newDurationPlus = newDuration + 1,
+                byStart = self.data.trackEvents.byStart,
+                byEnd = self.data.trackEvents.byEnd;
+
+            // Remove old padding events
+            byStart.pop();
+            byEnd.pop();
+
+            // Remove any internal tracking of events that have end times greater than duration
+            // otherwise their end events will never be hit.
+            for ( var k = byEnd.length - 1; k > 0; k-- ) {
+              if ( byEnd[ k ].end > newDuration ) {
+                self.removeTrackEvent( byEnd[ k ]._id );
+              }
+            }
+
+            // Remove any internal tracking of events that have end times greater than duration
+            // otherwise their end events will never be hit.
+            for ( var i = 0; i < byStart.length; i++ ) {
+              if ( byStart[ i ].end > newDuration ) {
+                self.removeTrackEvent( byStart[ i ]._id );
+              }
+            }
+
+            // References to byEnd/byStart are reset, so accessing it this way is
+            // forced upon us.
+            self.data.trackEvents.byEnd.push({
+              start: newDurationPlus,
+              end: newDurationPlus
+            });
+
+            self.data.trackEvents.byStart.push({
+              start: newDurationPlus,
+              end: newDurationPlus
+            });
+          };
+
+          // Listen for duration changes and adjust internal tracking of event timings
+          self.media.addEventListener( "durationchange", self.data.durationChange, false );
+        }
+
         if ( self.options.frameAnimation ) {
 
           //  if Popcorn is created with frameAnimation option set to true,
@@ -299,12 +345,9 @@
         }
       };
 
-      Object.defineProperty( this, "error", {
-        get: function() {
-
-          return self.media.error;
-        }
-      });
+      self.media.addEventListener( "error", function() {
+        self.error = self.media.error;
+      }, false );
 
       // http://www.whatwg.org/specs/web-apps/current-work/#dom-media-readystate
       //
@@ -1160,11 +1203,7 @@
     this.endIndex = 0;
     this.previousUpdateTime = -1;
 
-    Object.defineProperty( this, "count", {
-      get: function() {
-        return this.byStart.length;
-      }
-    });
+    this.count = 1;
   }
 
   function isMatch( obj, key, value ) {
@@ -1235,6 +1274,8 @@
 
       this.parent.data.trackEvents.endIndex++;
     }
+
+    this.count++;
 
   };
 
@@ -1342,6 +1383,7 @@
     this.byStart = byStart;
     this.byEnd = byEnd;
     this.animating = animating;
+    this.count--;
 
     historyLen = this.parent.data.history.length;
 
@@ -2522,8 +2564,20 @@
       head.removeChild( script );
     }, false );
 
-    script.src = url;
+    script.addEventListener( "error",  function( e ) {
+      //  Handling remote script loading callbacks
+      success && success( { error: e } );
 
+      //  Executing for JSONP requests
+      if ( !isScript ) {
+        //  Garbage collect the callback
+        delete window[ callback ];
+      }
+      //  Garbage collect the script resource
+      head.removeChild( script );
+    }, false );
+
+    script.src = url;
     head.insertBefore( script, head.firstChild );
 
     return;
@@ -2694,7 +2748,7 @@
   };
 
   // Make sure the browser has MediaError
-  MediaError = MediaError || (function() {
+  window.MediaError = window.MediaError || (function() {
     function MediaError(code, msg) {
       this.code = code || null;
       this.message = msg || "";
@@ -2709,11 +2763,14 @@
   }());
 
 
-  function MediaElementProto(){}
-  MediaElementProto.prototype = {
-
-    _util: {
-
+  function MediaElementProto() {
+    var protoElement = {},
+        events = {},
+        parentNode;
+    if ( !Object.prototype.__defineGetter__ ) {
+      protoElement = document.createElement( "div" );
+    }
+    protoElement._util = {
       // Each wrapper stamps a type.
       type: "HTML5",
 
@@ -2733,21 +2790,19 @@
       },
 
       parseUri: parseUri
-
-    },
-
+    };
     // Mimic DOM events with custom, namespaced events on the document.
     // Each media element using this prototype needs to provide a unique
     // namespace for all its events via _eventNamespace.
-    addEventListener: function( type, listener, useCapture ) {
+    protoElement.addEventListener = function( type, listener, useCapture ) {
       document.addEventListener( this._eventNamespace + type, listener, useCapture );
-    },
+    };
 
-    removeEventListener: function( type, listener, useCapture ) {
+    protoElement.removeEventListener = function( type, listener, useCapture ) {
       document.removeEventListener( this._eventNamespace + type, listener, useCapture );
-    },
+    };
 
-    dispatchEvent: function( name ) {
+    protoElement.dispatchEvent = function( name ) {
       var customEvent = document.createEvent( "CustomEvent" ),
         detail = {
           type: name,
@@ -2757,119 +2812,138 @@
 
       customEvent.initCustomEvent( this._eventNamespace + name, false, false, detail );
       document.dispatchEvent( customEvent );
-    },
+    };
 
-    load: Popcorn.nop,
+    protoElement.load = Popcorn.nop;
 
-    canPlayType: function( url ) {
+    protoElement.canPlayType = function( url ) {
       return "";
-    },
+    };
 
     // Popcorn expects getBoundingClientRect to exist, forward to parent node.
-    getBoundingClientRect: function() {
-      return this.parentNode.getBoundingClientRect();
-    },
+    protoElement.getBoundingClientRect = function() {
+      return parentNode.getBoundingClientRect();
+    };
 
-    NETWORK_EMPTY: 0,
-    NETWORK_IDLE: 1,
-    NETWORK_LOADING: 2,
-    NETWORK_NO_SOURCE: 3,
+    protoElement.NETWORK_EMPTY = 0;
+    protoElement.NETWORK_IDLE = 1;
+    protoElement.NETWORK_LOADING = 2;
+    protoElement.NETWORK_NO_SOURCE = 3;
 
-    HAVE_NOTHING: 0,
-    HAVE_METADATA: 1,
-    HAVE_CURRENT_DATA: 2,
-    HAVE_FUTURE_DATA: 3,
-    HAVE_ENOUGH_DATA: 4
+    protoElement.HAVE_NOTHING = 0;
+    protoElement.HAVE_METADATA = 1;
+    protoElement.HAVE_CURRENT_DATA = 2;
+    protoElement.HAVE_FUTURE_DATA = 3;
+    protoElement.HAVE_ENOUGH_DATA = 4;
+    Object.defineProperties( protoElement, {
 
-  };
-
-  MediaElementProto.prototype.constructor = MediaElementProto;
-
-  Object.defineProperties( MediaElementProto.prototype, {
-
-    currentSrc: {
-      get: function() {
-        return this.src !== undefined ? this.src : "";
-      }
-    },
-
-    // We really can't do much more than "auto" with most of these.
-    preload: {
-      get: function() {
-        return "auto";
+      currentSrc: {
+        get: function() {
+          return this.src !== undefined ? this.src : "";
+        },
+        configurable: true
       },
-      set: Popcorn.nop
-    },
 
-    controls: {
-      get: function() {
-        return true;
+      parentNode: {
+        get: function() {
+          return parentNode;
+        },
+        set: function( val ) {
+          parentNode = val;
+        },
+        configurable: true
       },
-      set: Popcorn.nop
-    },
-
-    // TODO: it would be good to overlay an <img> using this URL
-    poster: {
-      get: function() {
-        return "";
+      
+      // We really can't do much more than "auto" with most of these.
+      preload: {
+        get: function() {
+          return "auto";
+        },
+        set: Popcorn.nop,
+        configurable: true
       },
-      set: Popcorn.nop
-    },
 
-    crossorigin: {
-      get: function() {
-        return "";
+      controls: {
+        get: function() {
+          return true;
+        },
+        set: Popcorn.nop,
+        configurable: true
+      },
+
+      // TODO: it would be good to overlay an <img> using this URL
+      poster: {
+        get: function() {
+          return "";
+        },
+        set: Popcorn.nop,
+        configurable: true
+      },
+
+      crossorigin: {
+        get: function() {
+          return "";
+        },
+        configurable: true
+      },
+
+      played: {
+        get: function() {
+          return _fakeTimeRanges;
+        },
+        configurable: true
+      },
+
+      seekable: {
+        get: function() {
+          return _fakeTimeRanges;
+        },
+        configurable: true
+      },
+
+      buffered: {
+        get: function() {
+          return _fakeTimeRanges;
+        },
+        configurable: true
+      },
+
+      defaultMuted: {
+        get: function() {
+          return false;
+        },
+        configurable: true
+      },
+
+      defaultPlaybackRate: {
+        get: function() {
+          return 1.0;
+        },
+        configurable: true
+      },
+
+      style: {
+        get: function() {
+          return this.parentNode.style;
+        },
+        configurable: true
+      },
+
+      id: {
+        get: function() {
+          return this.parentNode.id;
+        },
+        configurable: true
       }
-    },
 
-    played: {
-      get: function() {
-        return _fakeTimeRanges;
-      }
-    },
+      // TODO:
+      //   initialTime
+      //   playbackRate
+      //   startOffsetTime
 
-    seekable: {
-      get: function() {
-        return _fakeTimeRanges;
-      }
-    },
-
-    buffered: {
-      get: function() {
-        return _fakeTimeRanges;
-      }
-    },
-
-    defaultMuted: {
-      get: function() {
-        return false;
-      }
-    },
-
-    defaultPlaybackRate: {
-      get: function() {
-        return 1.0;
-      }
-    },
-
-    style: {
-      get: function() {
-        return this.parentNode.style;
-      }
-    },
-
-    id: {
-      get: function() {
-        return this.parentNode.id;
-      }
-    }
-
-    // TODO:
-    //   initialTime
-    //   playbackRate
-    //   startOffsetTime
-
-  });
+     });
+    return protoElement;
+  }
 
   Popcorn._MediaElementProto = MediaElementProto;
 
@@ -2890,42 +2964,43 @@
 
   // Setup for YouTube API
   ytReady = false,
-  ytLoaded = false,
+  ytLoading = false,
   ytCallbacks = [];
 
-  function isYouTubeReady() {
-    // If the YouTube iframe API isn't injected, to it now.
-    if( !ytLoaded ) {
-      var tag = document.createElement( "script" );
-      var protocol = window.location.protocol === "file:" ? "http:" : "";
+  function onYouTubeIframeAPIReady() {
+    var callback;
+    if ( YT.loaded ) {
+      ytReady = true;
+      while( ytCallbacks.length ) {
+        callback = ytCallbacks.shift();
+        callback();
+      }
+    } else {
+      setTimeout( onYouTubeIframeAPIReady, 250 );
+    }
+  }
 
-      tag.src = protocol + "//www.youtube.com/iframe_api";
-      var firstScriptTag = document.getElementsByTagName( "script" )[ 0 ];
-      firstScriptTag.parentNode.insertBefore( tag, firstScriptTag );
-      ytLoaded = true;
+  function isYouTubeReady() {
+    var script;
+    // If we area already waiting, do nothing.
+    if( !ytLoading ) {
+      // If script is already there, check if it is loaded.
+      if ( window.YT ) {
+        onYouTubeIframeAPIReady();
+      } else {
+        script = document.createElement( "script" );
+        script.addEventListener( "load", onYouTubeIframeAPIReady, false);
+        script.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild( script );
+      }
+      ytLoading = true;
     }
     return ytReady;
   }
 
   function addYouTubeCallback( callback ) {
-    ytCallbacks.unshift( callback );
+    ytCallbacks.push( callback );
   }
-
-  // An existing YouTube references can break us.
-  // Remove it and use the one we can trust.
-  if ( window.YT ) {
-    window.quarantineYT = window.YT;
-    window.YT = null;
-  }
-
-  window.onYouTubeIframeAPIReady = function() {
-    ytReady = true;
-    var i = ytCallbacks.length;
-    while( i-- ) {
-      ytCallbacks[ i ]();
-      delete ytCallbacks[ i ];
-    }
-  };
 
   function HTMLYouTubeVideoElement( id ) {
 
@@ -2934,7 +3009,7 @@
       throw "ERROR: HTMLYouTubeVideoElement requires window.postMessage";
     }
 
-    var self = this,
+    var self = new Popcorn._MediaElementProto(),
       parent = typeof id === "string" ? document.querySelector( id ) : id,
       elem = document.createElement( "div" ),
       impl = {
@@ -2956,10 +3031,7 @@
         error: null
       },
       playerReady = false,
-      catchRoguePauseEvent = false,
-      catchRoguePlayEvent = false,
       mediaReady = false,
-      durationReady = false,
       loopedPlay = false,
       player,
       playerPaused = true,
@@ -2968,8 +3040,7 @@
       bufferedInterval,
       lastLoadedFraction = 0,
       currentTimeInterval,
-      timeUpdateInterval,
-      firstPlay = false;
+      timeUpdateInterval;
 
     // Namespace all events we'll produce
     self._eventNamespace = Popcorn.guid( "HTMLYouTubeVideoElement::" );
@@ -2980,13 +3051,26 @@
     self._util.type = "YouTube";
 
     function addMediaReadyCallback( callback ) {
-      mediaReadyCallbacks.unshift( callback );
+      mediaReadyCallbacks.push( callback );
+    }
+
+    function catchRoguePlayEvent() {
+      player.pauseVideo();
+      removeYouTubeEvent( "play", catchRoguePlayEvent );
+      addYouTubeEvent( "play", onPlay );
+    }
+
+    function catchRoguePauseEvent() {
+      addYouTubeEvent( "pause", onPause );
+      removeYouTubeEvent( "pause", catchRoguePauseEvent );
     }
 
     function onPlayerReady( event ) {
+
       var onMuted = function() {
         if ( player.isMuted() ) {
           // force an initial play on the video, to remove autostart on initial seekTo.
+          addYouTubeEvent( "play", onFirstPlay );
           player.playVideo();
         } else {
           setTimeout( onMuted, 0 );
@@ -3042,24 +3126,19 @@
       self.dispatchEvent( "error" );
     }
 
-    // This function needs duration and first play to be ready.
-    function onFirstPlay() {
-      addMediaReadyCallback(function() {
-        bufferedInterval = setInterval( monitorBuffered, 50 );
-      });
+    function onReady() {
 
+      addYouTubeEvent( "play", onPlay );
+      addYouTubeEvent( "pause", onPause );
       // Set initial paused state
       if( impl.autoplay || !impl.paused ) {
+        removeYouTubeEvent( "play", onReady );
         impl.paused = false;
         addMediaReadyCallback(function() {
-          onPlay();
+          if ( !impl.paused ) {
+            onPlay();
+          }
         });
-      } else {
-        // if a pause happens while seeking, ensure we catch it.
-        // in youtube seeks fire pause events, and we don't want to listen to that.
-        // except for the case of an actual pause.
-        catchRoguePauseEvent = false;
-        player.pauseVideo();
       }
 
       // Ensure video will now be unmuted when playing due to the mute on initial load.
@@ -3078,6 +3157,8 @@
       self.dispatchEvent( "canplay" );
 
       mediaReady = true;
+      bufferedInterval = setInterval( monitorBuffered, 50 );
+
       while( mediaReadyCallbacks.length ) {
         mediaReadyCallbacks[ 0 ]();
         mediaReadyCallbacks.shift();
@@ -3088,55 +3169,77 @@
       self.dispatchEvent( "canplaythrough" );
     }
 
+    function onFirstPause() {
+      removeYouTubeEvent( "pause", onFirstPause );
+      if ( player.getCurrentTime() > 0 ) {
+        setTimeout( onFirstPause, 0 );
+        return;
+      }
+
+      if( impl.autoplay || !impl.paused ) {
+        addYouTubeEvent( "play", onReady );
+        player.playVideo();
+      } else {
+        onReady();
+      }
+    }
+
+    // This function needs duration and first play to be ready.
+    function onFirstPlay() {
+      removeYouTubeEvent( "play", onFirstPlay );
+      if ( player.getCurrentTime() === 0 ) {
+        setTimeout( onFirstPlay, 0 );
+        return;
+      }
+      addYouTubeEvent( "pause", onFirstPause );
+      player.seekTo( 0 );
+      player.pauseVideo();
+    }
+
+    function addYouTubeEvent( event, listener ) {
+      self.addEventListener( "youtube-" + event, listener, false );
+    }
+    function removeYouTubeEvent( event, listener ) {
+      self.removeEventListener( "youtube-" + event, listener, false );
+    }
+    function dispatchYouTubeEvent( event ) {
+      self.dispatchEvent( "youtube-" + event );
+    }
+
+    function onBuffering() {
+      impl.networkState = self.NETWORK_LOADING;
+      self.dispatchEvent( "waiting" );
+    }
+
+    addYouTubeEvent( "buffering", onBuffering );
+    addYouTubeEvent( "ended", onEnded );
+
     function onPlayerStateChange( event ) {
 
       switch( event.data ) {
 
         // ended
         case YT.PlayerState.ENDED:
-          onEnded();
+          dispatchYouTubeEvent( "ended" );
           break;
 
         // playing
         case YT.PlayerState.PLAYING:
-          if( !firstPlay ) {
-            // fake ready event
-            firstPlay = true;
-
-            // Duration ready happened first, we're now ready.
-            if ( durationReady ) {
-              onFirstPlay();
-            }
-          } else if ( catchRoguePlayEvent ) {
-            catchRoguePlayEvent = false;
-            player.pauseVideo();
-          } else {
-            onPlay();
-          }
+          dispatchYouTubeEvent( "play" );
           break;
 
         // paused
         case YT.PlayerState.PAUSED:
-
           // Youtube fires a paused event before an ended event.
           // We have no need for this.
-          if ( player.getDuration() === player.getCurrentTime() ) {
-            break;
+          if ( player.getDuration() !== player.getCurrentTime() ) {
+            dispatchYouTubeEvent( "pause" );
           }
-
-          // a seekTo call fires a pause event, which we don't want at this point.
-          // as long as a seekTo continues to do this, we can safly toggle this state.
-          if ( catchRoguePauseEvent ) {
-            catchRoguePauseEvent = false;
-            break;
-          }
-          onPause();
           break;
 
         // buffering
         case YT.PlayerState.BUFFERING:
-          impl.networkState = self.NETWORK_LOADING;
-          self.dispatchEvent( "waiting" );
+          dispatchYouTubeEvent( "buffering" );
           break;
 
         // video cued
@@ -3157,14 +3260,21 @@
       if( !( playerReady && player ) ) {
         return;
       }
-      durationReady = false;
-      firstPlay = false;
+
+      removeYouTubeEvent( "buffering", onBuffering );
+      removeYouTubeEvent( "ended", onEnded );
+      removeYouTubeEvent( "play", onPlay );
+      removeYouTubeEvent( "pause", onPause );
+      onPause();
+      mediaReady = false;
+      loopedPlay = false;
+      impl.currentTime = 0;
+      mediaReadyCallbacks = [];
       clearInterval( currentTimeInterval );
       clearInterval( bufferedInterval );
       player.stopVideo();
       player.clearVideo();
       player.destroy();
-      mediaReadyCallbacks = [];
       elem = document.createElement( "div" );
     }
 
@@ -3223,6 +3333,9 @@
       // Don't show annotations by default
       playerVars.iv_load_policy = playerVars.iv_load_policy || 3;
 
+      // Disable keyboard controls by default
+      playerVars.disablekb = playerVars.disablekb || 1;
+
       // Don't show video info before playing
       playerVars.showinfo = playerVars.showinfo || 0;
 
@@ -3244,6 +3357,7 @@
       var xhrURL = "https://gdata.youtube.com/feeds/api/videos/" + aSrc + "?v=2&alt=jsonc&callback=?";
       // Get duration value.
       Popcorn.getJSONP( xhrURL, function( resp ) {
+
         var warning = "failed to retreive duration data, reason: ";
         if ( resp.error ) {
           console.warn( warning + resp.error.message );
@@ -3254,30 +3368,24 @@
         }
         impl.duration = resp.data.duration;
         self.dispatchEvent( "durationchange" );
-        durationReady = true;
 
-        // First play happened first, we're now ready.
-        if ( firstPlay ) {
-          onFirstPlay();
-        }
+        player = new YT.Player( elem, {
+          width: "100%",
+          height: "100%",
+          wmode: playerVars.wmode,
+          videoId: aSrc,
+          playerVars: playerVars,
+          events: {
+            'onReady': onPlayerReady,
+            'onError': onPlayerError,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+
+        impl.networkState = self.NETWORK_LOADING;
+        self.dispatchEvent( "loadstart" );
+        self.dispatchEvent( "progress" );
       });
-
-      player = new YT.Player( elem, {
-        width: "100%",
-        height: "100%",
-        wmode: playerVars.wmode,
-        videoId: aSrc,
-        playerVars: playerVars,
-        events: {
-          'onReady': onPlayerReady,
-          'onError': onPlayerError,
-          'onStateChange': onPlayerStateChange
-        }
-      });
-
-      impl.networkState = self.NETWORK_LOADING;
-      self.dispatchEvent( "loadstart" );
-      self.dispatchEvent( "progress" );
     }
 
     function monitorCurrentTime() {
@@ -3302,11 +3410,10 @@
       }
     }
 
-    function getCurrentTime() {
-      return impl.currentTime;
-    }
-
     function changeCurrentTime( aTime ) {
+      if ( aTime === impl.currentTime ) {
+        return;
+      }
       impl.currentTime = aTime;
       if( !mediaReady ) {
         addMediaReadyCallback( function() {
@@ -3328,7 +3435,8 @@
     function onSeeking() {
       // a seek in youtube fires a paused event.
       // we don't want to listen for this, so this state catches the event.
-      catchRoguePauseEvent = true;
+      addYouTubeEvent( "pause", catchRoguePauseEvent );
+      removeYouTubeEvent( "pause", onPause );
       impl.seeking = true;
       self.dispatchEvent( "seeking" );
     }
@@ -3343,7 +3451,6 @@
     }
 
     function onPlay() {
-
       if( impl.ended ) {
         changeCurrentTime( 0 );
         impl.ended = false;
@@ -3351,7 +3458,6 @@
       timeUpdateInterval = setInterval( onTimeUpdate,
                                         self._util.TIMEUPDATE_MS );
       impl.paused = false;
-
       if( playerPaused ) {
         playerPaused = false;
 
@@ -3371,7 +3477,9 @@
     self.play = function() {
       impl.paused = false;
       if( !mediaReady ) {
-        addMediaReadyCallback( function() { self.play(); } );
+        addMediaReadyCallback( function() {
+          self.play();
+        });
         return;
       }
       player.playVideo();
@@ -3389,13 +3497,15 @@
     self.pause = function() {
       impl.paused = true;
       if( !mediaReady ) {
-        addMediaReadyCallback( function() { self.pause(); } );
+        addMediaReadyCallback( function() {
+          self.pause();
+        });
         return;
       }
       // if a pause happens while seeking, ensure we catch it.
       // in youtube seeks fire pause events, and we don't want to listen to that.
       // except for the case of an actual pause.
-      catchRoguePauseEvent = false;
+      catchRoguePauseEvent();
       player.pauseVideo();
     };
 
@@ -3407,33 +3517,19 @@
         impl.ended = true;
         onPause();
         // YouTube will fire a Playing State change after the video has ended, causing it to loop.
-        catchRoguePlayEvent = true;
+        addYouTubeEvent( "play", catchRoguePlayEvent );
+        removeYouTubeEvent( "play", onPlay );
         self.dispatchEvent( "timeupdate" );
         self.dispatchEvent( "ended" );
       }
     }
 
-    function setVolume( aValue ) {
-      impl.volume = aValue;
-      if( !mediaReady ) {
-        addMediaReadyCallback( function() {
-          setVolume( impl.volume );
-        });
-        return;
-      }
-      player.setVolume( impl.volume * 100 );
-      self.dispatchEvent( "volumechange" );
-    }
-
-    function getVolume() {
-      // YouTube has getVolume(), but for sync access we use impl.volume
-      return impl.volume;
-    }
-
     function setMuted( aValue ) {
       impl.muted = aValue;
       if( !mediaReady ) {
-        addMediaReadyCallback( function() { setMuted( impl.muted ); } );
+        addMediaReadyCallback( function() {
+          setMuted( impl.muted );
+        });
         return;
       }
       player[ aValue ? "mute" : "unMute" ]();
@@ -3490,7 +3586,7 @@
 
       currentTime: {
         get: function() {
-          return getCurrentTime();
+          return impl.currentTime;
         },
         set: function( aValue ) {
           changeCurrentTime( aValue );
@@ -3535,16 +3631,21 @@
 
       volume: {
         get: function() {
-          // Remap from HTML5's 0-1 to YouTube's 0-100 range
-          var volume = getVolume();
-          return volume / 100;
+          return impl.volume;
         },
         set: function( aValue ) {
           if( aValue < 0 || aValue > 1 ) {
             throw "Volume value must be between 0.0 and 1.0";
           }
-
-          setVolume( aValue );
+          impl.volume = aValue;
+          if( !mediaReady ) {
+            addMediaReadyCallback( function() {
+              self.volume = aValue;
+            });
+            return;
+          }
+          player.setVolume( impl.volume * 100 );
+          self.dispatchEvent( "volumechange" );
         }
       },
 
@@ -3585,42 +3686,37 @@
 
               //throw fake DOMException/INDEX_SIZE_ERR
               throw "INDEX_SIZE_ERR: DOM Exception 1";
-            }
+            },
+            length: 1
           };
 
-          Object.defineProperties( timeRanges, {
-            length: {
-              get: function() {
-                return 1;
-              }
-            }
-          });
-
           return timeRanges;
-        }
+        },
+        configurable: true
       }
     });
+
+    self._canPlaySrc = Popcorn.HTMLYouTubeVideoElement._canPlaySrc;
+    self.canPlayType = Popcorn.HTMLYouTubeVideoElement.canPlayType;
+
+    return self;
   }
 
-  HTMLYouTubeVideoElement.prototype = new Popcorn._MediaElementProto();
-  HTMLYouTubeVideoElement.prototype.constructor = HTMLYouTubeVideoElement;
+  Popcorn.HTMLYouTubeVideoElement = function( id ) {
+    return new HTMLYouTubeVideoElement( id );
+  };
 
   // Helper for identifying URLs we know how to play.
-  HTMLYouTubeVideoElement.prototype._canPlaySrc = function( url ) {
+  Popcorn.HTMLYouTubeVideoElement._canPlaySrc = function( url ) {
     return (/(?:http:\/\/www\.|http:\/\/|www\.|\.|^)(youtu).*(?:\/|v=)(.{11})/).test( url ) ?
       "probably" :
       EMPTY_STRING;
   };
 
   // We'll attempt to support a mime type of video/x-youtube
-  HTMLYouTubeVideoElement.prototype.canPlayType = function( type ) {
+  Popcorn.HTMLYouTubeVideoElement.canPlayType = function( type ) {
     return type === "video/x-youtube" ? "probably" : EMPTY_STRING;
   };
-
-  Popcorn.HTMLYouTubeVideoElement = function( id ) {
-    return new HTMLYouTubeVideoElement( id );
-  };
-  Popcorn.HTMLYouTubeVideoElement._canPlaySrc = HTMLYouTubeVideoElement.prototype._canPlaySrc;
 
 }( Popcorn, window, document ));
 
@@ -8952,16 +9048,18 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					// console.log('media: %o', this.options.media);
 
 					if(this.options.media.youtube) {
+
 						// The YT element needs to be recreated while bugs in wrapper.
-						this.empty(this.wrapper.youtube);
-						this.solution.youtube = Popcorn.HTMLYouTubeVideoElement(this.wrapper.youtube);
+						// this.empty(this.wrapper.youtube);
+						// this.solution.youtube = Popcorn.HTMLYouTubeVideoElement(this.wrapper.youtube);
+
 						this.solution.youtube.src = this.options.media.youtube + '&html5=1';
 						this.videoElem = this.solution.youtube;
 						this.youtube = true;
 						this.updateSolution();
 
 						// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
-						this._ytFixListeners();
+						// this._ytFixListeners();
 					} else {
 
 						this.empty(this.solution.html);
@@ -9124,6 +9222,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 				}
 			}
 		},
+		// OBSOLETE Function due to Popcorn and YT Wrapper being fixed. ie., No more destroy and create... It persists!
 		_ytFixListeners: function() {
 			// Until the YouTube wrapper is fixed, we need to recreate it and the listeners when the YT media changes.
 			for(var i=0, l=this.ytFix.length; i<l; i++) {
