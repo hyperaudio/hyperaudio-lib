@@ -30,13 +30,23 @@ var Clipboard = (function(hyperaudio) {
 				this.target.appendChild(this.container);
 			}
 
-			// Handlers for top frame
-			window.top.document.documentElement.addEventListener('keydown', function(event) {
-				self.onKeyDown(event);
-			}, false);
-			window.top.document.documentElement.addEventListener('keyup', function(event) {
-				self.onKeyUp(event);
-			}, false);
+			// See if security allowed via same domain policy.
+			var rights = true;
+			try {
+				window.top.document.createElement('div');
+			} catch(error) {
+				rights = false;
+			}
+
+			if(rights) {
+				// Handlers for top frame
+				window.top.document.documentElement.addEventListener('keydown', function(event) {
+					self.onKeyDown(event);
+				}, false);
+				window.top.document.documentElement.addEventListener('keyup', function(event) {
+					self.onKeyUp(event);
+				}, false);
+			}
 
 			// Handlers for this window
 			document.documentElement.addEventListener('keydown', function(event) {
