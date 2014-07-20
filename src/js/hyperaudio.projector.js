@@ -61,7 +61,12 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 		this.iScrollOptions = {
 			scrollbars: true,
 			mouseWheel: true,
-			interactiveScrollbars: true
+			interactiveScrollbars: true,
+
+			// Options to disable grabbing the page and moving it.
+			disableMouse: true,
+			disablePointer: true,
+			disableTouch: true
 		};
 		this.iScrollSpeed = 800; // ms
 		this.iScrollOffsetY = -20; // pixels
