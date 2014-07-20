@@ -16,7 +16,7 @@ var Stage = (function(document, hyperaudio) {
 
 			id: '', // The ID of the saved mix.
 			mix: {
-				//title, desc, type, editable
+				// title, desc, type,
 				// url: [!content] The url of the mix
 				// content: [!url] The actual mix HTML
 			},
@@ -24,6 +24,8 @@ var Stage = (function(document, hyperaudio) {
 			title: 'Title not set',
 			desc: 'Description not set',
 			type: 'beta',
+
+			editable: true, // Set false to disable the drag and drop. Used for viewer and does not disable drops from transcripts.
 
 			idAttr: 'data-id', // Attribute name that holds the transcript ID.
 			transAttr: 'data-trans', // Attribute name that holds the transcript URL. [optional if ID not present]
@@ -165,11 +167,7 @@ var Stage = (function(document, hyperaudio) {
 							url: this.options.mix.url,
 							complete: function(event) {
 								self.updateStage(this.responseText);
-								if(self.options.mix.editable) {
-									self.initDragDrop();
-								} else {
-									self.changed();
-								}
+								self.initDragDrop();
 								self._trigger(hyperaudio.event.load, {msg: 'Loaded "' + self.options.mix.url + '"'});
 							},
 							error: function(event) {
@@ -179,11 +177,7 @@ var Stage = (function(document, hyperaudio) {
 						});
 					} else if(this.options.mix.content) {
 						this.updateStage(this.options.mix.content);
-						if(this.options.mix.editable) {
-							this.initDragDrop();
-						} else {
-							this.changed();
-						}
+						this.initDragDrop();
 						this._trigger(hyperaudio.event.load, {msg: 'Loaded given content'});
 					} else {
 						this.target.innerHTML = 'Problem with mix.'; // TMP - This sort of things should not be in the lib code, but acting off an error event hander.
@@ -257,36 +251,42 @@ var Stage = (function(document, hyperaudio) {
 				return string.charAt(0).toUpperCase() + string.slice(1);
 			};
 
-			if(this.target) {
-				sections = this.target.getElementsByTagName('section');
-				l = sections.length;
-				for(i=0; i < l; i++) {
+			// We use the Stage in the viewer... So want to disable this feature there.
+			if(this.options.editable) {
 
-					dragHtml = '';
+				if(this.target) {
+					sections = this.target.getElementsByTagName('section');
+					l = sections.length;
+					for(i=0; i < l; i++) {
 
-					// This code is to setup the drag-and-drop with a nice label. Otherwise the effects look bad after loading back in and dragged
-					effectType = sections[i].getAttribute('data-effect');
-					if(typeof effectType === 'string') {
-						switch(effectType) {
-							case 'fade':
-							case 'trim':
-							case 'title':
-								dragHtml = capitaliseFirstLetter(effectType);
-								break;
-							case 'bgm':
-								bgmTitleElem = sections[i].querySelector('.icon-music');
-								if(bgmTitleElem) {
-									dragHtml = bgmTitleElem.parentNode.innerHTML;
-								} else {
-									dragHtml = '<span class="icon-music">BGM</span>';
-								}
-								break;
+						dragHtml = '';
+
+						// This code is to setup the drag-and-drop with a nice label. Otherwise the effects look bad after loading back in and dragged
+						effectType = sections[i].getAttribute('data-effect');
+						if(typeof effectType === 'string') {
+							switch(effectType) {
+								case 'fade':
+								case 'trim':
+								case 'title':
+									dragHtml = capitaliseFirstLetter(effectType);
+									break;
+								case 'bgm':
+									bgmTitleElem = sections[i].querySelector('.icon-music');
+									if(bgmTitleElem) {
+										dragHtml = bgmTitleElem.parentNode.innerHTML;
+									} else {
+										dragHtml = '<span class="icon-music">BGM</span>';
+									}
+									break;
+							}
 						}
-					}
 
-					// And we finally setup the DragDrop
-					self.dropped(sections[i], dragHtml);
+						// And we finally setup the DragDrop
+						self.dropped(sections[i], dragHtml);
+					}
 				}
+			} else {
+				this.changed();
 			}
 		},
 
