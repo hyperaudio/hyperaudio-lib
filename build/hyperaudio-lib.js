@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.5.1 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 25th July 2014 14:26:43 */
+/*! hyperaudio-lib v0.5.2 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 28th July 2014 17:29:17 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -8349,7 +8349,7 @@ var Clipboard = (function(hyperaudio) {
 	// Following the method used by Trello
 	// http://stackoverflow.com/questions/17527870/how-does-trello-access-the-users-clipboard
 
-	var DEBUG = false;
+	var DEBUG = true;
 
 	return {
 		init: function(options) {
@@ -8398,6 +8398,14 @@ var Clipboard = (function(hyperaudio) {
 				self.onKeyUp(event);
 			}, false);
 
+			this.enable();
+		},
+		enable: function(enabled) {
+			enabled = enabled === 'undefined' ? true : !!enabled;
+			this.enabled = enabled;
+		},
+		disable: function(disable) {
+			this.enable(!disable);
 		},
 		copy: function(value) {
 			this.value = value;
@@ -8409,8 +8417,8 @@ var Clipboard = (function(hyperaudio) {
 
 			if(DEBUG) console.log('[onKeyDown] : Key pressed');
 
-			if(!this.value || !(event.ctrlKey || event.metaKey)) {
-				if(DEBUG) console.log('[onKeyDown] : Exit | value = "' + this.value + '"');
+			if(!this.enabled || !this.value || !(event.ctrlKey || event.metaKey)) {
+				if(DEBUG) console.log('[onKeyDown] : Exit | enabled = ' + this.enabled + ' | value = "' + this.value + '"');
 				return;
 			}
 
