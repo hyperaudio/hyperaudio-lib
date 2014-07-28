@@ -63,6 +63,7 @@ var Clipboard = (function(hyperaudio) {
 			this.enabled = enabled;
 		},
 		disable: function(disable) {
+			disable = disable === 'undefined' ? true : !!disable;
 			this.enable(!disable);
 		},
 		copy: function(value) {
