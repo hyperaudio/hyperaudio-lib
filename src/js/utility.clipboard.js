@@ -7,7 +7,7 @@ var Clipboard = (function(hyperaudio) {
 	// Following the method used by Trello
 	// http://stackoverflow.com/questions/17527870/how-does-trello-access-the-users-clipboard
 
-	var DEBUG = false;
+	var DEBUG = true;
 
 	return {
 		init: function(options) {
@@ -56,6 +56,14 @@ var Clipboard = (function(hyperaudio) {
 				self.onKeyUp(event);
 			}, false);
 
+			this.enable();
+		},
+		enable: function(enabled) {
+			enabled = enabled === 'undefined' ? true : !!enabled;
+			this.enabled = enabled;
+		},
+		disable: function(disable) {
+			this.enable(!disable);
 		},
 		copy: function(value) {
 			this.value = value;
@@ -67,8 +75,8 @@ var Clipboard = (function(hyperaudio) {
 
 			if(DEBUG) console.log('[onKeyDown] : Key pressed');
 
-			if(!this.value || !(event.ctrlKey || event.metaKey)) {
-				if(DEBUG) console.log('[onKeyDown] : Exit | value = "' + this.value + '"');
+			if(!this.enabled || !this.value || !(event.ctrlKey || event.metaKey)) {
+				if(DEBUG) console.log('[onKeyDown] : Exit | enabled = ' + this.enabled + ' | value = "' + this.value + '"');
 				return;
 			}
 
