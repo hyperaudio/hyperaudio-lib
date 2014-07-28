@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.5.4 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 28th July 2014 19:03:31 */
+/*! hyperaudio-lib v0.5.5 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 28th July 2014 20:25:35 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -8349,7 +8349,7 @@ var Clipboard = (function(hyperaudio) {
 	// Following the method used by Trello
 	// http://stackoverflow.com/questions/17527870/how-does-trello-access-the-users-clipboard
 
-	var DEBUG = true;
+	var DEBUG = false;
 
 	return {
 		init: function(options) {

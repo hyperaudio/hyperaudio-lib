@@ -7,7 +7,7 @@ var Clipboard = (function(hyperaudio) {
 	// Following the method used by Trello
 	// http://stackoverflow.com/questions/17527870/how-does-trello-access-the-users-clipboard
 
-	var DEBUG = true;
+	var DEBUG = false;
 
 	return {
 		init: function(options) {
