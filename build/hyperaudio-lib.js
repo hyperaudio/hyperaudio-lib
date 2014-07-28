@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.5.2 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 28th July 2014 17:29:17 */
+/*! hyperaudio-lib v0.5.3 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 28th July 2014 18:54:40 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -8405,6 +8405,7 @@ var Clipboard = (function(hyperaudio) {
 			this.enabled = enabled;
 		},
 		disable: function(disable) {
+			disable = disable === 'undefined' ? true : !!disable;
 			this.enable(!disable);
 		},
 		copy: function(value) {
