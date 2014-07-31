@@ -7,9 +7,14 @@ var api = (function(hyperaudio) {
 	return {
 		init: function(options) {
 			this.options = hyperaudio.extend({
+
+				// Options used to build the API url. See _updateInternals() to see how the API url is built.
 				protocol: 'http://',
 				org: '', // The organisations namespace / sub-domain. EG. 'chattanooga'
-				api: 'api.hyperaud.io/v1/',
+				api: 'api.', // The sub-domain of the API
+				domain: 'hyperaud.io', // The domain of the API
+				version: '/v1/', // The version of the API.
+
 				// Command syntax
 				transcripts: 'transcripts/',
 				transcripts_filter: '?type=html',
@@ -57,7 +62,7 @@ var api = (function(hyperaudio) {
 		},
 		_updateInternals: function() {
 			var namespace = this.options.org ? this.options.org + '.' : '';
-			this.url = this.options.protocol + namespace + this.options.api;
+			this.url = this.options.protocol + namespace + this.options.api + this.options.domain + this.options.version;
 		},
 		callback: function(callback, success) {
 			if(typeof callback === 'function') {
