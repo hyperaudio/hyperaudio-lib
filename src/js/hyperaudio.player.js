@@ -26,7 +26,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			// Types valid in a video element
 			mediaType: {
 				mp4: 'video/mp4', // The mp4 mime type.
-				webm:'video/webm' // The webm mime type.
+				webm:'video/webm', // The webm mime type.
+				mpeg:'audio/mpeg' // The mp3 mime type.
 			},
 
 			guiNative: false, // TMP during dev. Either we have a gui or we are chomeless.
@@ -63,6 +64,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 	Player.prototype = {
 		create: function() {
 			var self = this;
+			var tryLoad = false;
 
 			if(this.target) {
 
@@ -132,7 +134,16 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 					this.addEventListener('ended', handler);
 				}
 
-				if(this.options.media.youtube || this.options.media.mp4) { // Assumes we have the webm
+				// See if the media object contains anything.
+				hyperaudio.each(this.options.media, function(format, url) {
+					if(url) {
+						tryLoad = true;
+						return false; // exit each
+					}
+				});
+
+				// if(this.options.media.youtube || this.options.media.mp4) { // Assumes we have the webm
+				if(tryLoad) { // We have something - try to load it.
 					this.load();
 				}
 			} else {
