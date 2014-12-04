@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.6.2 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 4th December 2014 19:17:00 */
+/*! hyperaudio-lib v0.6.3 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 5th December 2014 00:45:35 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -9846,6 +9846,9 @@ var Transcript = (function(document, hyperaudio) {
 									if(opts.media.youtube) {
 										el.setAttribute(opts.stage.options.ytAttr, opts.media.youtube); // Pass the transcript youtube url
 									}
+									if(opts.media.mpeg) {
+										el.setAttribute(opts.stage.options.mpegAttr, opts.media.mpeg); // Pass the transcript mp3 url
+									}
 									el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
 									opts.stage.dropped(el);
 								}
@@ -9955,6 +9958,7 @@ var Stage = (function(document, hyperaudio) {
 			mp4Attr: 'data-mp4', // Attribute name that holds the transcript mp4 URL.
 			webmAttr: 'data-webm', // Attribute name that holds the transcript webm URL.
 			ytAttr: 'data-yt', // Attribute name that holds the transcript youtube URL.
+			mpegAttr: 'data-mpeg', // Attribute name that holds the transcript mpeg URL.
 			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
 			word: 'a',
@@ -10914,13 +10918,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				// Get the media
 				var mp4 = el.getAttribute(stageOptions.mp4Attr),
 					webm = el.getAttribute(stageOptions.webmAttr),
-					youtube = el.getAttribute(stageOptions.ytAttr);
+					youtube = el.getAttribute(stageOptions.ytAttr),
+					mpeg = el.getAttribute(stageOptions.mpegAttr);
 
-				if(mp4 || webm || youtube) {
+				if(mp4 || webm || youtube || mpeg) {
 					section.media = {
 						mp4: mp4,
 						webm: webm,
-						youtube: youtube
+						youtube: youtube,
+						mpeg: mpeg
 					};
 				} else {
 					section.media = false;
