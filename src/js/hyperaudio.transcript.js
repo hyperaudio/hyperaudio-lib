@@ -282,6 +282,9 @@ var Transcript = (function(document, hyperaudio) {
 									if(opts.media.youtube) {
 										el.setAttribute(opts.stage.options.ytAttr, opts.media.youtube); // Pass the transcript youtube url
 									}
+									if(opts.media.mpeg) {
+										el.setAttribute(opts.stage.options.mpegAttr, opts.media.mpeg); // Pass the transcript mp3 url
+									}
 									el.setAttribute(opts.stage.options.unitAttr, opts.unit); // Pass the transcript Unit
 									opts.stage.dropped(el);
 								}

@@ -633,13 +633,15 @@ var Projector = (function(window, document, hyperaudio, Popcorn) {
 				// Get the media
 				var mp4 = el.getAttribute(stageOptions.mp4Attr),
 					webm = el.getAttribute(stageOptions.webmAttr),
-					youtube = el.getAttribute(stageOptions.ytAttr);
+					youtube = el.getAttribute(stageOptions.ytAttr),
+					mpeg = el.getAttribute(stageOptions.mpegAttr);
 
-				if(mp4 || webm || youtube) {
+				if(mp4 || webm || youtube || mpeg) {
 					section.media = {
 						mp4: mp4,
 						webm: webm,
-						youtube: youtube
+						youtube: youtube,
+						mpeg: mpeg
 					};
 				} else {
 					section.media = false;

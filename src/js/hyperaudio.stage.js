@@ -32,6 +32,7 @@ var Stage = (function(document, hyperaudio) {
 			mp4Attr: 'data-mp4', // Attribute name that holds the transcript mp4 URL.
 			webmAttr: 'data-webm', // Attribute name that holds the transcript webm URL.
 			ytAttr: 'data-yt', // Attribute name that holds the transcript youtube URL.
+			mpegAttr: 'data-mpeg', // Attribute name that holds the transcript mpeg URL.
 			unitAttr: 'data-unit', // Attribute name that holds the transcript Unit.
 
 			word: 'a',
