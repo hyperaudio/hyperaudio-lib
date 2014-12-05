@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.6.3 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 5th December 2014 00:45:35 */
+/*! hyperaudio-lib v0.6.4 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 5th December 2014 15:39:18 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -8917,7 +8917,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			media: {
 				youtube: '', // The URL of the Youtube video.
 				mp4: '', // The URL of the mp4 video.
-				webm:'' // The URL of the webm video.
+				webm: '', // The URL of the webm video.
+				mpeg: '' // The URL of the mp3 audio.
 			},
 
 			// Types valid in a video element
@@ -8942,7 +8943,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 
 		// List of the media types, used to check for changes in media.
-		this.mediaTypes = "youtube mp4 webm";
+		this.mediaTypes = "youtube mp4 webm mpeg";
 
 		this.youtube = false; // A flag to indicate if the YT player being used.
 
