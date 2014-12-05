@@ -20,7 +20,8 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 			media: {
 				youtube: '', // The URL of the Youtube video.
 				mp4: '', // The URL of the mp4 video.
-				webm:'' // The URL of the webm video.
+				webm: '', // The URL of the webm video.
+				mpeg: '' // The URL of the mp3 audio.
 			},
 
 			// Types valid in a video element
@@ -45,7 +46,7 @@ var Player = (function(window, document, hyperaudio, Popcorn) {
 		this.commandsIgnored = /ipad|iphone|ipod|android/i.test(window.navigator.userAgent);
 
 		// List of the media types, used to check for changes in media.
-		this.mediaTypes = "youtube mp4 webm";
+		this.mediaTypes = "youtube mp4 webm mpeg";
 
 		this.youtube = false; // A flag to indicate if the YT player being used.
 
