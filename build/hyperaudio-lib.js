@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.6.4 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 5th December 2014 15:39:18 */
+/*! hyperaudio-lib v0.6.5 ~ (c) 2012-2014 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 5th December 2014 16:48:58 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -9630,8 +9630,18 @@ var Transcript = (function(document, hyperaudio) {
 			this._debug();
 		}
 
+		// See if the media object contains anything.
+		var tryLoad = false;
+		hyperaudio.each(this.options.media, function(format, url) {
+			if(url) {
+				tryLoad = true;
+				return false; // exit each
+			}
+		});
+
 		// If we have the info, kick things off
-		if(this.options.id || this.options.media.youtube || this.options.media.mp4) {
+		// if(this.options.id || this.options.media.youtube || this.options.media.mp4) {
+		if(this.options.id || tryLoad) { // We have something - try to load it.
 			this.load();
 		}
 	}
