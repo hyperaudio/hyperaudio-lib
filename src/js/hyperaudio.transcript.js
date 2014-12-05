@@ -65,8 +65,18 @@ var Transcript = (function(document, hyperaudio) {
 			this._debug();
 		}
 
+		// See if the media object contains anything.
+		var tryLoad = false;
+		hyperaudio.each(this.options.media, function(format, url) {
+			if(url) {
+				tryLoad = true;
+				return false; // exit each
+			}
+		});
+
 		// If we have the info, kick things off
-		if(this.options.id || this.options.media.youtube || this.options.media.mp4) {
+		// if(this.options.id || this.options.media.youtube || this.options.media.mp4) {
+		if(this.options.id || tryLoad) { // We have something - try to load it.
 			this.load();
 		}
 	}
