@@ -31,3 +31,14 @@ var id = HA.Address.getParam('id');
 ```
 
 See also: HA.getURLParameter(name)
+
+## Build and Deploy
+
+0. find a clean area
+1. clone hyperaudio-lib.git (enter directory)
+2. npm install
+3. grunt build
+4. clone hyperaudio-pad.git (enter directory)
+5. npm install
+6. grunt build
+7. deploy webapps/htdocs/pad/dist/hyperaudio-pad.min.js
