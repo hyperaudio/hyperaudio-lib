@@ -1,8 +1,8 @@
 {
   "name": "hyperaudio-lib",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "description": "The Hyperaudio Library.",
-  "homepage": "http://hyperaud.io", 
+  "homepage": "http://hyperaud.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/hyperaudio/hyperaudio-lib.git"
@@ -21,9 +21,13 @@
   "bugs": {
     "url": "https://github.com/hyperaudio/hyperaudio-lib/issues"
   },
+  "scripts": {
+    "build": "grunt"
+  },
   "dependencies": {},
   "devDependencies": {
     "grunt": "~0.4.1",
+    "grunt-cli": "^1.2.0",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-jshint": "~0.6.4",
     "grunt-contrib-uglify": "~0.2.4"

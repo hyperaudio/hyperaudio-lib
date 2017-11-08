@@ -130,7 +130,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 
-	grunt.registerTask('default', ['jshint:before', 'concat', 'uglify', 'jshint:after']);
+	grunt.registerTask('default', [/*'jshint:before',*/ 'concat', 'uglify', /*'jshint:after'*/]);
 
 	grunt.registerTask('build', ['concat', 'uglify']);
 	grunt.registerTask('test', ['jshint:before']);
