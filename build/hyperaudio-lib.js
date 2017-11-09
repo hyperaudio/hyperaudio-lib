@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.7.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 9th November 2017 16:38:52 */
+/*! hyperaudio-lib v0.7.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 9th November 2017 18:34:06 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -8131,6 +8131,9 @@ var api = (function(hyperaudio) {
 					url += 'channel=' + options.channel;
 				}
 				url += self.options.transcripts_filter;
+				if(options.user) {
+					url += '&user=' + self.username;
+				}
 				return url;
 			};
 

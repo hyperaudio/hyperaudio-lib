@@ -211,6 +211,9 @@ var api = (function(hyperaudio) {
 					url += 'channel=' + options.channel;
 				}
 				url += self.options.transcripts_filter;
+				if(options.user) {
+					url += '&user=' + self.username;
+				}
 				return url;
 			};
 
