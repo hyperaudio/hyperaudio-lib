@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.7.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 13th November 2017 15:29:49 */
+/*! hyperaudio-lib v0.7.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 13th November 2017 15:56:19 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7929,7 +7929,7 @@ var api = (function(hyperaudio) {
 			this.options = hyperaudio.extend({
 
 				// Options used to build the API url. See _updateInternals() to see how the API url is built.
-				protocol: 'http://',
+				// protocol: 'http://',
 				org: '', // The organisations namespace / sub-domain. EG. 'chattanooga'
 				api: 'api.', // The sub-domain of the API
 				domain: 'hyperaud.io', // The domain of the API
@@ -7940,11 +7940,17 @@ var api = (function(hyperaudio) {
 				transcripts_filter: '&type=html',
 				mixes: 'mixes/',
 				channels: 'channels/',
-				signin: 'login/',
-				whoami: 'whoami/',
+				// signin: 'login/',
+				// whoami: 'whoami/',
 				media: 'media/',
 				// Specific user (bgm) for music
-				bgm: 'bgm/media/'
+				// bgm: 'bgm/media/'
+
+				protocol: 'https://',
+				bgm: 'media?tag=bgm',
+				whoami: 'auth/whoami/' + window.localStorage.getItem('token'),
+				signin: 'accounts/token',
+				withCredentials: false
 			}, options);
 
 			// The base url of the API

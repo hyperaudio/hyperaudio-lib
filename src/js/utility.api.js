@@ -9,7 +9,7 @@ var api = (function(hyperaudio) {
 			this.options = hyperaudio.extend({
 
 				// Options used to build the API url. See _updateInternals() to see how the API url is built.
-				protocol: 'http://',
+				// protocol: 'http://',
 				org: '', // The organisations namespace / sub-domain. EG. 'chattanooga'
 				api: 'api.', // The sub-domain of the API
 				domain: 'hyperaud.io', // The domain of the API
@@ -20,11 +20,17 @@ var api = (function(hyperaudio) {
 				transcripts_filter: '&type=html',
 				mixes: 'mixes/',
 				channels: 'channels/',
-				signin: 'login/',
-				whoami: 'whoami/',
+				// signin: 'login/',
+				// whoami: 'whoami/',
 				media: 'media/',
 				// Specific user (bgm) for music
-				bgm: 'bgm/media/'
+				// bgm: 'bgm/media/'
+
+				protocol: 'https://',
+				bgm: 'media?tag=bgm',
+				whoami: 'auth/whoami/' + window.localStorage.getItem('token'),
+				signin: 'accounts/token',
+				withCredentials: false
 			}, options);
 
 			// The base url of the API
