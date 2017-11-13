@@ -79,6 +79,10 @@ var api = (function(hyperaudio) {
 				data: JSON.stringify(auth),
 				complete: function(event) {
 					var json = JSON.parse(this.responseText);
+
+					if (json.user) window.localStorage.setItem('user', json.user);
+					if (json.token) window.localStorage.setItem('token', json.token);
+
 					self.guest = !json.user;
 					if(!self.guest) {
 						self.username = json.user;

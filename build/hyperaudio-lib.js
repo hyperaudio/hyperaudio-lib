@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.7.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 9th November 2017 18:34:06 */
+/*! hyperaudio-lib v0.7.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 13th November 2017 15:29:49 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7999,6 +7999,10 @@ var api = (function(hyperaudio) {
 				data: JSON.stringify(auth),
 				complete: function(event) {
 					var json = JSON.parse(this.responseText);
+
+					if (json.user) window.localStorage.setItem('user', json.user);
+					if (json.token) window.localStorage.setItem('token', json.token);
+
 					self.guest = !json.user;
 					if(!self.guest) {
 						self.username = json.user;
