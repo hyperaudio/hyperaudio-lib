@@ -28,7 +28,7 @@ var api = (function(hyperaudio) {
 
 				protocol: 'https://',
 				bgm: 'media?tag=bgm',
-				whoami: 'auth/whoami/' + window.localStorage.getItem('token'),
+				whoami: 'auth/whoami/',
 				signin: 'accounts/token',
 				withCredentials: false
 			}, options);
@@ -121,7 +121,7 @@ var api = (function(hyperaudio) {
 				}, 0);
 			} else {
 				xhr({
-					url: this.url + this.options.whoami,
+					url: this.url + this.options.whoami + window.localStorage.getItem('token'),
 					complete: function(event) {
 						var json = JSON.parse(this.responseText);
 						self.guest = !json.user;

@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.7.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 13th November 2017 15:56:19 */
+/*! hyperaudio-lib v0.7.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 13th November 2017 16:07:07 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7948,7 +7948,7 @@ var api = (function(hyperaudio) {
 
 				protocol: 'https://',
 				bgm: 'media?tag=bgm',
-				whoami: 'auth/whoami/' + window.localStorage.getItem('token'),
+				whoami: 'auth/whoami/',
 				signin: 'accounts/token',
 				withCredentials: false
 			}, options);
@@ -8041,7 +8041,7 @@ var api = (function(hyperaudio) {
 				}, 0);
 			} else {
 				xhr({
-					url: this.url + this.options.whoami,
+					url: this.url + this.options.whoami + window.localStorage.getItem('token'),
 					complete: function(event) {
 						var json = JSON.parse(this.responseText);
 						self.guest = !json.user;
