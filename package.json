@@ -1,6 +1,6 @@
 {
   "name": "hyperaudio-lib",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "The Hyperaudio Library.",
   "homepage": "http://hyperaud.io",
   "repository": {
@@ -15,7 +15,8 @@
   "author": "Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io)",
   "contributors": [
     "Mark Panaghiston <markp@happyworm.com> (http://happyworm.com)",
-    "Matteo Spinelli <matteo@cubiq.org> (http://cubiq.org)"
+    "Matteo Spinelli <matteo@cubiq.org> (http://cubiq.org)",
+    "Laurian Gridinoc <laurian@gridinoc.name> (http://gridinoc.com)"
   ],
   "license": "http://hyperaud.io/licensing/",
   "bugs": {

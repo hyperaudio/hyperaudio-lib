@@ -4,263 +4,274 @@
  *
  */
 
-var PlayerGUI = (function (window, document, hyperaudio) {
+var PlayerGUI = (function(window, document, hyperaudio) {
+  function PlayerGUI(options) {
+    this.options = hyperaudio.extend(
+      {},
+      {
+        player: null, // mandatory instance to the player
 
-	function PlayerGUI (options) {
-		this.options = hyperaudio.extend({}, {
-			player:			null,	// mandatory instance to the player
+        navigation: true, // whether or not to display the next/prev buttons
+        fullscreen: true, // display the fullscreen button
 
-			navigation:		true,	// whether or not to display the next/prev buttons
-			fullscreen:		true,	// display the fullscreen button
+        cssClass: 'hyperaudio-player' // Class added to the target for the GUI CSS. (should move to GUI)
+      },
+      options
+    );
 
-			cssClass: 'hyperaudio-player' // Class added to the target for the GUI CSS. (should move to GUI)
-		}, options);
+    if (!this.options.player) {
+      return false;
+    }
 
-		if ( !this.options.player ) {
-			return false;
-		}
+    this.status = {
+      paused: true,
+      currentTime: 0,
+      duration: 0
+    };
 
-		this.status = {
-			paused: true,
-			currentTime: 0,
-			duration: 0
-		};
+    this.player = this.options.player;
 
-		this.player = this.options.player;
+    var buttonCount = 1;
 
-		var buttonCount = 1;
+    var cssClass = this.options.cssClass; // For mini opto
 
-		var cssClass = this.options.cssClass; // For mini opto
+    this.wrapperElem = document.createElement('div');
+    this.wrapperElem.className = cssClass + '-gui';
+    this.controlsElem = document.createElement('ul');
+    this.controlsElem.className = cssClass + '-controls';
 
-		this.wrapperElem = document.createElement('div');
-		this.wrapperElem.className = cssClass + '-gui';
-		this.controlsElem = document.createElement('ul');
-		this.controlsElem.className = cssClass + '-controls';
+    this.wrapperElem.appendChild(this.controlsElem);
 
-		this.wrapperElem.appendChild(this.controlsElem);
+    // PLAY button
+    this.playButton = document.createElement('li');
+    this.playButton.className = cssClass + '-play';
+    this.controlsElem.appendChild(this.playButton);
+    this.playButton.addEventListener('click', this.play.bind(this), false);
 
-		// PLAY button
-		this.playButton = document.createElement('li');
-		this.playButton.className = cssClass + '-play';
-		this.controlsElem.appendChild(this.playButton);
-		this.playButton.addEventListener('click', this.play.bind(this), false);
+    // PREV/NEXT buttons
+    if (this.options.navigation) {
+      this.prevButton = document.createElement('li');
+      this.prevButton.className = cssClass + '-prev';
+      this.nextButton = document.createElement('li');
+      this.nextButton.className = cssClass + '-next';
 
-		// PREV/NEXT buttons
-		if ( this.options.navigation ) {
-			this.prevButton = document.createElement('li');
-			this.prevButton.className = cssClass + '-prev';
-			this.nextButton = document.createElement('li');
-			this.nextButton.className = cssClass + '-next';
+      this.controlsElem.appendChild(this.prevButton);
+      this.controlsElem.appendChild(this.nextButton);
 
-			this.controlsElem.appendChild(this.prevButton);
-			this.controlsElem.appendChild(this.nextButton);
+      //this.prevButton.addEventListener('click', this.prev.bind(this), false);
+      //this.nextButton.addEventListener('click', this.next.bind(this), false);
+      buttonCount += 2;
+    }
 
-			//this.prevButton.addEventListener('click', this.prev.bind(this), false);
-			//this.nextButton.addEventListener('click', this.next.bind(this), false);
-			buttonCount += 2;
-		}
+    // PROGRESS BAR
+    this.progressBarElem = document.createElement('li');
+    this.progressBarElem.className = cssClass + '-bar';
+    this.progressIndicator = document.createElement('div');
+    this.progressIndicator.className = cssClass + '-progress';
+    this.progressIndicator.style.width = '0%';
 
-		// PROGRESS BAR
-		this.progressBarElem = document.createElement('li');
-		this.progressBarElem.className = cssClass + '-bar';
-		this.progressIndicator = document.createElement('div');
-		this.progressIndicator.className = cssClass + '-progress';
-		this.progressIndicator.style.width = '0%';
+    this.progressBarElem.appendChild(this.progressIndicator);
+    this.controlsElem.appendChild(this.progressBarElem);
 
-		this.progressBarElem.appendChild(this.progressIndicator);
-		this.controlsElem.appendChild(this.progressBarElem);
+    this.progressBarElem.addEventListener('mousedown', this.startSeeking.bind(this), false);
+    this.progressBarElem.addEventListener('mousemove', this.seek.bind(this), false);
+    document.addEventListener('mouseup', this.stopSeeking.bind(this), false);
+    // this.player.videoElem.addEventListener('timeupdate', this.timeUpdate.bind(this), false);
 
-		this.progressBarElem.addEventListener('mousedown', this.startSeeking.bind(this), false);
-		this.progressBarElem.addEventListener('mousemove', this.seek.bind(this), false);
-		document.addEventListener('mouseup', this.stopSeeking.bind(this), false);
-		// this.player.videoElem.addEventListener('timeupdate', this.timeUpdate.bind(this), false);
+    // FULLSCREEN Button
+    if (this.options.fullscreen) {
+      this.fullscreenButton = document.createElement('li');
+      this.fullscreenButton.className = cssClass + '-fullscreen';
+      this.controlsElem.appendChild(this.fullscreenButton);
 
-		// FULLSCREEN Button
-		if ( this.options.fullscreen ) {
-			this.fullscreenButton = document.createElement('li');
-			this.fullscreenButton.className = cssClass + '-fullscreen';
-			this.controlsElem.appendChild(this.fullscreenButton);
+      this.fullscreenButton.addEventListener('click', this.fullscreen.bind(this), false);
 
-			this.fullscreenButton.addEventListener('click', this.fullscreen.bind(this), false);
+      buttonCount += 1;
+    }
 
-			buttonCount += 1;
-		}
+    // The time displays
+    this.currentTimeElem = document.createElement('div');
+    this.currentTimeElem.className = cssClass + '-current-time';
+    this.durationElem = document.createElement('div');
+    this.durationElem.className = cssClass + '-duration';
+    this.progressBarElem.appendChild(this.currentTimeElem);
+    this.progressBarElem.appendChild(this.durationElem);
 
-		// The time displays
-		this.currentTimeElem = document.createElement('div');
-		this.currentTimeElem.className = cssClass + '-current-time';
-		this.durationElem = document.createElement('div');
-		this.durationElem.className = cssClass + '-duration';
-		this.progressBarElem.appendChild(this.currentTimeElem);
-		this.progressBarElem.appendChild(this.durationElem);
+    // Adjust sizes according to options
+    this.progressBarElem.style.width = 100 - buttonCount * 10 + '%';
 
-		// Adjust sizes according to options
-		this.progressBarElem.style.width = 100 - buttonCount*10 + '%';
+    // No longer required since fixing fullscreen using: .hyperaudio-player-bar { position: relative; }
+    // Now these are set to 100% width in the CSS.
+    // this.currentTimeElem.style.width = 100 - buttonCount*10 + '%';
+    // this.durationElem.style.width = 100 - buttonCount*10 + '%';
 
-		// No longer required since fixing fullscreen using: .hyperaudio-player-bar { position: relative; }
-		// Now these are set to 100% width in the CSS.
-		// this.currentTimeElem.style.width = 100 - buttonCount*10 + '%';
-		// this.durationElem.style.width = 100 - buttonCount*10 + '%';
+    // Add the GUI
+    hyperaudio.addClass(this.player.target, cssClass);
+    this.player.target.appendChild(this.wrapperElem);
+  }
 
-		// Add the GUI
-		hyperaudio.addClass(this.player.target, cssClass);
-		this.player.target.appendChild(this.wrapperElem);
-	}
+  PlayerGUI.prototype = {
+    setStatus: function(status) {
+      // Extending, since the new status might not hold all values.
+      hyperaudio.extend(this.status, status);
 
-	PlayerGUI.prototype = {
+      // console.log('paused:' + this.status.paused + ' | currentTime:' + this.status.currentTime + ' | duration:' + this.status.duration);
 
-		setStatus: function(status) {
-			// Extending, since the new status might not hold all values.
-			hyperaudio.extend(this.status, status);
+      this.timeUpdate();
+      // could also update the play pause button?
+      // - the playing to paused state is covered by timeUpdate()
+    },
 
-			// console.log('paused:' + this.status.paused + ' | currentTime:' + this.status.currentTime + ' | duration:' + this.status.duration);
+    play: function() {
+      // if ( !this.player.videoElem.paused ) {
+      if (!this.status.paused) {
+        hyperaudio.removeClass(this.wrapperElem, 'playing');
+        this.player.gui_pause();
+        return;
+      }
 
-			this.timeUpdate();
-			// could also update the play pause button?
-			// - the playing to paused state is covered by timeUpdate()
-		},
+      hyperaudio.addClass(this.wrapperElem, 'playing');
+      this.player.gui_play();
+    },
 
-		play: function () {
-			// if ( !this.player.videoElem.paused ) {
-			if ( !this.status.paused ) {
-				hyperaudio.removeClass(this.wrapperElem, 'playing');
-				this.player.gui_pause();
-				return;
-			}
+    timeUpdate: function() {
+      var percentage = 0;
+      if (this.status.duration > 0) {
+        percentage = Math.round(100 * this.status.currentTime / this.status.duration);
+      }
 
-			hyperaudio.addClass(this.wrapperElem, 'playing');
-			this.player.gui_play();
-		},
+      this.progressIndicator.style.width = percentage + '%';
 
-		timeUpdate: function () {
+      this.currentTimeElem.innerHTML = time(this.status.currentTime);
+      this.durationElem.innerHTML = time(this.status.duration);
 
-			var percentage = 0;
-			if(this.status.duration > 0) {
-				percentage = Math.round(100 * this.status.currentTime / this.status.duration);	
-			}
+      if (this.status.paused) {
+        hyperaudio.removeClass(this.wrapperElem, 'playing');
+      } else {
+        hyperaudio.addClass(this.wrapperElem, 'playing');
+      }
+    },
 
-			this.progressIndicator.style.width = percentage + '%';
+    fullscreen: function() {
+      if (!this._isFullscreen()) {
+        this._requestFullScreen();
+        return;
+      }
 
-			this.currentTimeElem.innerHTML = time(this.status.currentTime);
-			this.durationElem.innerHTML = time(this.status.duration);
+      this._cancelFullScreen();
+    },
 
-			if ( this.status.paused ) {
-				hyperaudio.removeClass(this.wrapperElem, 'playing');
-			} else {
-				hyperaudio.addClass(this.wrapperElem, 'playing');
-			}
-		},
+    _requestFullScreen: function() {
+      if (this.player.target.requestFullScreen) {
+        this.player.target.requestFullScreen();
+      } else if (this.player.target.mozRequestFullScreen) {
+        this.player.target.mozRequestFullScreen();
+      } else if (this.player.target.webkitRequestFullScreen) {
+        this.player.target.webkitRequestFullScreen();
+      }
+    },
 
-		fullscreen: function () {
-			if ( !this._isFullscreen() ) {
-				this._requestFullScreen();
-				return;
-			}
+    _cancelFullScreen: function() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
+      }
+    },
 
-			this._cancelFullScreen();
-		},
+    _isFullscreen: function() {
+      return !!(
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.webkitCurrentFullScreenElement ||
+        document.msFullscreenElement ||
+        false
+      );
+    },
 
-		_requestFullScreen: function () {
-			if (this.player.target.requestFullScreen) {
-				this.player.target.requestFullScreen();
-			} else if (this.player.target.mozRequestFullScreen) {
-				this.player.target.mozRequestFullScreen();
-			} else if (this.player.target.webkitRequestFullScreen) {
-				this.player.target.webkitRequestFullScreen();
-			}
-		},
+    startSeeking: function(e) {
+      this.seeking = true;
+      this.seek(e);
+    },
 
-		_cancelFullScreen: function () {
-			if (document.exitFullscreen) {
-				document.exitFullscreen();
-			} else if (document.mozCancelFullScreen) {
-				document.mozCancelFullScreen();
-			} else if (document.webkitExitFullscreen) {
-				document.webkitExitFullscreen();
-			} else if (document.webkitCancelFullScreen) {
-				document.webkitCancelFullScreen();	
-			}
-		},
+    stopSeeking: function() {
+      if (!this.seeking) {
+        return;
+      }
 
-		_isFullscreen: function () {
-			return !!(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement || document.msFullscreenElement || false);
-		},
+      this.seeking = false;
+    },
 
-		startSeeking: function (e) {
-			this.seeking = true;
-			this.seek(e);
-		},
+    seek: function(e) {
+      if (!this.seeking) {
+        return;
+      }
 
-		stopSeeking: function () {
-			if ( !this.seeking ) {
-				return;
-			}
+      var rect = this.progressBarElem.getBoundingClientRect();
+      var width = rect.width;
+      var x = e.pageX - rect.left;
 
-			this.seeking = false;
-		},
+      // var current = Math.round(this.player.videoElem.duration / width * x);
+      // this.player.currentTime(current, !this.player.videoElem.paused);
 
-		seek: function (e) {
-			if ( !this.seeking ) {
-				return;
-			}
+      // var current = Math.round(this.status.duration / width * x);
+      var current = Math.round(100 * this.status.duration * x / width) / 100;
+      this.player.gui_currentTime(current);
+    }
+  };
 
-			var rect = this.progressBarElem.getBoundingClientRect();
-			var width = rect.width;
-			var x = e.pageX - rect.left;
-			
-			// var current = Math.round(this.player.videoElem.duration / width * x);
-			// this.player.currentTime(current, !this.player.videoElem.paused);
+  // Adapted this from jPlayer code
+  function ConvertTime() {
+    this.init();
+  }
+  ConvertTime.prototype = {
+    init: function() {
+      this.options = {
+        timeFormat: {
+          showHour: false,
+          showMin: true,
+          showSec: true,
+          padHour: false,
+          padMin: true,
+          padSec: true,
+          sepHour: ':',
+          sepMin: ':',
+          sepSec: ''
+        }
+      };
+    },
+    time: function(s) {
+      s = s && typeof s === 'number' ? s : 0;
 
-			// var current = Math.round(this.status.duration / width * x);
-			var current = Math.round(100 * this.status.duration * x / width) / 100;
-			this.player.gui_currentTime(current);
-		}
-	};
+      var myTime = new Date(s * 1000),
+        hour = myTime.getUTCHours(),
+        min = this.options.timeFormat.showHour
+          ? myTime.getUTCMinutes()
+          : myTime.getUTCMinutes() + hour * 60,
+        sec = this.options.timeFormat.showMin
+          ? myTime.getUTCSeconds()
+          : myTime.getUTCSeconds() + min * 60,
+        strHour = this.options.timeFormat.padHour && hour < 10 ? '0' + hour : hour,
+        strMin = this.options.timeFormat.padMin && min < 10 ? '0' + min : min,
+        strSec = this.options.timeFormat.padSec && sec < 10 ? '0' + sec : sec,
+        strTime = '';
 
-	// Adapted this from jPlayer code
-	function ConvertTime() {
-		this.init();
-	}
-	ConvertTime.prototype = {
-		init: function() {
-			this.options = {
-				timeFormat: {
-					showHour: false,
-					showMin: true,
-					showSec: true,
-					padHour: false,
-					padMin: true,
-					padSec: true,
-					sepHour: ":",
-					sepMin: ":",
-					sepSec: ""
-				}
-			};
-		},
-		time: function(s) {
-			s = (s && typeof s === 'number') ? s : 0;
+      strTime += this.options.timeFormat.showHour ? strHour + this.options.timeFormat.sepHour : '';
+      strTime += this.options.timeFormat.showMin ? strMin + this.options.timeFormat.sepMin : '';
+      strTime += this.options.timeFormat.showSec ? strSec + this.options.timeFormat.sepSec : '';
 
-			var myTime = new Date(s * 1000),
-				hour = myTime.getUTCHours(),
-				min = this.options.timeFormat.showHour ? myTime.getUTCMinutes() : myTime.getUTCMinutes() + hour * 60,
-				sec = this.options.timeFormat.showMin ? myTime.getUTCSeconds() : myTime.getUTCSeconds() + min * 60,
-				strHour = (this.options.timeFormat.padHour && hour < 10) ? "0" + hour : hour,
-				strMin = (this.options.timeFormat.padMin && min < 10) ? "0" + min : min,
-				strSec = (this.options.timeFormat.padSec && sec < 10) ? "0" + sec : sec,
-				strTime = "";
+      return strTime;
+    }
+  };
+  var myConvertTime = new ConvertTime();
+  function time(s) {
+    return myConvertTime.time(s);
+  }
 
-			strTime += this.options.timeFormat.showHour ? strHour + this.options.timeFormat.sepHour : "";
-			strTime += this.options.timeFormat.showMin ? strMin + this.options.timeFormat.sepMin : "";
-			strTime += this.options.timeFormat.showSec ? strSec + this.options.timeFormat.sepSec : "";
-
-			return strTime;
-		}
-	};
-	var myConvertTime = new ConvertTime();
-	function time(s) {
-		return myConvertTime.time(s);
-	}
-
-	return PlayerGUI;
-
+  return PlayerGUI;
 })(window, document, hyperaudio);
