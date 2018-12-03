@@ -130,7 +130,7 @@ var api = (function(hyperaudio) {
           self.callback(callback, true);
         }, 0);
       } else {
-        var token = "";
+        var token = null;
         try {
           token = window.localStorage.getItem('token');
         } catch (ignored) {}
