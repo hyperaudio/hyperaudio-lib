@@ -130,25 +130,27 @@ var api = (function(hyperaudio) {
           self.callback(callback, true);
         }, 0);
       } else {
+        var token = "";
         try {
-          xhr({
-            url: this.url + this.options.whoami + window.localStorage.getItem('token'),
-            complete: function(event) {
-              var json = JSON.parse(this.responseText);
-              self.guest = !json.user;
-              if (!self.guest) {
-                self.username = json.user;
-              } else {
-                self.username = '';
-              }
-              self.callback(callback, true);
-            },
-            error: function(event) {
-              self.error = true;
-              self.callback(callback, false);
-            }
-          });
+          token = window.localStorage.getItem('token');
         } catch (ignored) {}
+        xhr({
+          url: this.url + this.options.whoami + token,
+          complete: function(event) {
+            var json = JSON.parse(this.responseText);
+            self.guest = !json.user;
+            if (!self.guest) {
+              self.username = json.user;
+            } else {
+              self.username = '';
+            }
+            self.callback(callback, true);
+          },
+          error: function(event) {
+            self.error = true;
+            self.callback(callback, false);
+          }
+        });        
       }
     },
     getChannels: function(options) {
