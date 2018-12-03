@@ -94,8 +94,10 @@ var api = (function(hyperaudio) {
         complete: function(event) {
           var json = JSON.parse(this.responseText);
 
-          if (json.user) window.localStorage.setItem('user', json.user);
-          if (json.token) window.localStorage.setItem('token', json.token);
+          try {
+            if (json.user) window.localStorage.setItem('user', json.user);
+            if (json.token) window.localStorage.setItem('token', json.token);
+          } catch (ignored) {}
 
           self.guest = !json.user;
           if (!self.guest) {
@@ -128,23 +130,25 @@ var api = (function(hyperaudio) {
           self.callback(callback, true);
         }, 0);
       } else {
-        xhr({
-          url: this.url + this.options.whoami + window.localStorage.getItem('token'),
-          complete: function(event) {
-            var json = JSON.parse(this.responseText);
-            self.guest = !json.user;
-            if (!self.guest) {
-              self.username = json.user;
-            } else {
-              self.username = '';
+        try {
+          xhr({
+            url: this.url + this.options.whoami + window.localStorage.getItem('token'),
+            complete: function(event) {
+              var json = JSON.parse(this.responseText);
+              self.guest = !json.user;
+              if (!self.guest) {
+                self.username = json.user;
+              } else {
+                self.username = '';
+              }
+              self.callback(callback, true);
+            },
+            error: function(event) {
+              self.error = true;
+              self.callback(callback, false);
             }
-            self.callback(callback, true);
-          },
-          error: function(event) {
-            self.error = true;
-            self.callback(callback, false);
-          }
-        });
+          });
+        } catch (ignored) {}
       }
     },
     getChannels: function(options) {

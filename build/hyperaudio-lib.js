@@ -1,4 +1,4 @@
-/*! hyperaudio-lib v0.8.0 ~ (c) 2012-2017 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 17th November 2017 12:09:01 */
+/*! hyperaudio-lib v0.8.1 ~ (c) 2012-2018 Hyperaudio Inc. <hello@hyperaud.io> (http://hyperaud.io) http://hyperaud.io/licensing/ ~ Built: 3rd December 2018 14:33:44 */
 (function(global, document) {
 
   // Popcorn.js does not support archaic browsers
@@ -7988,9 +7988,11 @@ var xhr = (function(hyperaudio) {
       xhr.setRequestHeader('content-type', 'application/json; charset=utf-8');
     }
 
-    if (window.localStorage.getItem('token')) {
-      xhr.setRequestHeader('Authorization', 'Bearer ' + window.localStorage.getItem('token'));
-    }
+    try {
+      if (window.localStorage.getItem('token')) {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + window.localStorage.getItem('token'));
+      }
+    } catch (ignored) {}
 
     xhr.send(options.data);
 
@@ -8095,8 +8097,10 @@ var api = (function(hyperaudio) {
         complete: function(event) {
           var json = JSON.parse(this.responseText);
 
-          if (json.user) window.localStorage.setItem('user', json.user);
-          if (json.token) window.localStorage.setItem('token', json.token);
+          try {
+            if (json.user) window.localStorage.setItem('user', json.user);
+            if (json.token) window.localStorage.setItem('token', json.token);
+          } catch (ignored) {}
 
           self.guest = !json.user;
           if (!self.guest) {
@@ -8129,23 +8133,25 @@ var api = (function(hyperaudio) {
           self.callback(callback, true);
         }, 0);
       } else {
-        xhr({
-          url: this.url + this.options.whoami + window.localStorage.getItem('token'),
-          complete: function(event) {
-            var json = JSON.parse(this.responseText);
-            self.guest = !json.user;
-            if (!self.guest) {
-              self.username = json.user;
-            } else {
-              self.username = '';
+        try {
+          xhr({
+            url: this.url + this.options.whoami + window.localStorage.getItem('token'),
+            complete: function(event) {
+              var json = JSON.parse(this.responseText);
+              self.guest = !json.user;
+              if (!self.guest) {
+                self.username = json.user;
+              } else {
+                self.username = '';
+              }
+              self.callback(callback, true);
+            },
+            error: function(event) {
+              self.error = true;
+              self.callback(callback, false);
             }
-            self.callback(callback, true);
-          },
-          error: function(event) {
-            self.error = true;
-            self.callback(callback, false);
-          }
-        });
+          });
+        } catch (ignored) {}
       }
     },
     getChannels: function(options) {

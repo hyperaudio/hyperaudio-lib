@@ -69,9 +69,11 @@ var xhr = (function(hyperaudio) {
       xhr.setRequestHeader('content-type', 'application/json; charset=utf-8');
     }
 
-    if (window.localStorage.getItem('token')) {
-      xhr.setRequestHeader('Authorization', 'Bearer ' + window.localStorage.getItem('token'));
-    }
+    try {
+      if (window.localStorage.getItem('token')) {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + window.localStorage.getItem('token'));
+      }
+    } catch (ignored) {}
 
     xhr.send(options.data);
 
